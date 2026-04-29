@@ -1,65 +1,205 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowUpRight, Hammer, ShieldCheck, Star } from "lucide-react";
+import { ProductCard } from "@/components/product-card";
+import { RecentSalesTicker } from "@/components/recent-sales-ticker";
+import { RecentlyViewed } from "@/components/recently-viewed";
+import { getCatalogWithPricing } from "@/lib/db";
+import { isPresale } from "@/lib/utils";
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ sport?: string }>;
+}) {
+  const { sport } = await searchParams;
+  const all = await getCatalogWithPricing();
+  const filtered = sport ? all.filter((s) => s.sport === sport) : all;
+  const presaleSkus = filtered.filter((s) => isPresale(s.releaseDate));
+  const releasedSkus = filtered.filter((s) => !isPresale(s.releaseDate));
+  const releases = presaleSkus.length > 0 ? presaleSkus.slice(0, 4) : filtered.slice(0, 4);
+  const trending = releasedSkus.slice(0, 4);
+  const justDropped = releasedSkus.slice(4, 8);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div>
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-white/5">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_-10%,rgba(212,175,55,0.18),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_110%,rgba(124,58,237,0.12),transparent_50%)]" />
+        <div className="relative mx-auto max-w-7xl px-6 py-20 lg:py-28">
+          <div className="max-w-3xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-white/70 uppercase backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-br from-amber-400 to-amber-600" />
+              Sealed Sports Cards · Est. 2026
+            </div>
+            <h1 className="font-display text-5xl leading-[1.05] font-black tracking-tight text-white lg:text-7xl">
+              The marketplace for{" "}
+              <span className="italic text-amber-400">serious</span> collectors.
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/70">
+              Bid, ask, and buy sealed wax with the transparency of a stock market. Real prices,
+              real provenance, real escrow.
+            </p>
+            <div className="mt-10 flex flex-wrap gap-3">
+              <Link
+                href="#featured"
+                className="rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-5 py-3 text-sm font-bold text-slate-900 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
+              >
+                Browse the catalog
+              </Link>
+              <Link
+                href="/sell"
+                className="rounded-md border border-white/15 px-5 py-3 text-sm font-semibold text-white/90 transition hover:border-white/30 hover:bg-white/5"
+              >
+                List a box →
+              </Link>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Stats */}
+      <section className="border-b border-white/5">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-px bg-white/5 sm:grid-cols-3">
+          {[
+            { k: "$2.4M", v: "in escrow", sub: "across active orders" },
+            { k: "8,400+", v: "verified sellers", sub: "Pro & Elite tiers" },
+            { k: "99.7%", v: "positive feedback", sub: "rolling 30 days" },
+          ].map((s) => (
+            <div key={s.v} className="bg-[#0a0a0b] px-8 py-10">
+              <div className="font-display text-4xl font-black text-amber-400">{s.k}</div>
+              <div className="mt-1 text-sm font-semibold text-white">{s.v}</div>
+              <div className="mt-0.5 text-xs text-white/50">{s.sub}</div>
+            </div>
+          ))}
         </div>
-      </main>
+      </section>
+
+      <div className="mx-auto max-w-7xl px-4 py-16 lg:px-6">
+        {sport && (
+          <div className="mb-6 text-sm text-white/50">
+            Filtered by <span className="font-semibold text-white">{sport}</span> ·{" "}
+            <Link href="/" className="text-amber-400 hover:underline">
+              clear
+            </Link>
+          </div>
+        )}
+
+        <RecentSalesTicker />
+
+        <RecentlyViewed />
+
+        <Section
+          id="featured"
+          eyebrow={presaleSkus.length > 0 ? "Now open" : "Open Market"}
+          title={presaleSkus.length > 0 ? "Pre-orders open" : "Tonight's book"}
+          subtitle={presaleSkus.length > 0 ? "List early to lock the lowest ask" : "Hot boxes this week"}
+        >
+          <Grid>
+            {releases.map((s) => (
+              <ProductCard
+                key={s.id}
+                sku={s}
+                lowestAsk={s.lowestAsk}
+                lastSale={s.lastSale}
+                presale={isPresale(s.releaseDate)}
+              />
+            ))}
+          </Grid>
+        </Section>
+
+        <Section
+          eyebrow="Trending"
+          title="New lowest ask"
+          subtitle="Sellers just dropped prices"
+        >
+          <Grid>
+            {trending.map((s) => (
+              <ProductCard key={s.id} sku={s} lowestAsk={s.lowestAsk} lastSale={s.lastSale} />
+            ))}
+          </Grid>
+        </Section>
+
+        <Section eyebrow="Just dropped" title="Newest releases" subtitle="Hot off the printer">
+          <Grid>
+            {justDropped.map((s) => (
+              <ProductCard key={s.id} sku={s} lowestAsk={s.lowestAsk} lastSale={s.lastSale} />
+            ))}
+          </Grid>
+        </Section>
+      </div>
+
+      {/* Value props */}
+      <section className="border-y border-white/5 bg-gradient-to-b from-[#0a0a0b] to-[#101013]">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 px-6 py-20 md:grid-cols-3">
+          {[
+            {
+              icon: <Hammer size={20} />,
+              title: "Real bid/ask",
+              body: "A live order book like Wall Street, not a flea market. Buyers bid up, sellers undercut, prices discover.",
+            },
+            {
+              icon: <ShieldCheck size={20} />,
+              title: "Held in escrow",
+              body: "Every transaction is held until the box arrives sealed. No middleman risk, no resealed wax slipping through.",
+            },
+            {
+              icon: <Star size={20} />,
+              title: "Tier-based fees",
+              body: "Earn 10% → 8% → 6% commission savings as you climb. Elite sellers get paid every three days.",
+            },
+          ].map((f) => (
+            <div key={f.title}>
+              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-amber-700/40 bg-amber-500/10 text-amber-400">
+                {f.icon}
+              </div>
+              <h3 className="font-display text-2xl font-black text-white">{f.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-white/60">{f.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
+}
+
+function Section({
+  id,
+  eyebrow,
+  title,
+  subtitle,
+  children,
+}: {
+  id?: string;
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section id={id} className="mb-16">
+      <div className="mb-8 flex items-end justify-between">
+        <div>
+          <div className="text-[10px] font-semibold tracking-[0.2em] text-amber-400/80 uppercase">
+            {eyebrow}
+          </div>
+          <h2 className="font-display mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
+            {title}
+          </h2>
+          <p className="mt-1 text-sm text-white/50">{subtitle}</p>
+        </div>
+        <Link
+          href="/search"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-white/60 transition hover:text-amber-300"
+        >
+          View all <ArrowUpRight size={12} />
+        </Link>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Grid({ children }: { children: React.ReactNode }) {
+  return <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">{children}</div>;
 }
