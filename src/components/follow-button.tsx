@@ -12,8 +12,8 @@ export function FollowButton({ username }: { username: string }) {
       onClick={() => toggle(username)}
       className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm font-semibold transition ${
         following
-          ? "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-          : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+          ? "border-emerald-700/50 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/15"
+          : "border-white/15 bg-[#101012] text-white/80 hover:bg-white/[0.02]"
       }`}
     >
       {following ? (

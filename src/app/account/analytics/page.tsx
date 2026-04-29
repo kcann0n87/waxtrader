@@ -66,19 +66,19 @@ export default function AnalyticsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
-      <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/account" className="inline-flex items-center gap-1 hover:text-slate-900">
+      <div className="mb-2 flex items-center gap-2 text-sm text-white/50">
+        <Link href="/account" className="inline-flex items-center gap-1 hover:text-white">
           <ArrowLeft size={14} /> Account
         </Link>
         <span>/</span>
-        <span className="text-slate-900">Analytics</span>
+        <span className="text-white">Analytics</span>
       </div>
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">Seller analytics</h1>
-          <p className="text-sm text-slate-500">Last 30 days · across all your listings</p>
+          <h1 className="text-2xl font-black tracking-tight text-white">Seller analytics</h1>
+          <p className="text-sm text-white/50">Last 30 days · across all your listings</p>
         </div>
-        <select className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700">
+        <select className="rounded-md border border-white/15 bg-[#101012] px-3 py-1.5 text-sm font-semibold text-white/80">
           <option>Last 30 days</option>
           <option>Last 7 days</option>
           <option>Last 90 days</option>
@@ -114,22 +114,22 @@ export default function AnalyticsPage() {
         />
       </div>
 
-      <section className="mb-8 rounded-xl border border-slate-200 bg-white p-5">
+      <section className="mb-8 rounded-xl border border-white/10 bg-[#101012] p-5">
         <div className="mb-4 flex items-end justify-between">
           <div>
-            <h2 className="text-base font-bold text-slate-900">Daily revenue</h2>
-            <p className="text-xs text-slate-500">Total: {formatUSDFull(totalRevenue)} across {totalOrders} orders</p>
+            <h2 className="text-base font-bold text-white">Daily revenue</h2>
+            <p className="text-xs text-white/50">Total: {formatUSDFull(totalRevenue)} across {totalOrders} orders</p>
           </div>
         </div>
         <SalesChart data={data} />
       </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <section className="rounded-xl border border-white/10 bg-[#101012] p-5">
           <div className="mb-4 flex items-end justify-between">
             <div>
-              <h2 className="text-base font-bold text-slate-900">Top sellers</h2>
-              <p className="text-xs text-slate-500">By revenue, last 30d</p>
+              <h2 className="text-base font-bold text-white">Top sellers</h2>
+              <p className="text-xs text-white/50">By revenue, last 30d</p>
             </div>
           </div>
           <ul className="space-y-2">
@@ -137,21 +137,21 @@ export default function AnalyticsPage() {
               const sku = skus.find((s) => s.id === row.skuId)!;
               return (
                 <li key={row.skuId} className="flex items-center gap-3">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/5 text-xs font-bold text-white/80">
                     {i + 1}
                   </div>
                   <ProductImage sku={sku} size="sm" className="aspect-[4/5] w-9 shrink-0 rounded" showText={false} />
                   <div className="min-w-0 flex-1">
-                    <Link href={`/product/${sku.slug}`} className="line-clamp-1 text-sm font-semibold text-slate-900 hover:text-indigo-600">
+                    <Link href={`/product/${sku.slug}`} className="line-clamp-1 text-sm font-semibold text-white hover:text-amber-300">
                       {formatSkuTitle(sku)}
                     </Link>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-white/50">
                       {row.units} sold · {row.conversionRate}% conversion
                     </div>
                   </div>
                   <div className="shrink-0 text-right">
-                    <div className="text-sm font-bold text-slate-900">{formatUSD(row.revenue)}</div>
-                    <div className="text-[10px] text-slate-400">revenue</div>
+                    <div className="text-sm font-bold text-white">{formatUSD(row.revenue)}</div>
+                    <div className="text-[10px] text-white/40">revenue</div>
                   </div>
                 </li>
               );
@@ -159,14 +159,14 @@ export default function AnalyticsPage() {
           </ul>
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <section className="rounded-xl border border-white/10 bg-[#101012] p-5">
           <div className="mb-4 flex items-end justify-between">
             <div>
-              <h2 className="flex items-center gap-1.5 text-base font-bold text-slate-900">
-                <MapPin size={14} className="text-slate-400" />
+              <h2 className="flex items-center gap-1.5 text-base font-bold text-white">
+                <MapPin size={14} className="text-white/40" />
                 Top states
               </h2>
-              <p className="text-xs text-slate-500">Where your buyers ship to</p>
+              <p className="text-xs text-white/50">Where your buyers ship to</p>
             </div>
           </div>
           <ul className="space-y-3">
@@ -176,12 +176,12 @@ export default function AnalyticsPage() {
               return (
                 <li key={row.state}>
                   <div className="mb-1 flex items-baseline justify-between gap-2 text-xs">
-                    <span className="font-semibold text-slate-700">{row.state}</span>
-                    <span className="text-slate-500">
-                      {row.orders} orders · <span className="font-semibold text-slate-900">{formatUSD(row.revenue)}</span>
+                    <span className="font-semibold text-white/80">{row.state}</span>
+                    <span className="text-white/50">
+                      {row.orders} orders · <span className="font-semibold text-white">{formatUSD(row.revenue)}</span>
                     </span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-2 overflow-hidden rounded-full bg-white/5">
                     <div className="h-full bg-indigo-500" style={{ width: `${pct}%` }} />
                   </div>
                 </li>
@@ -191,31 +191,31 @@ export default function AnalyticsPage() {
         </section>
       </div>
 
-      <section className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
+      <section className="mt-6 rounded-xl border border-white/10 bg-[#101012] p-5">
         <div className="mb-4 flex items-end justify-between">
           <div>
-            <h2 className="flex items-center gap-1.5 text-base font-bold text-slate-900">
-              <Users size={14} className="text-slate-400" />
+            <h2 className="flex items-center gap-1.5 text-base font-bold text-white">
+              <Users size={14} className="text-white/40" />
               Buyer breakdown
             </h2>
-            <p className="text-xs text-slate-500">Repeat vs new customers</p>
+            <p className="text-xs text-white/50">Repeat vs new customers</p>
           </div>
         </div>
-        <div className="grid grid-cols-3 divide-x divide-slate-200 rounded-lg border border-slate-200 bg-slate-50">
+        <div className="grid grid-cols-3 divide-x divide-white/10 rounded-lg border border-white/10 bg-white/[0.02]">
           <BuyerStat label="New buyers" value="42" sub="of 70 orders" pct={60} tone="indigo" />
           <BuyerStat label="Returning" value="28" sub="40% loyal" pct={40} tone="emerald" />
           <BuyerStat label="Top buyer" value="ripper2024" sub="6 orders, $2,240" pct={null} tone="amber" />
         </div>
       </section>
 
-      <section className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50/40 p-5">
+      <section className="mt-6 rounded-xl border border-emerald-700/40 bg-emerald-500/10 p-5">
         <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-300">
             <ArrowUpRight size={16} />
           </div>
           <div className="flex-1">
-            <h3 className="text-sm font-bold text-emerald-900">Tips to grow</h3>
-            <ul className="mt-1.5 space-y-1 text-xs text-emerald-800">
+            <h3 className="text-sm font-bold text-emerald-100">Tips to grow</h3>
+            <ul className="mt-1.5 space-y-1 text-xs text-emerald-200">
               <li>· Your conversion is highest on Topps Series 1 — consider listing the Update Series too.</li>
               <li>· 60% of your buyers are first-timers — a thank-you note in the package boosts return rate by ~22% on similar sellers.</li>
               <li>· Avg shipping speed score is 4.2/5 — same-day shipping pushes you to 4.8+ and unlocks Verified Seller badge.</li>
@@ -242,16 +242,16 @@ function KPI({
 }) {
   const positive = delta !== undefined && delta >= 0;
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-slate-500 uppercase">
-        <span className={accent === "emerald" ? "text-emerald-600" : "text-slate-400"}>{icon}</span>
+    <div className="rounded-xl border border-white/10 bg-[#101012] p-4">
+      <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-white/50 uppercase">
+        <span className={accent === "emerald" ? "text-emerald-400" : "text-white/40"}>{icon}</span>
         {label}
       </div>
-      <div className="mt-1 text-2xl font-bold text-slate-900">{value}</div>
+      <div className="mt-1 text-2xl font-bold text-white">{value}</div>
       {delta !== undefined && (
         <div
           className={`mt-1 inline-flex items-center gap-0.5 text-xs font-semibold ${
-            positive ? "text-emerald-700" : "text-rose-700"
+            positive ? "text-emerald-300" : "text-rose-300"
           }`}
         >
           {positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
@@ -277,15 +277,15 @@ function BuyerStat({
   tone: "indigo" | "emerald" | "amber";
 }) {
   const toneCfg = {
-    indigo: "text-indigo-700",
-    emerald: "text-emerald-700",
-    amber: "text-amber-700",
+    indigo: "text-amber-400",
+    emerald: "text-emerald-300",
+    amber: "text-amber-300",
   }[tone];
   return (
     <div className="px-4 py-3">
-      <div className="text-xs font-semibold tracking-wider text-slate-500 uppercase">{label}</div>
+      <div className="text-xs font-semibold tracking-wider text-white/50 uppercase">{label}</div>
       <div className={`mt-1 text-xl font-bold ${toneCfg}`}>{value}</div>
-      <div className="text-xs text-slate-500">{sub}</div>
+      <div className="text-xs text-white/50">{sub}</div>
       {pct !== null && (
         <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-200">
           <div

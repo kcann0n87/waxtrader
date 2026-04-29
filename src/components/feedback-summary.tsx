@@ -15,21 +15,21 @@ export function FeedbackSummary({ username }: { username: string }) {
   const status = sellerStatusBadge(lifetime);
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+          <div className="text-xs font-semibold tracking-wider text-white/40 uppercase">
             Buyer feedback
           </div>
           <div className="mt-1 flex items-baseline gap-2">
             <div className={`text-4xl font-black tracking-tight ${tonePctColor(lifetime.positivePct)}`}>
               {lifetime.total > 0 ? `${lifetime.positivePct.toFixed(1)}%` : "—"}
             </div>
-            <div className="text-sm font-semibold text-slate-500">positive</div>
+            <div className="text-sm font-semibold text-white/50">positive</div>
           </div>
-          <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
+          <div className="mt-1 flex items-center gap-1.5 text-xs text-white/50">
             <Star size={11} className="fill-amber-400 text-amber-400" />
-            <span className="font-bold text-slate-700">
+            <span className="font-bold text-white/80">
               {lifetime.avgStars > 0 ? lifetime.avgStars.toFixed(1) : "—"}
             </span>
             <span>·</span>
@@ -45,7 +45,7 @@ export function FeedbackSummary({ username }: { username: string }) {
         )}
       </div>
 
-      <div className="mt-4 grid grid-cols-3 divide-x divide-slate-200 rounded-lg border border-slate-200 bg-slate-50 text-center">
+      <div className="mt-4 grid grid-cols-3 divide-x divide-white/10 rounded-lg border border-white/10 bg-white/[0.02] text-center">
         <Window label="30 days" stats={past30} />
         <Window label="12 months" stats={past12} />
         <Window label="Lifetime" stats={lifetime} />
@@ -69,11 +69,11 @@ export function FeedbackSummary({ username }: { username: string }) {
 function Window({ label, stats }: { label: string; stats: ReturnType<typeof feedbackStatsForSeller> }) {
   return (
     <div className="px-3 py-3">
-      <div className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">{label}</div>
+      <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">{label}</div>
       <div className={`mt-1 text-base font-bold ${tonePctColor(stats.positivePct)}`}>
         {stats.total > 0 ? `${stats.positivePct.toFixed(1)}%` : "—"}
       </div>
-      <div className="text-[11px] text-slate-500">{stats.total} ratings</div>
+      <div className="text-[11px] text-white/50">{stats.total} ratings</div>
     </div>
   );
 }
@@ -84,8 +84,8 @@ function SubRatingBar({ label, value }: { label: string; value: number }) {
   return (
     <div>
       <div className="mb-1 flex items-center justify-between text-xs">
-        <span className="text-slate-600">{label}</span>
-        <span className="font-bold text-slate-900">{value > 0 ? value.toFixed(1) : "—"}</span>
+        <span className="text-white/60">{label}</span>
+        <span className="font-bold text-white">{value > 0 ? value.toFixed(1) : "—"}</span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
         <div className={`h-full ${color}`} style={{ width: `${pct}%` }} />
@@ -106,9 +106,9 @@ function Pill({
   tone: "emerald" | "amber" | "rose";
 }) {
   const tones = {
-    emerald: "bg-emerald-50 text-emerald-700",
-    amber: "bg-amber-50 text-amber-700",
-    rose: "bg-rose-50 text-rose-700",
+    emerald: "bg-emerald-500/10 text-emerald-300",
+    amber: "bg-amber-500/10 text-amber-300",
+    rose: "bg-rose-500/10 text-rose-300",
   }[tone];
   return (
     <div className={`inline-flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 font-semibold ${tones}`}>
@@ -121,16 +121,16 @@ function Pill({
 }
 
 function tonePctColor(pct: number) {
-  if (pct >= 99) return "text-emerald-700";
-  if (pct >= 95) return "text-emerald-600";
-  if (pct >= 90) return "text-amber-600";
-  return "text-rose-600";
+  if (pct >= 99) return "text-emerald-300";
+  if (pct >= 95) return "text-emerald-400";
+  if (pct >= 90) return "text-amber-400";
+  return "text-rose-400";
 }
 
 function statusToneClass(tone: "gold" | "blue" | "slate") {
   return {
     gold: "bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-950",
-    blue: "bg-sky-100 text-sky-800",
-    slate: "bg-slate-100 text-slate-700",
+    blue: "bg-sky-500/15 text-sky-800",
+    slate: "bg-white/5 text-white/80",
   }[tone];
 }

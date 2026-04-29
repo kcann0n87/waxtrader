@@ -43,39 +43,39 @@ export default function DisputesPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
-      <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/account" className="inline-flex items-center gap-1 hover:text-slate-900">
+      <div className="mb-2 flex items-center gap-2 text-sm text-white/50">
+        <Link href="/account" className="inline-flex items-center gap-1 hover:text-white">
           <ArrowLeft size={14} /> Account
         </Link>
         <span>/</span>
-        <span className="text-slate-900">Disputes</span>
+        <span className="text-white">Disputes</span>
       </div>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-black tracking-tight text-slate-900">Disputes</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-2xl font-black tracking-tight text-white">Disputes</h1>
+        <p className="text-sm text-white/50">
           Open or track a dispute. Funds stay held in escrow until each dispute is resolved.
         </p>
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-3">
-        <Stat icon={<AlertTriangle className="text-amber-600" size={16} />} label="Open" value={String(open.length)} sub="awaiting response" />
-        <Stat icon={<CheckCircle2 className="text-emerald-600" size={16} />} label="Refunded" value={String(resolved.filter((d) => d.status.includes("refunded")).length)} sub="lifetime" />
-        <Stat icon={<Clock className="text-slate-500" size={16} />} label="Avg resolution" value="2.4 days" sub="across all disputes" />
+        <Stat icon={<AlertTriangle className="text-amber-400" size={16} />} label="Open" value={String(open.length)} sub="awaiting response" />
+        <Stat icon={<CheckCircle2 className="text-emerald-400" size={16} />} label="Refunded" value={String(resolved.filter((d) => d.status.includes("refunded")).length)} sub="lifetime" />
+        <Stat icon={<Clock className="text-white/50" size={16} />} label="Avg resolution" value="2.4 days" sub="across all disputes" />
       </div>
 
       {disputes.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center">
-          <ShieldCheck className="mx-auto text-emerald-600" size={32} />
-          <p className="mt-3 text-sm font-bold text-slate-900">No disputes</p>
-          <p className="mt-1 text-sm text-slate-500">
+        <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-12 text-center">
+          <ShieldCheck className="mx-auto text-emerald-400" size={32} />
+          <p className="mt-3 text-sm font-bold text-white">No disputes</p>
+          <p className="mt-1 text-sm text-white/50">
             If you have an issue with an order, open a dispute from the order detail page.
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-white/10">
           <table className="w-full min-w-[760px] text-sm">
-            <thead className="bg-slate-50 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase">
+            <thead className="bg-white/[0.02] text-left text-xs font-semibold tracking-wider text-white/50 uppercase">
               <tr>
                 <th className="px-4 py-2.5">Dispute</th>
                 <th className="px-4 py-2.5">Order</th>
@@ -86,32 +86,32 @@ export default function DisputesPage() {
                 <th className="px-4 py-2.5">Last update</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-white/5">
               {disputes.map((d) => {
                 const sku = skus.find((s) => s.id === d.skuId);
                 return (
-                  <tr key={d.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-mono text-xs text-slate-500">{d.id}</td>
+                  <tr key={d.id} className="hover:bg-white/[0.02]">
+                    <td className="px-4 py-3 font-mono text-xs text-white/50">{d.id}</td>
                     <td className="px-4 py-3">
-                      <Link href={`/account/orders/${d.orderId}`} className="font-mono text-xs text-indigo-600 hover:underline">
+                      <Link href={`/account/orders/${d.orderId}`} className="font-mono text-xs text-amber-300 hover:underline">
                         {d.orderId}
                       </Link>
                     </td>
                     <td className="px-4 py-3">
                       {sku ? (
-                        <Link href={`/product/${sku.slug}`} className="text-sm font-semibold text-slate-900 hover:text-indigo-600">
+                        <Link href={`/product/${sku.slug}`} className="text-sm font-semibold text-white hover:text-amber-300">
                           {formatSkuTitle(sku)}
                         </Link>
                       ) : (
                         "—"
                       )}
                     </td>
-                    <td className="px-4 py-3 font-semibold text-slate-900">{formatUSDFull(d.amount)}</td>
-                    <td className="px-4 py-3 text-slate-700">{d.reason}</td>
+                    <td className="px-4 py-3 font-semibold text-white">{formatUSDFull(d.amount)}</td>
+                    <td className="px-4 py-3 text-white/80">{d.reason}</td>
                     <td className="px-4 py-3">
                       <StatusBadge status={d.status} />
                     </td>
-                    <td className="px-4 py-3 text-slate-500">{formatDate(d.lastUpdate)}</td>
+                    <td className="px-4 py-3 text-white/50">{formatDate(d.lastUpdate)}</td>
                   </tr>
                 );
               })}
@@ -120,16 +120,16 @@ export default function DisputesPage() {
         </div>
       )}
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600">
+      <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-xs text-white/60">
         <div className="flex items-start gap-2">
-          <ShieldCheck className="mt-0.5 text-emerald-600" size={14} />
+          <ShieldCheck className="mt-0.5 text-emerald-400" size={14} />
           <div>
-            <div className="font-semibold text-slate-800">How disputes work</div>
+            <div className="font-semibold text-white/90">How disputes work</div>
             <p className="mt-1">
               Open a dispute from the order page within 3 days of delivery. Seller has 48 hours to
               respond. WaxMarket Support reviews both sides within 3 business days. We err on the
               side of buyers when authenticity is in question — see{" "}
-              <Link href="/help/disputes/dispute-process" className="text-indigo-600 hover:underline">
+              <Link href="/help/disputes/dispute-process" className="text-amber-300 hover:underline">
                 dispute process
               </Link>
               .
@@ -153,23 +153,23 @@ function Stat({
   sub: string;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-slate-500 uppercase">
+    <div className="rounded-xl border border-white/10 bg-[#101012] p-4">
+      <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-white/50 uppercase">
         {icon}
         {label}
       </div>
-      <div className="mt-1 text-2xl font-bold text-slate-900">{value}</div>
-      <div className="text-xs text-slate-400">{sub}</div>
+      <div className="mt-1 text-2xl font-bold text-white">{value}</div>
+      <div className="text-xs text-white/40">{sub}</div>
     </div>
   );
 }
 
 function StatusBadge({ status }: { status: DisputeStatus }) {
   const cfg = {
-    "Awaiting seller": "bg-amber-50 text-amber-700",
-    "Awaiting WaxMarket": "bg-sky-50 text-sky-700",
-    "Resolved — refunded": "bg-emerald-50 text-emerald-700",
-    "Resolved — denied": "bg-slate-100 text-slate-600",
+    "Awaiting seller": "bg-amber-500/10 text-amber-300",
+    "Awaiting WaxMarket": "bg-sky-500/10 text-sky-300",
+    "Resolved — refunded": "bg-emerald-500/10 text-emerald-300",
+    "Resolved — denied": "bg-white/5 text-white/60",
   }[status];
   return (
     <span className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold ${cfg}`}>{status}</span>

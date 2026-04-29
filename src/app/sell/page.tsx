@@ -44,21 +44,21 @@ export default function SellPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-3xl font-black tracking-tight text-slate-900">List a sealed box</h1>
-      <p className="mt-1 text-slate-600">
+      <h1 className="text-3xl font-black tracking-tight text-white">List a sealed box</h1>
+      <p className="mt-1 text-white/60">
         It takes about 60 seconds. We hold the buyer&apos;s payment in escrow until the box arrives
         sealed.
       </p>
 
       <Link
         href="/sell/payouts"
-        className="mt-4 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm transition hover:bg-amber-100"
+        className="mt-4 flex items-center gap-3 rounded-lg border border-amber-700/40 bg-amber-500/10 px-3 py-2.5 text-sm transition hover:bg-amber-500/15"
       >
-        <Building2 size={16} className="text-amber-700" />
-        <span className="flex-1 text-amber-900">
+        <Building2 size={16} className="text-amber-300" />
+        <span className="flex-1 text-amber-100">
           <strong>Set up payouts</strong> to receive ACH transfers every Friday for your sales.
         </span>
-        <ChevronRight size={16} className="text-amber-700" />
+        <ChevronRight size={16} className="text-amber-300" />
       </Link>
 
       <Stepper step={step} />
@@ -66,19 +66,19 @@ export default function SellPage() {
       {step === 1 && (
         <Card title="1. Find your product" subtitle="Search by year, brand, sport, or set">
           <div className="relative">
-            <Search className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-slate-400" size={16} />
+            <Search className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/40" size={16} />
             <input
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder='e.g. "2025 Bowman" or "Prizm"'
-              className="w-full rounded-md border border-slate-300 bg-white py-2.5 pr-3 pl-9 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-md border border-white/15 bg-[#101012] py-2.5 pr-3 pl-9 text-sm focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
             />
           </div>
 
-          <div className="mt-4 divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-200">
+          <div className="mt-4 divide-y divide-white/5 overflow-hidden rounded-lg border border-white/10">
             {matches.length === 0 && (
-              <div className="p-6 text-center text-sm text-slate-500">
+              <div className="p-6 text-center text-sm text-white/50">
                 No matches. Try a different search.
               </div>
             )}
@@ -91,7 +91,7 @@ export default function SellPage() {
                   if (initial) setAskPrice(String(Math.max(initial - 5, 1)));
                   setStep(2);
                 }}
-                className="flex w-full items-center gap-3 p-3 text-left transition hover:bg-slate-50"
+                className="flex w-full items-center gap-3 p-3 text-left transition hover:bg-white/[0.02]"
               >
                 <div
                   className="flex h-12 w-10 items-center justify-center rounded text-[8px] font-bold text-white"
@@ -102,14 +102,14 @@ export default function SellPage() {
                   {s.brand.slice(0, 4).toUpperCase()}
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-semibold text-slate-900">
+                  <div className="text-sm font-semibold text-white">
                     {formatSkuTitle(s)}
                   </div>
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-white/50">
                     {s.sport} · Last sale {lastSale(s.id) ? formatUSD(lastSale(s.id)!) : "—"}
                   </div>
                 </div>
-                <ChevronRight size={16} className="text-slate-400" />
+                <ChevronRight size={16} className="text-white/40" />
               </button>
             ))}
           </div>
@@ -120,35 +120,35 @@ export default function SellPage() {
         <Card title="2. Set your asking price" subtitle="See what the market is paying right now">
           <SmartPricingCard skuId={sku.id} ask={ask} last={last} bid={bid} onApply={(p) => setAskPrice(String(p))} />
 
-          <div className="mt-5 grid grid-cols-3 divide-x divide-slate-200 rounded-lg border border-slate-200 bg-slate-50 text-center">
+          <div className="mt-5 grid grid-cols-3 divide-x divide-white/10 rounded-lg border border-white/10 bg-white/[0.02] text-center">
             <Stat label="Lowest Ask" value={ask !== null ? formatUSD(ask) : "—"} accent="emerald" />
             <Stat label="Last Sale" value={last !== null ? formatUSD(last) : "—"} />
             <Stat label="Highest Bid" value={bid !== null ? formatUSD(bid) : "—"} accent="rose" />
           </div>
 
           <label className="mt-6 block">
-            <span className="text-sm font-semibold text-slate-700">Your asking price</span>
+            <span className="text-sm font-semibold text-white/80">Your asking price</span>
             <div className="relative mt-1">
-              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400">$</span>
+              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-white/40">$</span>
               <input
                 type="number"
                 value={askPrice}
                 onChange={(e) => setAskPrice(e.target.value)}
-                className="w-full rounded-md border border-slate-300 py-2.5 pr-3 pl-7 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-md border border-white/15 py-2.5 pr-3 pl-7 text-sm focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
               />
             </div>
             {ask !== null && askNum > 0 && askNum >= ask && (
-              <p className="mt-1.5 text-xs text-amber-700">
+              <p className="mt-1.5 text-xs text-amber-300">
                 ⚠ Your price is at or above the lowest ask — sellers under you will sell first.
               </p>
             )}
             {ask !== null && askNum > 0 && askNum < ask && (
-              <p className="mt-1.5 text-xs text-emerald-700">
+              <p className="mt-1.5 text-xs text-emerald-300">
                 ✓ You&apos;ll be the new lowest ask, undercutting by {formatUSD(ask - askNum)}.
               </p>
             )}
             {bid !== null && askNum > 0 && askNum <= bid && (
-              <p className="mt-1.5 text-xs text-rose-700">
+              <p className="mt-1.5 text-xs text-rose-300">
                 ⚡ Your price meets the highest bid — this will sell instantly for {formatUSD(bid)}.
               </p>
             )}
@@ -156,11 +156,11 @@ export default function SellPage() {
 
           <div className="mt-4 grid grid-cols-2 gap-4">
             <label className="block">
-              <span className="text-sm font-semibold text-slate-700">Shipping</span>
+              <span className="text-sm font-semibold text-white/80">Shipping</span>
               <select
                 value={shipping}
                 onChange={(e) => setShipping(e.target.value)}
-                className="mt-1 w-full rounded-md border border-slate-300 py-2.5 px-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="mt-1 w-full rounded-md border border-white/15 py-2.5 px-3 text-sm focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
               >
                 <option value="0">Free shipping</option>
                 <option value="10">$10 flat</option>
@@ -169,23 +169,23 @@ export default function SellPage() {
               </select>
             </label>
             <label className="block">
-              <span className="text-sm font-semibold text-slate-700">Quantity</span>
+              <span className="text-sm font-semibold text-white/80">Quantity</span>
               <input
                 type="number"
                 min="1"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                className="mt-1 w-full rounded-md border border-slate-300 py-2.5 px-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="mt-1 w-full rounded-md border border-white/15 py-2.5 px-3 text-sm focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
               />
             </label>
           </div>
 
-          <div className="mt-6 rounded-lg border border-slate-200 bg-white p-4">
-            <div className="text-xs font-semibold tracking-wider text-slate-400 uppercase">Your payout</div>
+          <div className="mt-6 rounded-lg border border-white/10 bg-[#101012] p-4">
+            <div className="text-xs font-semibold tracking-wider text-white/40 uppercase">Your payout</div>
             <div className="mt-2 space-y-1.5 text-sm">
               <Row label="Sale price" value={formatUSDFull(askNum)} />
               <Row label={`${CURRENT_USER_TIER} tier fee (${(FEE_RATE * 100).toFixed(0)}%)`} value={`-${formatUSDFull(fee)}`} muted />
-              <div className="my-2 border-t border-slate-100" />
+              <div className="my-2 border-t border-white/5" />
               <Row label="You receive" value={formatUSDFull(payout)} bold />
             </div>
           </div>
@@ -193,7 +193,7 @@ export default function SellPage() {
           <div className="mt-6 flex justify-between">
             <button
               onClick={() => setStep(1)}
-              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-md border border-white/15 bg-[#101012] px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
             >
               ← Change product
             </button>
@@ -210,7 +210,7 @@ export default function SellPage() {
 
       {step === 3 && sku && (
         <Card title="3. Review listing" subtitle="Last check before it goes live">
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
             <div className="flex items-start gap-3">
               <div
                 className="flex h-16 w-12 shrink-0 items-center justify-center rounded text-[8px] font-bold text-white"
@@ -221,17 +221,17 @@ export default function SellPage() {
                 {sku.brand.slice(0, 4).toUpperCase()}
               </div>
               <div>
-                <div className="font-bold text-slate-900">
+                <div className="font-bold text-white">
                   {formatSkuTitle(sku)}
                 </div>
-                <div className="text-sm text-slate-600">
+                <div className="text-sm text-white/60">
                   {sku.sport} · {sku.product} · Factory Sealed
                 </div>
               </div>
             </div>
           </div>
 
-          <dl className="mt-4 divide-y divide-slate-100 rounded-lg border border-slate-200">
+          <dl className="mt-4 divide-y divide-white/5 rounded-lg border border-white/10">
             <Field label="Asking price" value={formatUSDFull(askNum)} />
             <Field
               label="Shipping"
@@ -242,7 +242,7 @@ export default function SellPage() {
             <Field label="Payout per box" value={formatUSDFull(payout)} bold />
           </dl>
 
-          <div className="mt-6 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+          <div className="mt-6 rounded-md border border-amber-700/40 bg-amber-500/10 p-3 text-xs text-amber-200">
             By listing, you agree to ship within 2 business days of sale. Buyer payment is held in
             escrow and released after delivery confirmation.
           </div>
@@ -250,7 +250,7 @@ export default function SellPage() {
           <div className="mt-6 flex justify-between">
             <button
               onClick={() => setStep(2)}
-              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-md border border-white/15 bg-[#101012] px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
             >
               ← Back
             </button>
@@ -270,11 +270,11 @@ export default function SellPage() {
       {step === 4 && submitted && sku && (
         <Card title="4. You're live" subtitle="Your listing is now visible to buyers">
           <div className="flex flex-col items-center py-6 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-              <Check className="text-emerald-600" size={28} />
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15">
+              <Check className="text-emerald-400" size={28} />
             </div>
-            <div className="mt-4 text-lg font-bold text-slate-900">Listing published</div>
-            <div className="mt-1 text-sm text-slate-600">
+            <div className="mt-4 text-lg font-bold text-white">Listing published</div>
+            <div className="mt-1 text-sm text-white/60">
               {quantity} × {sku.brand} {sku.set} {sku.product} at {formatUSDFull(askNum)} each
             </div>
             <div className="mt-6 flex gap-2">
@@ -291,7 +291,7 @@ export default function SellPage() {
                   setAskPrice("");
                   setSubmitted(false);
                 }}
-                className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="rounded-md border border-white/15 bg-[#101012] px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
               >
                 List another
               </button>
@@ -319,14 +319,14 @@ function Stepper({ step }: { step: number }) {
                   ? "bg-emerald-600 text-white"
                   : isCurrent
                     ? "bg-slate-900 text-white"
-                    : "bg-slate-200 text-slate-500"
+                    : "bg-slate-200 text-white/50"
               }`}
             >
               {isDone ? <Check size={14} /> : n}
             </div>
             <span
               className={`hidden text-xs font-semibold sm:inline ${
-                isCurrent ? "text-slate-900" : "text-slate-500"
+                isCurrent ? "text-white" : "text-white/50"
               }`}
             >
               {label}
@@ -351,9 +351,9 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6">
-      <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-      <p className="mt-0.5 mb-4 text-sm text-slate-500">{subtitle}</p>
+    <div className="rounded-xl border border-white/10 bg-[#101012] p-6">
+      <h2 className="text-lg font-bold text-white">{title}</h2>
+      <p className="mt-0.5 mb-4 text-sm text-white/50">{subtitle}</p>
       {children}
     </div>
   );
@@ -368,10 +368,10 @@ function Stat({
   value: string;
   accent?: "emerald" | "rose";
 }) {
-  const tone = accent === "emerald" ? "text-emerald-700" : accent === "rose" ? "text-rose-700" : "text-slate-900";
+  const tone = accent === "emerald" ? "text-emerald-300" : accent === "rose" ? "text-rose-300" : "text-white";
   return (
     <div className="px-3 py-3">
-      <div className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">{label}</div>
+      <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">{label}</div>
       <div className={`mt-1 text-base font-bold ${tone}`}>{value}</div>
     </div>
   );
@@ -390,8 +390,8 @@ function Row({
 }) {
   return (
     <div className="flex justify-between">
-      <span className={muted ? "text-slate-500" : "text-slate-700"}>{label}</span>
-      <span className={`${bold ? "text-base font-bold text-slate-900" : "text-slate-900"}`}>{value}</span>
+      <span className={muted ? "text-white/50" : "text-white/80"}>{label}</span>
+      <span className={`${bold ? "text-base font-bold text-white" : "text-white"}`}>{value}</span>
     </div>
   );
 }
@@ -399,8 +399,8 @@ function Row({
 function Field({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
     <div className="flex items-center justify-between px-4 py-3">
-      <dt className="text-sm text-slate-600">{label}</dt>
-      <dd className={`text-sm ${bold ? "font-bold text-slate-900" : "font-semibold text-slate-900"}`}>{value}</dd>
+      <dt className="text-sm text-white/60">{label}</dt>
+      <dd className={`text-sm ${bold ? "font-bold text-white" : "font-semibold text-white"}`}>{value}</dd>
     </div>
   );
 }
@@ -429,19 +429,19 @@ function SmartPricingCard({
   const fastSell = bid !== null ? bid : recommended;
 
   return (
-    <div className="rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-white p-4">
+    <div className="rounded-xl border border-amber-700/40 bg-gradient-to-br from-indigo-50 to-white p-4">
       <div className="flex items-start gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400">
           <Lightbulb size={18} />
         </div>
         <div className="flex-1">
-          <div className="text-sm font-bold text-slate-900">Smart pricing</div>
-          <div className="text-xs text-slate-600">
-            30-day avg: <span className="font-bold text-slate-900">{avg30 ? formatUSD(avg30) : "—"}</span>
+          <div className="text-sm font-bold text-white">Smart pricing</div>
+          <div className="text-xs text-white/60">
+            30-day avg: <span className="font-bold text-white">{avg30 ? formatUSD(avg30) : "—"}</span>
             {trend !== 0 && (
               <span
                 className={`ml-1.5 inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
-                  trend >= 0 ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
+                  trend >= 0 ? "bg-emerald-500/15 text-emerald-300" : "bg-rose-500/15 text-rose-300"
                 }`}
               >
                 {trend >= 0 ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
@@ -449,7 +449,7 @@ function SmartPricingCard({
                 {trend.toFixed(1)}%
               </span>
             )}
-            {sales.length > 0 && <span className="ml-1.5 text-slate-500">· {sales.length} recent sales</span>}
+            {sales.length > 0 && <span className="ml-1.5 text-white/50">· {sales.length} recent sales</span>}
           </div>
         </div>
       </div>
@@ -457,26 +457,26 @@ function SmartPricingCard({
       <div className="mt-3 grid grid-cols-2 gap-2">
         <button
           onClick={() => onApply(recommended)}
-          className="rounded-lg border border-emerald-200 bg-white p-3 text-left transition hover:border-emerald-400 hover:bg-emerald-50"
+          className="rounded-lg border border-emerald-700/40 bg-[#101012] p-3 text-left transition hover:border-emerald-400 hover:bg-emerald-500/10"
         >
-          <div className="text-[10px] font-semibold tracking-wider text-emerald-700 uppercase">Recommended</div>
-          <div className="mt-0.5 text-lg font-bold text-slate-900">{formatUSD(recommended)}</div>
-          <div className="text-[11px] text-slate-500">Be the new lowest ask</div>
+          <div className="text-[10px] font-semibold tracking-wider text-emerald-300 uppercase">Recommended</div>
+          <div className="mt-0.5 text-lg font-bold text-white">{formatUSD(recommended)}</div>
+          <div className="text-[11px] text-white/50">Be the new lowest ask</div>
         </button>
         <button
           onClick={() => onApply(fastSell)}
-          className="rounded-lg border border-amber-200 bg-white p-3 text-left transition hover:border-amber-400 hover:bg-amber-50"
+          className="rounded-lg border border-amber-700/40 bg-[#101012] p-3 text-left transition hover:border-amber-400 hover:bg-amber-500/10"
         >
-          <div className="text-[10px] font-semibold tracking-wider text-amber-700 uppercase">Quick sell</div>
-          <div className="mt-0.5 text-lg font-bold text-slate-900">{formatUSD(fastSell)}</div>
-          <div className="text-[11px] text-slate-500">
+          <div className="text-[10px] font-semibold tracking-wider text-amber-300 uppercase">Quick sell</div>
+          <div className="mt-0.5 text-lg font-bold text-white">{formatUSD(fastSell)}</div>
+          <div className="text-[11px] text-white/50">
             {bid !== null ? "Match highest bid · sells now" : "Aggressive pricing"}
           </div>
         </button>
       </div>
 
       {last !== null && ask !== null && last > ask && (
-        <div className="mt-3 rounded-md border border-slate-200 bg-white p-2.5 text-[11px] text-slate-600">
+        <div className="mt-3 rounded-md border border-white/10 bg-[#101012] p-2.5 text-[11px] text-white/60">
           💡 Last sale was {formatUSD(last)}, currently {formatUSD(last - ask)} above the lowest ask. Buyers are
           paying a premium right now.
         </div>

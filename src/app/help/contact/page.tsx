@@ -27,15 +27,15 @@ export default function ContactPage() {
   if (submitted) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16">
-        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-            <Check className="text-emerald-600" size={28} />
+        <div className="rounded-xl border border-white/10 bg-[#101012] p-8 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15">
+            <Check className="text-emerald-400" size={28} />
           </div>
-          <h1 className="mt-4 text-2xl font-black tracking-tight text-slate-900">
+          <h1 className="mt-4 text-2xl font-black tracking-tight text-white">
             We got your message
           </h1>
-          <p className="mt-2 text-sm text-slate-600">
-            Ticket <span className="font-mono font-bold text-slate-900">SUP-{Math.floor(Math.random() * 900000 + 100000)}</span>{" "}
+          <p className="mt-2 text-sm text-white/60">
+            Ticket <span className="font-mono font-bold text-white">SUP-{Math.floor(Math.random() * 900000 + 100000)}</span>{" "}
             has been opened. Expect a reply at <strong>{email}</strong> within 24 hours — sooner for
             order issues.
           </p>
@@ -48,7 +48,7 @@ export default function ContactPage() {
             </Link>
             <Link
               href="/help"
-              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-md border border-white/15 bg-[#101012] px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
             >
               Back to help
             </Link>
@@ -60,16 +60,16 @@ export default function ContactPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/help" className="inline-flex items-center gap-1 hover:text-slate-900">
+      <div className="mb-2 flex items-center gap-2 text-sm text-white/50">
+        <Link href="/help" className="inline-flex items-center gap-1 hover:text-white">
           <ArrowLeft size={14} /> Help
         </Link>
         <span>/</span>
-        <span className="text-slate-900">Contact support</span>
+        <span className="text-white">Contact support</span>
       </div>
 
-      <h1 className="text-2xl font-black tracking-tight text-slate-900">Contact support</h1>
-      <p className="mt-1 text-sm text-slate-600">
+      <h1 className="text-2xl font-black tracking-tight text-white">Contact support</h1>
+      <p className="mt-1 text-sm text-white/60">
         Real human response within 24 hours. Faster for order issues.
       </p>
 
@@ -83,7 +83,7 @@ export default function ContactPage() {
           e.preventDefault();
           setSubmitted(true);
         }}
-        className="space-y-4 rounded-xl border border-slate-200 bg-white p-6"
+        className="space-y-4 rounded-xl border border-white/10 bg-[#101012] p-6"
       >
         <Field label="What's this about?" required>
           <select
@@ -143,7 +143,7 @@ export default function ContactPage() {
         >
           Send to support
         </button>
-        <p className="text-center text-[11px] text-slate-400">
+        <p className="text-center text-[11px] text-white/40">
           By submitting, you agree to our support terms. Don&apos;t send card numbers, passwords, or
           full SSN.
         </p>
@@ -153,7 +153,7 @@ export default function ContactPage() {
 }
 
 const input =
-  "w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
+  "w-full rounded-md border border-white/15 px-3 py-2.5 text-sm focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-400/20";
 
 function Field({
   label,
@@ -166,7 +166,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-semibold text-slate-700">
+      <span className="mb-1 block text-sm font-semibold text-white/80">
         {label}
         {required && <span className="ml-0.5 text-rose-500">*</span>}
       </span>
@@ -177,12 +177,12 @@ function Field({
 
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3">
-      <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-slate-400 uppercase">
-        <span className="text-slate-300">{icon}</span>
+    <div className="rounded-lg border border-white/10 bg-[#101012] p-3">
+      <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-white/40 uppercase">
+        <span className="text-white/30">{icon}</span>
         {label}
       </div>
-      <div className="mt-0.5 text-base font-bold text-slate-900">{value}</div>
+      <div className="mt-0.5 text-base font-bold text-white">{value}</div>
     </div>
   );
 }

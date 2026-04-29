@@ -16,30 +16,30 @@ export function ListingActions({ listingId, currentAsk }: { listingId: string; c
               setEditing(true);
               setSaved(false);
             }}
-            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            className="rounded-md border border-white/15 bg-[#101012] px-3 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
           >
             Edit price
           </button>
-          <button className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+          <button className="rounded-md border border-white/15 bg-[#101012] px-3 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]">
             Pause listing
           </button>
-          <button className="rounded-md border border-rose-300 bg-white px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50">
+          <button className="rounded-md border border-rose-700/50 bg-[#101012] px-3 py-2 text-sm font-semibold text-rose-300 hover:bg-rose-500/10">
             Delete
           </button>
           {saved && (
-            <span className="ml-auto self-center text-xs text-emerald-700">✓ Updated</span>
+            <span className="ml-auto self-center text-xs text-emerald-300">✓ Updated</span>
           )}
         </>
       ) : (
         <div className="flex w-full items-center gap-2">
-          <span className="text-sm font-semibold text-slate-700">New ask</span>
+          <span className="text-sm font-semibold text-white/80">New ask</span>
           <div className="relative flex-1 max-w-[160px]">
-            <span className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400">$</span>
+            <span className="absolute top-1/2 left-3 -translate-y-1/2 text-white/40">$</span>
             <input
               type="number"
               value={newAsk}
               onChange={(e) => setNewAsk(e.target.value)}
-              className="w-full rounded-md border border-slate-300 py-2 pl-7 pr-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-md border border-white/15 py-2 pl-7 pr-3 text-sm focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
             />
           </div>
           <button
@@ -56,7 +56,7 @@ export function ListingActions({ listingId, currentAsk }: { listingId: string; c
               setEditing(false);
               setNewAsk(String(currentAsk));
             }}
-            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            className="rounded-md border border-white/15 bg-[#101012] px-3 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
           >
             Cancel
           </button>

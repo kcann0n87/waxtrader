@@ -15,21 +15,21 @@ export default function PayoutsDashboard() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
-      <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/account" className="hover:text-slate-900">
+      <div className="mb-2 flex items-center gap-2 text-sm text-white/50">
+        <Link href="/account" className="hover:text-white">
           Account
         </Link>
         <span>/</span>
-        <span className="text-slate-900">Payouts</span>
+        <span className="text-white">Payouts</span>
       </div>
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">Payouts</h1>
-          <p className="text-sm text-slate-500">Weekly ACH every Friday for sales released that week</p>
+          <h1 className="text-2xl font-black tracking-tight text-white">Payouts</h1>
+          <p className="text-sm text-white/50">Weekly ACH every Friday for sales released that week</p>
         </div>
         <Link
           href="/sell/payouts"
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+          className="rounded-md border border-white/15 bg-[#101012] px-3 py-1.5 text-xs font-semibold text-white/80 hover:bg-white/[0.02]"
         >
           Manage payout settings
         </Link>
@@ -59,18 +59,18 @@ export default function PayoutsDashboard() {
         />
       </div>
 
-      <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
+      <div className="mb-6 rounded-xl border border-emerald-700/40 bg-emerald-500/10 p-4">
         <div className="flex items-start gap-3">
-          <ShieldCheck className="mt-0.5 text-emerald-600" size={20} />
+          <ShieldCheck className="mt-0.5 text-emerald-400" size={20} />
           <div>
-            <div className="text-sm font-bold text-emerald-900">Account verified</div>
-            <div className="text-xs text-emerald-800">
+            <div className="text-sm font-bold text-emerald-100">Account verified</div>
+            <div className="text-xs text-emerald-200">
               {seller.taxStatus} · Payouts to <strong>{seller.bankName} •••{seller.bankLast4}</strong> · {seller.payoutSchedule}
             </div>
           </div>
           <Link
             href="/sell/payouts"
-            className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 hover:underline"
+            className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-emerald-200 hover:underline"
           >
             Update <ExternalLink size={12} />
           </Link>
@@ -78,9 +78,9 @@ export default function PayoutsDashboard() {
       </div>
 
       <Section title="Pending balance" subtitle="Sales not yet paid out — broken down by lifecycle status">
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-white/10">
           <table className="w-full min-w-[760px] text-sm">
-            <thead className="bg-slate-50 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase">
+            <thead className="bg-white/[0.02] text-left text-xs font-semibold tracking-wider text-white/50 uppercase">
               <tr>
                 <th className="px-4 py-2.5">Order</th>
                 <th className="px-4 py-2.5">Product</th>
@@ -90,20 +90,20 @@ export default function PayoutsDashboard() {
                 <th className="px-4 py-2.5">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-white/5">
               {pending.map((p) => {
                 const sku = skus.find((s) => s.id === p.skuId)!;
                 return (
-                  <tr key={p.orderId} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-mono text-xs text-slate-500">{p.orderId}</td>
+                  <tr key={p.orderId} className="hover:bg-white/[0.02]">
+                    <td className="px-4 py-3 font-mono text-xs text-white/50">{p.orderId}</td>
                     <td className="px-4 py-3">
-                      <Link href={`/product/${sku.slug}`} className="text-sm font-semibold text-slate-900 hover:text-indigo-600">
+                      <Link href={`/product/${sku.slug}`} className="text-sm font-semibold text-white hover:text-amber-300">
                         {formatSkuTitle(sku)}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-slate-700">{formatUSDFull(p.grossSale)}</td>
-                    <td className="px-4 py-3 text-rose-600">-{formatUSDFull(p.fee + p.processing)}</td>
-                    <td className="px-4 py-3 font-bold text-slate-900">{formatUSDFull(p.netToSeller)}</td>
+                    <td className="px-4 py-3 text-white/80">{formatUSDFull(p.grossSale)}</td>
+                    <td className="px-4 py-3 text-rose-400">-{formatUSDFull(p.fee + p.processing)}</td>
+                    <td className="px-4 py-3 font-bold text-white">{formatUSDFull(p.netToSeller)}</td>
                     <td className="px-4 py-3">
                       <LifecycleBadge status={p.status} eta={p.releaseEta} />
                     </td>
@@ -111,7 +111,7 @@ export default function PayoutsDashboard() {
                 );
               })}
             </tbody>
-            <tfoot className="bg-slate-50 text-sm font-bold text-slate-900">
+            <tfoot className="bg-white/[0.02] text-sm font-bold text-white">
               <tr>
                 <td colSpan={4} className="px-4 py-3 text-right">
                   Total pending
@@ -125,9 +125,9 @@ export default function PayoutsDashboard() {
       </Section>
 
       <Section title="Payout history" subtitle="ACH transfers to your bank account">
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-white/10">
           <table className="w-full min-w-[760px] text-sm">
-            <thead className="bg-slate-50 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase">
+            <thead className="bg-white/[0.02] text-left text-xs font-semibold tracking-wider text-white/50 uppercase">
               <tr>
                 <th className="px-4 py-2.5">Payout</th>
                 <th className="px-4 py-2.5">Amount</th>
@@ -138,20 +138,20 @@ export default function PayoutsDashboard() {
                 <th className="px-4 py-2.5">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-white/5">
               {payoutHistory.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-mono text-xs text-slate-500">{p.id}</td>
-                  <td className="px-4 py-3 font-bold text-slate-900">{formatUSDFull(p.amount)}</td>
-                  <td className="px-4 py-3 text-slate-600">
+                <tr key={p.id} className="hover:bg-white/[0.02]">
+                  <td className="px-4 py-3 font-mono text-xs text-white/50">{p.id}</td>
+                  <td className="px-4 py-3 font-bold text-white">{formatUSDFull(p.amount)}</td>
+                  <td className="px-4 py-3 text-white/60">
                     <span className="inline-flex items-center gap-1.5">
-                      <Building2 size={12} className="text-slate-400" />
+                      <Building2 size={12} className="text-white/40" />
                       •••{p.bankLast4}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-slate-500">{formatDate(p.initiated)}</td>
-                  <td className="px-4 py-3 text-slate-500">{formatDate(p.arrivesBy)}</td>
-                  <td className="px-4 py-3 text-slate-500">{p.ordersIncluded.length}</td>
+                  <td className="px-4 py-3 text-white/50">{formatDate(p.initiated)}</td>
+                  <td className="px-4 py-3 text-white/50">{formatDate(p.arrivesBy)}</td>
+                  <td className="px-4 py-3 text-white/50">{p.ordersIncluded.length}</td>
                   <td className="px-4 py-3">
                     <PayoutBadge status={p.status} />
                   </td>
@@ -162,8 +162,8 @@ export default function PayoutsDashboard() {
         </div>
       </Section>
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600">
-        <div className="font-semibold text-slate-800">When you get paid</div>
+      <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-xs text-white/60">
+        <div className="font-semibold text-white/90">When you get paid</div>
         <p className="mt-1.5">
           Buyer payments are charged at checkout and held in escrow. When the buyer confirms
           delivery (or the 3-day auto-confirm window passes), funds are released to your pending
@@ -194,22 +194,22 @@ function BigStat({
   sub: string;
 }) {
   const tones = {
-    emerald: "bg-emerald-50 text-emerald-600 border-emerald-200",
-    amber: "bg-amber-50 text-amber-600 border-amber-200",
-    slate: "bg-slate-100 text-slate-600 border-slate-200",
+    emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-700/40",
+    amber: "bg-amber-500/10 text-amber-400 border-amber-700/40",
+    slate: "bg-white/5 text-white/60 border-white/10",
   }[accent];
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
       <div className="flex items-center gap-3">
         <div className={`flex h-10 w-10 items-center justify-center rounded-lg border ${tones}`}>
           {icon}
         </div>
         <div>
-          <div className="text-xs font-semibold tracking-wider text-slate-400 uppercase">{label}</div>
-          <div className="text-2xl font-bold text-slate-900">{value}</div>
+          <div className="text-xs font-semibold tracking-wider text-white/40 uppercase">{label}</div>
+          <div className="text-2xl font-bold text-white">{value}</div>
         </div>
       </div>
-      <div className="mt-2 text-xs text-slate-500">{sub}</div>
+      <div className="mt-2 text-xs text-white/50">{sub}</div>
     </div>
   );
 }
@@ -226,8 +226,8 @@ function Section({
   return (
     <section className="mb-8">
       <div className="mb-3">
-        <h2 className="text-base font-bold text-slate-900">{title}</h2>
-        <p className="text-xs text-slate-500">{subtitle}</p>
+        <h2 className="text-base font-bold text-white">{title}</h2>
+        <p className="text-xs text-white/50">{subtitle}</p>
       </div>
       {children}
     </section>
@@ -242,29 +242,29 @@ function LifecycleBadge({
   eta?: string;
 }) {
   const cfg = {
-    Charged: "bg-slate-100 text-slate-600",
-    InEscrow: "bg-amber-50 text-amber-700",
-    Shipped: "bg-sky-50 text-sky-700",
-    Delivered: "bg-indigo-50 text-indigo-700",
-    Released: "bg-emerald-50 text-emerald-700",
-    PaidOut: "bg-slate-100 text-slate-600",
+    Charged: "bg-white/5 text-white/60",
+    InEscrow: "bg-amber-500/10 text-amber-300",
+    Shipped: "bg-sky-500/10 text-sky-300",
+    Delivered: "bg-amber-500/10 text-amber-400",
+    Released: "bg-emerald-500/10 text-emerald-300",
+    PaidOut: "bg-white/5 text-white/60",
   }[status];
   return (
     <div className="flex flex-col gap-0.5">
       <span className={`inline-flex w-fit rounded-md px-2 py-1 text-xs font-semibold ${cfg}`}>
         {lifecycleLabel(status)}
       </span>
-      {eta && <span className="text-[11px] text-slate-400">{eta}</span>}
+      {eta && <span className="text-[11px] text-white/40">{eta}</span>}
     </div>
   );
 }
 
 function PayoutBadge({ status }: { status: import("@/lib/payouts").PayoutStatus }) {
   const cfg = {
-    Pending: "bg-slate-100 text-slate-600",
-    InTransit: "bg-sky-50 text-sky-700",
-    Paid: "bg-emerald-50 text-emerald-700",
-    Failed: "bg-rose-50 text-rose-700",
+    Pending: "bg-white/5 text-white/60",
+    InTransit: "bg-sky-500/10 text-sky-300",
+    Paid: "bg-emerald-500/10 text-emerald-300",
+    Failed: "bg-rose-500/10 text-rose-300",
   }[status];
   return (
     <span className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold ${cfg}`}>

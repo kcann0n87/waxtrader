@@ -41,12 +41,12 @@ export default async function SellerStorefrontPage({
     <div className="mx-auto max-w-6xl px-4 py-6">
       <Link
         href="/"
-        className="mb-3 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900"
+        className="mb-3 inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-white"
       >
         <ArrowLeft size={14} /> Back to marketplace
       </Link>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#101012]">
         <div
           className="h-32 md:h-40"
           style={{
@@ -58,17 +58,17 @@ export default async function SellerStorefrontPage({
             <Avatar name={seller.displayName} large />
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-black tracking-tight text-slate-900">
+                <h1 className="text-2xl font-black tracking-tight text-white">
                   {seller.displayName}
                 </h1>
                 {seller.verified && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-300">
                     <CheckCircle2 size={12} />
                     Verified
                   </span>
                 )}
               </div>
-              <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+              <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-white/50">
                 <span className="font-mono">@{seller.username}</span>
                 <span className="inline-flex items-center gap-1">
                   <MapPin size={12} /> {seller.location}
@@ -88,17 +88,17 @@ export default async function SellerStorefrontPage({
             </div>
           </div>
 
-          <p className="mt-4 max-w-3xl text-sm text-slate-600">{seller.bio}</p>
+          <p className="mt-4 max-w-3xl text-sm text-white/60">{seller.bio}</p>
 
           <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3">
             <Stat icon={<Package size={14} />} label="Total sales">
-              <span className="font-bold text-slate-900">{seller.totalSales.toLocaleString()}</span>
+              <span className="font-bold text-white">{seller.totalSales.toLocaleString()}</span>
             </Stat>
             <Stat icon={<Clock size={14} />} label="Response time">
-              <span className="font-bold text-slate-900">{seller.responseTime}</span>
+              <span className="font-bold text-white">{seller.responseTime}</span>
             </Stat>
             <Stat icon={<ShieldCheck size={14} />} label="Member since">
-              <span className="font-bold text-slate-900">{formatJoined(seller.joinedAt)}</span>
+              <span className="font-bold text-white">{formatJoined(seller.joinedAt)}</span>
             </Stat>
           </div>
         </div>
@@ -111,8 +111,8 @@ export default async function SellerStorefrontPage({
       <section className="mt-8">
         <div className="mb-3 flex items-end justify-between">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Active listings</h2>
-            <p className="text-sm text-slate-500">
+            <h2 className="text-lg font-bold text-white">Active listings</h2>
+            <p className="text-sm text-white/50">
               {sellerListings.length}{" "}
               {sellerListings.length === 1 ? "product" : "products"} available
             </p>
@@ -120,10 +120,10 @@ export default async function SellerStorefrontPage({
         </div>
 
         {sellerListings.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center">
-            <Package className="mx-auto text-slate-400" size={32} />
-            <p className="mt-3 text-sm font-bold text-slate-900">No active listings</p>
-            <p className="mt-1 text-sm text-slate-500">
+          <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-12 text-center">
+            <Package className="mx-auto text-white/40" size={32} />
+            <p className="mt-3 text-sm font-bold text-white">No active listings</p>
+            <p className="mt-1 text-sm text-white/50">
               {seller.displayName} doesn&apos;t have anything listed right now.
             </p>
           </div>
@@ -133,23 +133,23 @@ export default async function SellerStorefrontPage({
               <Link
                 key={sku.id}
                 href={`/product/${sku.slug}`}
-                className="group flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:shadow-md"
+                className="group flex flex-col overflow-hidden rounded-lg border border-white/10 bg-[#101012] transition hover:shadow-md"
               >
                 <ProductImage sku={sku} size="card" className="aspect-[4/5]" />
                 <div className="flex flex-1 flex-col p-3">
-                  <div className="line-clamp-2 text-sm font-semibold text-slate-900 group-hover:text-indigo-600">
+                  <div className="line-clamp-2 text-sm font-semibold text-white group-hover:text-amber-300">
                     {formatSkuTitle(sku)}
                   </div>
                   <div className="mt-3 flex items-end justify-between">
                     <div>
-                      <div className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
+                      <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">
                         Their ask
                       </div>
-                      <div className="text-base font-bold text-slate-900">
+                      <div className="text-base font-bold text-white">
                         {formatUSDFull(listing.price)}
                       </div>
                     </div>
-                    <div className="text-xs text-slate-500">{stock} listed</div>
+                    <div className="text-xs text-white/50">{stock} listed</div>
                   </div>
                 </div>
               </Link>
@@ -161,15 +161,15 @@ export default async function SellerStorefrontPage({
       <section className="mt-10">
         <div className="mb-3 flex items-end justify-between">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Recent feedback</h2>
-            <p className="text-sm text-slate-500">
+            <h2 className="text-lg font-bold text-white">Recent feedback</h2>
+            <p className="text-sm text-white/50">
               {reviews.length === 0 ? "No reviews yet" : `${reviews.length} buyer reviews`}
             </p>
           </div>
         </div>
 
         {reviews.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500">
+          <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-8 text-center text-sm text-white/50">
             Reviews will appear here after buyers complete orders.
           </div>
         ) : (
@@ -177,33 +177,33 @@ export default async function SellerStorefrontPage({
             {reviews.map((r) => {
               const sku = skus.find((s) => s.id === r.skuId);
               return (
-                <li key={r.id} className="rounded-xl border border-slate-200 bg-white p-5">
+                <li key={r.id} className="rounded-xl border border-white/10 bg-[#101012] p-5">
                   <div className="flex items-start gap-3">
                     <Avatar name={r.reviewer} />
                     <div className="flex-1">
                       <div className="flex items-baseline justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <div className="text-sm font-bold text-slate-900">{r.reviewer}</div>
+                          <div className="text-sm font-bold text-white">{r.reviewer}</div>
                           <VerdictTag verdict={r.verdict} />
                         </div>
-                        <div className="text-xs text-slate-400">{formatTs(r.ts)}</div>
+                        <div className="text-xs text-white/40">{formatTs(r.ts)}</div>
                       </div>
                       <Stars stars={r.stars} />
                       {sku && (
                         <Link
                           href={`/product/${sku.slug}`}
-                          className="mt-1 block text-xs text-slate-500 hover:text-indigo-600"
+                          className="mt-1 block text-xs text-white/50 hover:text-amber-300"
                         >
                           on {formatSkuTitle(sku)}
                         </Link>
                       )}
-                      <p className="mt-2 text-sm text-slate-700">{r.text}</p>
+                      <p className="mt-2 text-sm text-white/80">{r.text}</p>
                       {r.sellerReply && (
-                        <div className="mt-3 rounded-md border-l-2 border-indigo-200 bg-indigo-50/40 px-3 py-2">
-                          <div className="text-xs font-bold text-slate-700">
+                        <div className="mt-3 rounded-md border-l-2 border-amber-700/40 bg-amber-500/10 px-3 py-2">
+                          <div className="text-xs font-bold text-white/80">
                             {seller.displayName} replied
                           </div>
-                          <p className="mt-0.5 text-sm text-slate-700">{r.sellerReply.text}</p>
+                          <p className="mt-0.5 text-sm text-white/80">{r.sellerReply.text}</p>
                         </div>
                       )}
                     </div>
@@ -228,9 +228,9 @@ function Stat({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3">
-      <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-slate-500 uppercase">
-        <span className="text-slate-400">{icon}</span>
+    <div className="rounded-lg border border-white/10 bg-[#101012] p-3">
+      <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-white/50 uppercase">
+        <span className="text-white/40">{icon}</span>
         {label}
       </div>
       <div className="mt-1 text-base">{children}</div>
@@ -261,9 +261,9 @@ function Avatar({ name, large }: { name: string; large?: boolean }) {
 
 function VerdictTag({ verdict }: { verdict: Verdict }) {
   const cfg = {
-    positive: "bg-emerald-50 text-emerald-700",
-    neutral: "bg-amber-50 text-amber-700",
-    negative: "bg-rose-50 text-rose-700",
+    positive: "bg-emerald-500/10 text-emerald-300",
+    neutral: "bg-amber-500/10 text-amber-300",
+    negative: "bg-rose-500/10 text-rose-300",
   }[verdict];
   const label = verdict[0].toUpperCase() + verdict.slice(1);
   return (

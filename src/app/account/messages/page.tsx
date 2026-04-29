@@ -12,17 +12,17 @@ export default function MessagesPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
-      <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/account" className="inline-flex items-center gap-1 hover:text-slate-900">
+      <div className="mb-2 flex items-center gap-2 text-sm text-white/50">
+        <Link href="/account" className="inline-flex items-center gap-1 hover:text-white">
           <ArrowLeft size={14} /> Account
         </Link>
         <span>/</span>
-        <span className="text-slate-900">Messages</span>
+        <span className="text-white">Messages</span>
       </div>
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">Messages</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-black tracking-tight text-white">Messages</h1>
+          <p className="text-sm text-white/50">
             Conversations with sellers, buyers, and support · {unreadCount} unread
           </p>
         </div>
@@ -31,14 +31,14 @@ export default function MessagesPage() {
       {!hydrated ? (
         <div className="space-y-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-20 animate-pulse rounded-xl bg-slate-100" />
+            <div key={i} className="h-20 animate-pulse rounded-xl bg-white/5" />
           ))}
         </div>
       ) : conversations.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center">
-          <MessageCircle className="mx-auto text-slate-400" size={32} />
-          <p className="mt-3 text-sm font-bold text-slate-900">No messages yet</p>
-          <p className="mt-1 text-sm text-slate-500">
+        <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-12 text-center">
+          <MessageCircle className="mx-auto text-white/40" size={32} />
+          <p className="mt-3 text-sm font-bold text-white">No messages yet</p>
+          <p className="mt-1 text-sm text-white/50">
             When you contact a seller or have an order question, the conversation lives here.
           </p>
           <Link
@@ -50,40 +50,40 @@ export default function MessagesPage() {
           </Link>
         </div>
       ) : (
-        <ul className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <ul className="overflow-hidden rounded-xl border border-white/10 bg-[#101012]">
           {sorted.map((c) => {
             const sku = c.skuId ? skus.find((s) => s.id === c.skuId) : null;
             const last = c.messages[c.messages.length - 1];
             return (
-              <li key={c.id} className="border-b border-slate-100 last:border-0">
+              <li key={c.id} className="border-b border-white/5 last:border-0">
                 <Link
                   href={`/account/messages/${c.id}`}
-                  className={`flex gap-3 px-4 py-3 transition hover:bg-slate-50 ${
-                    c.unread ? "bg-indigo-50/40" : ""
+                  className={`flex gap-3 px-4 py-3 transition hover:bg-white/[0.02] ${
+                    c.unread ? "bg-amber-500/10" : ""
                   }`}
                 >
                   <Avatar name={c.with} support={c.withRole === "support"} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
-                      <div className="flex items-center gap-1.5 text-sm font-bold text-slate-900">
+                      <div className="flex items-center gap-1.5 text-sm font-bold text-white">
                         {c.with}
                         {c.withRating !== undefined && (
-                          <span className="text-[11px] font-semibold text-emerald-600">
+                          <span className="text-[11px] font-semibold text-emerald-400">
                             {c.withRating}%
                           </span>
                         )}
                         {c.withRole === "support" && (
-                          <span className="rounded-full bg-indigo-100 px-1.5 py-0.5 text-[10px] font-bold text-indigo-700">
+                          <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-400">
                             STAFF
                           </span>
                         )}
                       </div>
-                      <span className="shrink-0 text-[11px] text-slate-400">{ago(c.lastMessageAt)}</span>
+                      <span className="shrink-0 text-[11px] text-white/40">{ago(c.lastMessageAt)}</span>
                     </div>
-                    {sku && <div className="mt-0.5 text-xs text-slate-500">{formatSkuTitle(sku)}</div>}
-                    {!sku && c.subject && <div className="mt-0.5 text-xs text-slate-500">{c.subject}</div>}
-                    <div className="mt-1 line-clamp-1 text-sm text-slate-700">
-                      <span className="font-semibold text-slate-500">
+                    {sku && <div className="mt-0.5 text-xs text-white/50">{formatSkuTitle(sku)}</div>}
+                    {!sku && c.subject && <div className="mt-0.5 text-xs text-white/50">{c.subject}</div>}
+                    <div className="mt-1 line-clamp-1 text-sm text-white/80">
+                      <span className="font-semibold text-white/50">
                         {last.from === "buyer" ? "You: " : ""}
                       </span>
                       {last.text}

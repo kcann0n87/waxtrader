@@ -48,7 +48,7 @@ export function BuyBidActions({
         <button
           disabled={ask === null}
           onClick={() => setMode("buy")}
-          className="flex w-full items-center justify-between rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-3 font-bold text-slate-900 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex w-full items-center justify-between rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-3 font-bold text-white shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <span>Buy Now</span>
           <span>{ask !== null ? formatUSD(ask) : "—"}</span>
@@ -65,7 +65,7 @@ export function BuyBidActions({
       <div className="mt-4 border-t border-white/10 pt-4">
         <Link
           href="/sell"
-          className="block w-full rounded-md border border-white/10 bg-white/[0.03] px-4 py-2.5 text-center text-sm font-semibold text-white/70 transition hover:border-white/20 hover:text-white"
+          className="block w-full rounded-md border border-white/10 bg-[#101012]/[0.03] px-4 py-2.5 text-center text-sm font-semibold text-white/70 transition hover:border-white/20 hover:text-white"
         >
           Sell yours →
         </Link>
@@ -81,11 +81,11 @@ export function BuyBidActions({
 
       {mode !== "closed" && (
         <div
-          className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/60 px-4"
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4"
           onClick={close}
         >
           <div
-            className="w-full max-w-md rounded-xl bg-white shadow-xl"
+            className="w-full max-w-md rounded-xl bg-[#101012] shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             {mode === "buy" && (
@@ -168,11 +168,11 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 
 function ModalHeader({ title, onClose }: { title: string; onClose: () => void }) {
   return (
-    <div className="flex items-start justify-between border-b border-slate-100 p-5">
-      <h3 className="text-lg font-bold text-slate-900">{title}</h3>
+    <div className="flex items-start justify-between border-b border-white/5 p-5">
+      <h3 className="text-lg font-bold text-white">{title}</h3>
       <button
         onClick={onClose}
-        className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+        className="rounded-md p-1 text-white/40 hover:bg-white/5 hover:text-white/60"
         aria-label="Close"
       >
         <X size={18} />
@@ -210,7 +210,7 @@ function BuyModal({
     <>
       <ModalHeader title="Confirm purchase" onClose={onClose} />
       <div className="max-h-[80vh] overflow-y-auto p-5">
-        <div className="flex gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+        <div className="flex gap-3 rounded-lg border border-white/10 bg-white/[0.02] p-3">
           <div
             className="flex h-14 w-11 shrink-0 items-center justify-center rounded text-[8px] font-bold text-white"
             style={{ background: `linear-gradient(135deg, ${sku.gradient[0]}, ${sku.gradient[1]})` }}
@@ -218,8 +218,8 @@ function BuyModal({
             {sku.brand.slice(0, 4).toUpperCase()}
           </div>
           <div>
-            <div className="text-sm font-bold text-slate-900">{formatSkuTitle(sku)}</div>
-            <div className="text-xs text-slate-500">{sku.sport} · Factory Sealed</div>
+            <div className="text-sm font-bold text-white">{formatSkuTitle(sku)}</div>
+            <div className="text-xs text-white/50">{sku.sport} · Factory Sealed</div>
           </div>
         </div>
 
@@ -227,20 +227,20 @@ function BuyModal({
           <Row label="Item price" value={formatUSDFull(ask)} />
           <Row label="Shipping" value={shipping === 0 ? "Free" : formatUSDFull(shipping)} />
           <Row label="Sales tax (est)" value={formatUSDFull(tax)} />
-          <div className="my-2 border-t border-slate-100" />
+          <div className="my-2 border-t border-white/5" />
           <Row label="Total" value={formatUSDFull(total)} bold />
         </dl>
 
         <div className="mt-5">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-semibold text-slate-700">Payment</span>
-            <span className="inline-flex items-center gap-1 text-xs text-slate-400">
+            <span className="text-sm font-semibold text-white/80">Payment</span>
+            <span className="inline-flex items-center gap-1 text-xs text-white/40">
               <Lock size={11} /> Encrypted
             </span>
           </div>
-          <div className="rounded-lg border border-slate-300 bg-white p-3">
+          <div className="rounded-lg border border-white/15 bg-[#101012] p-3">
             <div className="flex items-center gap-2">
-              <CreditCard size={16} className="text-slate-400" />
+              <CreditCard size={16} className="text-white/40" />
               <input
                 inputMode="numeric"
                 value={cardNumber}
@@ -256,7 +256,7 @@ function BuyModal({
                 className="flex-1 text-sm focus:outline-none"
               />
             </div>
-            <div className="mt-2 grid grid-cols-3 gap-2 border-t border-slate-100 pt-2">
+            <div className="mt-2 grid grid-cols-3 gap-2 border-t border-white/5 pt-2">
               <input
                 inputMode="numeric"
                 value={exp}
@@ -286,7 +286,7 @@ function BuyModal({
               />
             </div>
           </div>
-          <label className="mt-2 flex cursor-pointer items-center gap-2 text-xs text-slate-600">
+          <label className="mt-2 flex cursor-pointer items-center gap-2 text-xs text-white/60">
             <input
               type="checkbox"
               checked={saveCard}
@@ -296,7 +296,7 @@ function BuyModal({
           </label>
         </div>
 
-        <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
+        <div className="mt-4 rounded-md border border-emerald-700/40 bg-emerald-500/10 p-3 text-xs text-emerald-200">
           <strong>Buyer Protection:</strong> Your payment is held in escrow. Released to the seller
           only after you confirm the box arrived sealed.
         </div>
@@ -304,7 +304,7 @@ function BuyModal({
         <div className="mt-5 flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            className="flex-1 rounded-md border border-white/15 bg-[#101012] px-4 py-2.5 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
           >
             Cancel
           </button>
@@ -352,58 +352,58 @@ function BidModal({
     <>
       <ModalHeader title="Place a bid" onClose={onClose} />
       <div className="p-5">
-        <div className="mb-4 text-sm text-slate-600">{formatSkuTitle(sku)}</div>
+        <div className="mb-4 text-sm text-white/60">{formatSkuTitle(sku)}</div>
 
-        <div className="grid grid-cols-2 divide-x divide-slate-200 rounded-lg border border-slate-200 bg-slate-50 text-center">
+        <div className="grid grid-cols-2 divide-x divide-white/10 rounded-lg border border-white/10 bg-white/[0.02] text-center">
           <div className="px-3 py-3">
-            <div className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Highest Bid</div>
-            <div className="mt-1 text-base font-bold text-slate-900">
+            <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">Highest Bid</div>
+            <div className="mt-1 text-base font-bold text-white">
               {currentHighest !== null ? formatUSD(currentHighest) : "—"}
             </div>
           </div>
           <div className="px-3 py-3">
-            <div className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Lowest Ask</div>
-            <div className="mt-1 text-base font-bold text-emerald-700">
+            <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">Lowest Ask</div>
+            <div className="mt-1 text-base font-bold text-emerald-300">
               {lowestAsk !== null ? formatUSD(lowestAsk) : "—"}
             </div>
           </div>
         </div>
 
         <label className="mt-5 block">
-          <span className="text-sm font-semibold text-slate-700">Your bid</span>
+          <span className="text-sm font-semibold text-white/80">Your bid</span>
           <div className="relative mt-1">
-            <span className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400">$</span>
+            <span className="absolute top-1/2 left-3 -translate-y-1/2 text-white/40">$</span>
             <input
               type="number"
               value={bidAmount}
               onChange={(e) => onChangeAmount(e.target.value)}
-              className="w-full rounded-md border border-slate-300 py-2.5 pr-3 pl-7 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-md border border-white/15 py-2.5 pr-3 pl-7 text-sm focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
             />
           </div>
           {tooLow && (
-            <p className="mt-1.5 text-xs text-amber-700">
+            <p className="mt-1.5 text-xs text-amber-300">
               ⚠ Below the current highest bid of {formatUSD(currentHighest!)} — yours won&apos;t win
               first.
             </p>
           )}
           {meetsAsk && (
-            <p className="mt-1.5 text-xs text-emerald-700">
+            <p className="mt-1.5 text-xs text-emerald-300">
               ⚡ This meets the lowest ask — buying instantly for {formatUSD(lowestAsk!)}.
             </p>
           )}
           {!tooLow && !meetsAsk && bidNum > 0 && (
-            <p className="mt-1.5 text-xs text-slate-500">
+            <p className="mt-1.5 text-xs text-white/50">
               You&apos;ll be the new highest bid if a seller doesn&apos;t accept it sooner.
             </p>
           )}
         </label>
 
         <label className="mt-4 block">
-          <span className="text-sm font-semibold text-slate-700">Expires</span>
+          <span className="text-sm font-semibold text-white/80">Expires</span>
           <select
             value={bidDays}
             onChange={(e) => onChangeDays(e.target.value)}
-            className="mt-1 w-full rounded-md border border-slate-300 py-2.5 px-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="mt-1 w-full rounded-md border border-white/15 py-2.5 px-3 text-sm focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
           >
             <option value="1">1 day</option>
             <option value="3">3 days</option>
@@ -413,9 +413,9 @@ function BidModal({
           </select>
         </label>
 
-        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs">
-          <div className="font-semibold text-slate-700">If accepted</div>
-          <div className="mt-1.5 space-y-1 text-slate-600">
+        <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.02] p-3 text-xs">
+          <div className="font-semibold text-white/80">If accepted</div>
+          <div className="mt-1.5 space-y-1 text-white/60">
             <div className="flex justify-between">
               <span>Bid amount</span>
               <span>{formatUSDFull(bidNum)}</span>
@@ -424,7 +424,7 @@ function BidModal({
               <span>Sales tax (est)</span>
               <span>{formatUSDFull(total - bidNum)}</span>
             </div>
-            <div className="mt-1 flex justify-between border-t border-slate-200 pt-1 font-bold text-slate-900">
+            <div className="mt-1 flex justify-between border-t border-white/10 pt-1 font-bold text-white">
               <span>Charged to your card</span>
               <span>{formatUSDFull(total)}</span>
             </div>
@@ -434,7 +434,7 @@ function BidModal({
         <div className="mt-5 flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            className="flex-1 rounded-md border border-white/15 bg-[#101012] px-4 py-2.5 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
           >
             Cancel
           </button>
@@ -447,7 +447,7 @@ function BidModal({
           </button>
         </div>
 
-        <div className="mt-3 text-[11px] text-slate-400">
+        <div className="mt-3 text-[11px] text-white/40">
           Flat {(FEE_RATE * 100).toFixed(0)}% seller fee — no buyer fees, no separate processing.
         </div>
         {/* keep referenced so the var isn't unused */}
@@ -474,14 +474,14 @@ function ConfirmedModal({
     <>
       <ModalHeader title={title} onClose={onClose} />
       <div className="flex flex-col items-center px-5 py-7 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-          <Check className="text-emerald-600" size={28} />
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15">
+          <Check className="text-emerald-400" size={28} />
         </div>
         <div className="mt-4 space-y-1.5 text-sm">
           {lines.map((l, i) => (
             <div
               key={i}
-              className={i === 0 ? "text-base font-bold text-slate-900" : "text-slate-600"}
+              className={i === 0 ? "text-base font-bold text-white" : "text-white/60"}
             >
               {l}
             </div>
@@ -490,7 +490,7 @@ function ConfirmedModal({
         <div className="mt-6 flex gap-2">
           <button
             onClick={onClose}
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            className="rounded-md border border-white/15 bg-[#101012] px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
           >
             Close
           </button>
@@ -510,8 +510,8 @@ function ConfirmedModal({
 function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
     <div className="flex justify-between">
-      <dt className={bold ? "font-bold text-slate-900" : "text-slate-600"}>{label}</dt>
-      <dd className={bold ? "font-bold text-slate-900" : "font-semibold text-slate-900"}>{value}</dd>
+      <dt className={bold ? "font-bold text-white" : "text-white/60"}>{label}</dt>
+      <dd className={bold ? "font-bold text-white" : "font-semibold text-white"}>{value}</dd>
     </div>
   );
 }

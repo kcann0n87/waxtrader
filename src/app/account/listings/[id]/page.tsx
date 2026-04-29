@@ -19,22 +19,22 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
-      <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/account" className="inline-flex items-center gap-1 hover:text-slate-900">
+      <div className="mb-2 flex items-center gap-2 text-sm text-white/50">
+        <Link href="/account" className="inline-flex items-center gap-1 hover:text-white">
           <ArrowLeft size={14} /> Account
         </Link>
         <span>/</span>
-        <span className="hover:text-slate-900">Listings</span>
+        <span className="hover:text-white">Listings</span>
         <span>/</span>
-        <span className="font-mono text-slate-900">{listing.id}</span>
+        <span className="font-mono text-white">{listing.id}</span>
       </div>
 
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">
+          <h1 className="text-2xl font-black tracking-tight text-white">
             Listing {listing.id}
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-white/50">
             Listed {formatDate(listing.listedAt)} · {listing.qty} qty available
           </p>
         </div>
@@ -43,7 +43,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
-          <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
             <div className="flex items-start gap-4">
               <Link
                 href={`/product/${sku.slug}`}
@@ -57,11 +57,11 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               <div className="flex-1">
                 <Link
                   href={`/product/${sku.slug}`}
-                  className="text-base font-bold text-slate-900 hover:text-indigo-600"
+                  className="text-base font-bold text-white hover:text-amber-300"
                 >
                   {formatSkuTitle(sku)}
                 </Link>
-                <div className="text-xs text-slate-500">
+                <div className="text-xs text-white/50">
                   {sku.sport} · Factory Sealed
                 </div>
                 <div className="mt-3 grid grid-cols-3 gap-4 text-xs">
@@ -74,9 +74,9 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           </div>
 
           {listing.status === "Active" && (
-            <div className="rounded-xl border border-slate-200 bg-white p-5">
-              <h2 className="mb-3 text-base font-bold text-slate-900">Listing details</h2>
-              <dl className="divide-y divide-slate-100 rounded-lg border border-slate-200">
+            <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
+              <h2 className="mb-3 text-base font-bold text-white">Listing details</h2>
+              <dl className="divide-y divide-white/5 rounded-lg border border-white/10">
                 <Row label="Asking price" value={formatUSDFull(listing.ask)} />
                 <Row
                   label="Shipping"
@@ -91,31 +91,31 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           )}
 
           {listing.status === "Sold" && listing.soldOrder && (
-            <div className="rounded-xl border border-slate-200 bg-white p-5">
-              <h2 className="mb-1 text-base font-bold text-slate-900">Sold to a buyer</h2>
-              <p className="mb-4 text-xs text-slate-500">
+            <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
+              <h2 className="mb-1 text-base font-bold text-white">Sold to a buyer</h2>
+              <p className="mb-4 text-xs text-white/50">
                 Order{" "}
                 <Link
                   href={`/account/orders/${listing.soldOrder.id}`}
-                  className="font-mono text-indigo-600 hover:underline"
+                  className="font-mono text-amber-300 hover:underline"
                 >
                   {listing.soldOrder.id}
                 </Link>{" "}
                 · sold {formatDate(listing.soldOrder.soldAt)}
               </p>
 
-              <div className="mb-4 grid grid-cols-3 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-center text-sm">
+              <div className="mb-4 grid grid-cols-3 gap-3 rounded-lg border border-white/10 bg-white/[0.02] p-3 text-center text-sm">
                 <div>
-                  <div className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Sold for</div>
-                  <div className="mt-0.5 font-bold text-slate-900">{formatUSDFull(listing.ask)}</div>
+                  <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">Sold for</div>
+                  <div className="mt-0.5 font-bold text-white">{formatUSDFull(listing.ask)}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Fees</div>
-                  <div className="mt-0.5 font-bold text-rose-600">-{formatUSDFull(fee)}</div>
+                  <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">Fees</div>
+                  <div className="mt-0.5 font-bold text-rose-400">-{formatUSDFull(fee)}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Net to you</div>
-                  <div className="mt-0.5 font-bold text-emerald-700">{formatUSD(payout)}</div>
+                  <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">Net to you</div>
+                  <div className="mt-0.5 font-bold text-emerald-300">{formatUSD(payout)}</div>
                 </div>
               </div>
 
@@ -130,16 +130,16 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </div>
 
         <aside className="space-y-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-5">
-            <div className="text-xs font-semibold tracking-wider text-slate-400 uppercase">Listing ID</div>
-            <div className="mt-0.5 font-mono text-sm font-semibold text-slate-900">{listing.id}</div>
-            <div className="mt-3 text-xs font-semibold tracking-wider text-slate-400 uppercase">SKU</div>
-            <div className="mt-0.5 text-sm font-semibold text-slate-900">{formatSkuTitle(sku)}</div>
+          <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
+            <div className="text-xs font-semibold tracking-wider text-white/40 uppercase">Listing ID</div>
+            <div className="mt-0.5 font-mono text-sm font-semibold text-white">{listing.id}</div>
+            <div className="mt-3 text-xs font-semibold tracking-wider text-white/40 uppercase">SKU</div>
+            <div className="mt-0.5 text-sm font-semibold text-white">{formatSkuTitle(sku)}</div>
           </div>
 
           {listing.status === "Active" && (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600">
-              <div className="font-semibold text-slate-800">Tip</div>
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-xs text-white/60">
+              <div className="font-semibold text-white/90">Tip</div>
               <p className="mt-1">
                 Lowering your ask by even $5 below the current lowest can dramatically increase
                 visibility. Your listing is currently {listing.watching > 5 ? "well-watched" : "below average attention"}.
@@ -148,7 +148,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           )}
 
           {listing.status === "Sold" && listing.soldOrder && !listing.soldOrder.tracking && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
+            <div className="rounded-xl border border-amber-700/40 bg-amber-500/10 p-4 text-xs text-amber-100">
               <div className="font-semibold">Ship by {formatDate(listing.soldOrder.needsShipBy)}</div>
               <p className="mt-1">
                 Add tracking before this date to keep your seller score high. Late shipments hurt
@@ -165,11 +165,11 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div>
-      <dt className="flex items-center gap-1 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
-        <span className="text-slate-300">{icon}</span>
+      <dt className="flex items-center gap-1 text-[10px] font-semibold tracking-wider text-white/40 uppercase">
+        <span className="text-white/30">{icon}</span>
         {label}
       </dt>
-      <dd className="text-sm font-semibold text-slate-900">{value}</dd>
+      <dd className="text-sm font-semibold text-white">{value}</dd>
     </div>
   );
 }
@@ -177,17 +177,17 @@ function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; va
 function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
     <div className="flex items-center justify-between px-4 py-2.5">
-      <dt className="text-sm text-slate-600">{label}</dt>
-      <dd className={`text-sm ${bold ? "font-bold text-slate-900" : "font-semibold text-slate-900"}`}>{value}</dd>
+      <dt className="text-sm text-white/60">{label}</dt>
+      <dd className={`text-sm ${bold ? "font-bold text-white" : "font-semibold text-white"}`}>{value}</dd>
     </div>
   );
 }
 
 function ListingStatusBadge({ status }: { status: import("@/lib/orders").ListingStatus }) {
   const cfg = {
-    Active: "bg-emerald-50 text-emerald-700",
-    Sold: "bg-indigo-50 text-indigo-700",
-    Expired: "bg-slate-100 text-slate-600",
+    Active: "bg-emerald-500/10 text-emerald-300",
+    Sold: "bg-amber-500/10 text-amber-400",
+    Expired: "bg-white/5 text-white/60",
   }[status];
   return (
     <span className={`inline-flex rounded-md px-3 py-1.5 text-sm font-bold ${cfg}`}>{status}</span>

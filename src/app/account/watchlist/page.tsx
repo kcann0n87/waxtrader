@@ -13,31 +13,31 @@ export default function WatchlistPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
-      <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/account" className="inline-flex items-center gap-1 hover:text-slate-900">
+      <div className="mb-2 flex items-center gap-2 text-sm text-white/50">
+        <Link href="/account" className="inline-flex items-center gap-1 hover:text-white">
           <ArrowLeft size={14} /> Account
         </Link>
         <span>/</span>
-        <span className="text-slate-900">Watchlist</span>
+        <span className="text-white">Watchlist</span>
       </div>
-      <h1 className="text-2xl font-black tracking-tight text-slate-900">Watchlist</h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <h1 className="text-2xl font-black tracking-tight text-white">Watchlist</h1>
+      <p className="mt-1 text-sm text-white/50">
         Boxes you&apos;re tracking. We&apos;ll alert you when prices drop or new listings appear.
       </p>
 
       {!hydrated ? (
         <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-32 animate-pulse rounded-xl bg-slate-100" />
+            <div key={i} className="h-32 animate-pulse rounded-xl bg-white/5" />
           ))}
         </div>
       ) : watched.length === 0 ? (
-        <div className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-rose-500">
+        <div className="mt-10 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-12 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10 text-rose-500">
             <Heart size={24} />
           </div>
-          <h3 className="mt-4 text-base font-bold text-slate-900">No watchlist yet</h3>
-          <p className="mt-1 text-sm text-slate-500">
+          <h3 className="mt-4 text-base font-bold text-white">No watchlist yet</h3>
+          <p className="mt-1 text-sm text-white/50">
             Tap the heart on any product to track it here.
           </p>
           <Link
@@ -48,9 +48,9 @@ export default function WatchlistPage() {
           </Link>
         </div>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200">
+        <div className="mt-6 overflow-x-auto rounded-xl border border-white/10">
           <table className="w-full min-w-[640px] text-sm">
-            <thead className="bg-slate-50 text-left text-xs font-semibold tracking-wider text-slate-500 uppercase">
+            <thead className="bg-white/[0.02] text-left text-xs font-semibold tracking-wider text-white/50 uppercase">
               <tr>
                 <th className="px-4 py-2.5">Product</th>
                 <th className="px-4 py-2.5">Lowest ask</th>
@@ -59,7 +59,7 @@ export default function WatchlistPage() {
                 <th className="px-4 py-2.5"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-white/5">
               {watched.map((s) => {
                 const ask = lowestAsk(s.id);
                 const last = lastSale(s.id);
@@ -68,7 +68,7 @@ export default function WatchlistPage() {
                 const change = (last ?? 0) - prev;
                 const pct = prev ? (change / prev) * 100 : 0;
                 return (
-                  <tr key={s.id} className="hover:bg-slate-50">
+                  <tr key={s.id} className="hover:bg-white/[0.02]">
                     <td className="px-4 py-3">
                       <Link href={`/product/${s.slug}`} className="flex items-center gap-3">
                         <div
@@ -80,23 +80,23 @@ export default function WatchlistPage() {
                           {s.brand.slice(0, 4).toUpperCase()}
                         </div>
                         <div>
-                          <div className="text-sm font-semibold text-slate-900 hover:text-indigo-600">
+                          <div className="text-sm font-semibold text-white hover:text-amber-300">
                             {formatSkuTitle(s)}
                           </div>
-                          <div className="text-xs text-slate-500">{s.sport}</div>
+                          <div className="text-xs text-white/50">{s.sport}</div>
                         </div>
                       </Link>
                     </td>
-                    <td className="px-4 py-3 font-bold text-slate-900">
+                    <td className="px-4 py-3 font-bold text-white">
                       {ask !== null ? formatUSDFull(ask) : "—"}
                     </td>
-                    <td className="px-4 py-3 text-slate-700">
+                    <td className="px-4 py-3 text-white/80">
                       {last !== null ? formatUSDFull(last) : "—"}
                     </td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex rounded-md px-2 py-0.5 text-xs font-semibold ${
-                          change >= 0 ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+                          change >= 0 ? "bg-emerald-500/10 text-emerald-300" : "bg-rose-500/10 text-rose-300"
                         }`}
                       >
                         {change >= 0 ? "+" : ""}

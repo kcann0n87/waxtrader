@@ -11,31 +11,31 @@ export default function FollowingPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
-      <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/account" className="inline-flex items-center gap-1 hover:text-slate-900">
+      <div className="mb-2 flex items-center gap-2 text-sm text-white/50">
+        <Link href="/account" className="inline-flex items-center gap-1 hover:text-white">
           <ArrowLeft size={14} /> Account
         </Link>
         <span>/</span>
-        <span className="text-slate-900">Following</span>
+        <span className="text-white">Following</span>
       </div>
-      <h1 className="text-2xl font-black tracking-tight text-slate-900">Following</h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <h1 className="text-2xl font-black tracking-tight text-white">Following</h1>
+      <p className="mt-1 text-sm text-white/50">
         Sellers you follow show up in your activity feed when they list new boxes.
       </p>
 
       {!hydrated ? (
         <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-2">
           {[0, 1].map((i) => (
-            <div key={i} className="h-24 animate-pulse rounded-xl bg-slate-100" />
+            <div key={i} className="h-24 animate-pulse rounded-xl bg-white/5" />
           ))}
         </div>
       ) : followed.length === 0 ? (
-        <div className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+        <div className="mt-10 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-12 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10 text-amber-300">
             <Users size={24} />
           </div>
-          <h3 className="mt-4 text-base font-bold text-slate-900">Not following anyone yet</h3>
-          <p className="mt-1 text-sm text-slate-500">
+          <h3 className="mt-4 text-base font-bold text-white">Not following anyone yet</h3>
+          <p className="mt-1 text-sm text-white/50">
             Tap Follow on any seller&apos;s profile to track their listings.
           </p>
           <Link
@@ -53,17 +53,17 @@ export default function FollowingPage() {
             return (
               <li
                 key={s.username}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:shadow-md"
+                className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#101012] p-4 transition hover:shadow-md"
               >
                 <Avatar name={s.displayName} />
                 <div className="min-w-0 flex-1">
                   <Link
                     href={`/seller/${s.username}`}
-                    className="line-clamp-1 text-base font-bold text-slate-900 hover:text-indigo-600"
+                    className="line-clamp-1 text-base font-bold text-white hover:text-amber-300"
                   >
                     {s.displayName}
                   </Link>
-                  <div className="mt-0.5 flex items-center gap-2 text-xs text-slate-500">
+                  <div className="mt-0.5 flex items-center gap-2 text-xs text-white/50">
                     <span className="inline-flex items-center gap-1">
                       <MapPin size={11} />
                       {s.location}
@@ -75,11 +75,11 @@ export default function FollowingPage() {
                           <Star size={11} className="fill-amber-400 text-amber-400" />
                           {stats.avgStars.toFixed(1)}
                         </span>
-                        <span className="font-semibold text-emerald-600">{stats.positivePct.toFixed(0)}%</span>
+                        <span className="font-semibold text-emerald-400">{stats.positivePct.toFixed(0)}%</span>
                       </>
                     )}
                   </div>
-                  <div className="mt-1 line-clamp-1 text-xs text-slate-600">{s.bio}</div>
+                  <div className="mt-1 line-clamp-1 text-xs text-white/60">{s.bio}</div>
                 </div>
               </li>
             );

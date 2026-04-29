@@ -21,20 +21,20 @@ export default async function BidDetailPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
-      <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/account" className="inline-flex items-center gap-1 hover:text-slate-900">
+      <div className="mb-2 flex items-center gap-2 text-sm text-white/50">
+        <Link href="/account" className="inline-flex items-center gap-1 hover:text-white">
           <ArrowLeft size={14} /> Account
         </Link>
         <span>/</span>
-        <span className="hover:text-slate-900">Bids</span>
+        <span className="hover:text-white">Bids</span>
         <span>/</span>
-        <span className="font-mono text-slate-900">{bid.id}</span>
+        <span className="font-mono text-white">{bid.id}</span>
       </div>
 
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">Bid {bid.id}</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-black tracking-tight text-white">Bid {bid.id}</h1>
+          <p className="text-sm text-white/50">
             Placed {formatDate(bid.placedAt)} · expires {formatDate(bid.expiresAt)}
           </p>
         </div>
@@ -43,13 +43,13 @@ export default async function BidDetailPage({ params }: { params: Promise<{ id: 
 
       <Link
         href={`/product/${sku.slug}`}
-        className="block rounded-xl border border-slate-200 bg-white p-5 transition hover:shadow-md"
+        className="block rounded-xl border border-white/10 bg-[#101012] p-5 transition hover:shadow-md"
       >
         <div className="flex gap-4">
           <ProductImage sku={sku} size="md" className="aspect-[4/5] w-24 shrink-0 rounded" />
           <div className="flex-1">
-            <div className="text-base font-bold text-slate-900">{formatSkuTitle(sku)}</div>
-            <div className="text-xs text-slate-500">
+            <div className="text-base font-bold text-white">{formatSkuTitle(sku)}</div>
+            <div className="text-xs text-white/50">
               {sku.sport} · {sku.brand}
             </div>
             <div className="mt-3 grid grid-cols-3 gap-3">
@@ -66,13 +66,13 @@ export default async function BidDetailPage({ params }: { params: Promise<{ id: 
 
       {bid.status === "Active" && (
         <>
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
+          <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm">
             {youAreHighest ? (
               <div className="flex items-start gap-2">
-                <TrendingUp size={16} className="mt-0.5 text-emerald-600" />
+                <TrendingUp size={16} className="mt-0.5 text-emerald-400" />
                 <div>
-                  <div className="font-bold text-slate-900">You&apos;re the top bidder.</div>
-                  <p className="mt-0.5 text-slate-600">
+                  <div className="font-bold text-white">You&apos;re the top bidder.</div>
+                  <p className="mt-0.5 text-white/60">
                     Sellers will see your bid first. If one accepts, your card is charged
                     automatically.
                   </p>
@@ -80,14 +80,14 @@ export default async function BidDetailPage({ params }: { params: Promise<{ id: 
               </div>
             ) : (
               <div className="flex items-start gap-2">
-                <TrendingDown size={16} className="mt-0.5 text-rose-600" />
+                <TrendingDown size={16} className="mt-0.5 text-rose-400" />
                 <div>
-                  <div className="font-bold text-slate-900">
+                  <div className="font-bold text-white">
                     {currentHighest !== null && currentHighest > bid.price
                       ? `You're below the top bid by ${formatUSD(currentHighest - bid.price)}.`
                       : "You're not the top bidder."}
                   </div>
-                  <p className="mt-0.5 text-slate-600">
+                  <p className="mt-0.5 text-white/60">
                     Raise your bid to take the lead, or wait — if a seller accepts your offer
                     anyway, you still win.
                   </p>
@@ -95,8 +95,8 @@ export default async function BidDetailPage({ params }: { params: Promise<{ id: 
               </div>
             )}
             {ask !== null && askGap > 0 && (
-              <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
-                <Calendar size={12} className="text-slate-400" />
+              <div className="mt-2 flex items-center gap-2 text-xs text-white/50">
+                <Calendar size={12} className="text-white/40" />
                 Buy instantly at the lowest ask: {formatUSD(ask)} ({formatUSD(askGap)} above your bid)
               </div>
             )}
@@ -107,12 +107,12 @@ export default async function BidDetailPage({ params }: { params: Promise<{ id: 
       )}
 
       {bid.status === "Outbid" && (
-        <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm">
+        <div className="mt-4 rounded-xl border border-rose-700/40 bg-rose-500/10 p-4 text-sm">
           <div className="flex items-start gap-2">
-            <TrendingDown size={16} className="mt-0.5 text-rose-600" />
+            <TrendingDown size={16} className="mt-0.5 text-rose-400" />
             <div className="flex-1">
               <div className="font-bold text-rose-900">You were outbid.</div>
-              <p className="mt-0.5 text-rose-800">
+              <p className="mt-0.5 text-rose-200">
                 Someone placed a higher bid. Raise yours or move on.
               </p>
               <Link
@@ -127,16 +127,16 @@ export default async function BidDetailPage({ params }: { params: Promise<{ id: 
       )}
 
       {bid.status === "Won" && (
-        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
-          <div className="font-bold text-emerald-900">Bid accepted</div>
-          <p className="mt-1 text-emerald-800">
+        <div className="mt-4 rounded-xl border border-emerald-700/40 bg-emerald-500/10 p-4 text-sm">
+          <div className="font-bold text-emerald-100">Bid accepted</div>
+          <p className="mt-1 text-emerald-200">
             A seller accepted your bid. Your card was charged {formatUSDFull(bid.price)}.
           </p>
         </div>
       )}
 
       {(bid.status === "Expired" || bid.status === "Canceled") && (
-        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+        <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-white/60">
           This bid has been {bid.status.toLowerCase()}. No charge will be made.
         </div>
       )}
@@ -154,10 +154,10 @@ function Pillar({
   accent?: "indigo" | "emerald";
 }) {
   const tone =
-    accent === "indigo" ? "text-indigo-700" : accent === "emerald" ? "text-emerald-700" : "text-slate-900";
+    accent === "indigo" ? "text-amber-400" : accent === "emerald" ? "text-emerald-300" : "text-white";
   return (
-    <div className="rounded-md border border-slate-200 bg-slate-50 p-2 text-center">
-      <div className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">{label}</div>
+    <div className="rounded-md border border-white/10 bg-white/[0.02] p-2 text-center">
+      <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">{label}</div>
       <div className={`mt-0.5 text-base font-bold ${tone}`}>{value}</div>
     </div>
   );
@@ -165,11 +165,11 @@ function Pillar({
 
 function StatusBadge({ status }: { status: import("@/lib/bids").MyBid["status"] }) {
   const cfg = {
-    Active: "bg-indigo-50 text-indigo-700",
-    Won: "bg-emerald-50 text-emerald-700",
-    Outbid: "bg-rose-50 text-rose-700",
-    Expired: "bg-slate-100 text-slate-600",
-    Canceled: "bg-slate-100 text-slate-600",
+    Active: "bg-amber-500/10 text-amber-400",
+    Won: "bg-emerald-500/10 text-emerald-300",
+    Outbid: "bg-rose-500/10 text-rose-300",
+    Expired: "bg-white/5 text-white/60",
+    Canceled: "bg-white/5 text-white/60",
   }[status];
   return (
     <span className={`inline-flex rounded-md px-3 py-1.5 text-sm font-bold ${cfg}`}>{status}</span>

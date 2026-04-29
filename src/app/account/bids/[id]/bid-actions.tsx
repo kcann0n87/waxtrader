@@ -27,11 +27,11 @@ export function BidActions({
 
   if (saved === "canceled") {
     return (
-      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
-        <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-          <Check size={16} className="text-emerald-600" /> Bid canceled
+      <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-5">
+        <div className="flex items-center gap-2 text-sm font-bold text-white/80">
+          <Check size={16} className="text-emerald-400" /> Bid canceled
         </div>
-        <p className="mt-1 text-xs text-slate-600">
+        <p className="mt-1 text-xs text-white/60">
           Bid {bidId} was canceled. Your card won&apos;t be charged.
         </p>
         <Link
@@ -46,11 +46,11 @@ export function BidActions({
 
   if (saved === "raised") {
     return (
-      <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-5">
-        <div className="flex items-center gap-2 text-sm font-bold text-emerald-900">
+      <div className="mt-4 rounded-xl border border-emerald-700/40 bg-emerald-500/10 p-5">
+        <div className="flex items-center gap-2 text-sm font-bold text-emerald-100">
           <Check size={16} /> Bid raised to {formatUSDFull(newPriceNum)}
         </div>
-        <p className="mt-1 text-xs text-emerald-800">
+        <p className="mt-1 text-xs text-emerald-200">
           {meetsAsk
             ? "This met the lowest ask — your card was charged and the order is being processed."
             : "Your new bid is now live. We'll notify you if a seller accepts or someone outbids you."}
@@ -60,8 +60,8 @@ export function BidActions({
   }
 
   return (
-    <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5">
-      <h3 className="text-base font-bold text-slate-900">Manage bid</h3>
+    <div className="mt-4 rounded-xl border border-white/10 bg-[#101012] p-5">
+      <h3 className="text-base font-bold text-white">Manage bid</h3>
 
       {!editing ? (
         <div className="mt-3 flex flex-wrap gap-2">
@@ -73,7 +73,7 @@ export function BidActions({
           </button>
           <Link
             href={`/product/${skuSlug}`}
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-[#101012] px-3 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
           >
             <ShoppingBag size={14} />
             View listings
@@ -84,7 +84,7 @@ export function BidActions({
                 setSaved("canceled");
               }
             }}
-            className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-rose-300 bg-white px-3 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50"
+            className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-rose-700/50 bg-[#101012] px-3 py-2 text-sm font-semibold text-rose-300 hover:bg-rose-500/10"
           >
             <Trash2 size={14} />
             Cancel bid
@@ -95,12 +95,12 @@ export function BidActions({
           <div className="grid grid-cols-2 gap-3">
             <Field label="New bid">
               <div className="relative">
-                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400">$</span>
+                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-white/40">$</span>
                 <input
                   type="number"
                   value={newPrice}
                   onChange={(e) => setNewPrice(e.target.value)}
-                  className="w-full rounded-md border border-slate-300 py-2 pr-3 pl-7 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full rounded-md border border-white/15 py-2 pr-3 pl-7 text-sm focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
                 />
               </div>
             </Field>
@@ -117,14 +117,14 @@ export function BidActions({
                   setEditing(false);
                   setNewPrice(String(currentPrice));
                 }}
-                className="rounded-md border border-slate-300 bg-white p-2 text-slate-700 hover:bg-slate-50"
+                className="rounded-md border border-white/15 bg-[#101012] p-2 text-white/80 hover:bg-white/[0.02]"
                 aria-label="Cancel"
               >
                 <X size={16} />
               </button>
             </div>
           </div>
-          <div className="mt-2 text-xs text-slate-500">
+          <div className="mt-2 text-xs text-white/50">
             {newPriceNum <= currentPrice
               ? `New bid must be above your current ${formatUSD(currentPrice)}.`
               : highestBid !== null && newPriceNum > highestBid
@@ -142,7 +142,7 @@ export function BidActions({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-semibold text-slate-700">{label}</span>
+      <span className="mb-1 block text-xs font-semibold text-white/80">{label}</span>
       {children}
     </label>
   );

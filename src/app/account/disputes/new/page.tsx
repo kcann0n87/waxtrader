@@ -57,12 +57,12 @@ function NewDisputeForm() {
   if (!orderIdParam || !order || !sku) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-12">
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-8 text-center">
-          <AlertTriangle className="mx-auto text-amber-600" size={32} />
-          <h1 className="mt-3 text-lg font-bold text-slate-900">Pick an order to dispute</h1>
-          <p className="mt-1 text-sm text-slate-600">
+        <div className="rounded-xl border border-amber-700/40 bg-amber-500/10 p-8 text-center">
+          <AlertTriangle className="mx-auto text-amber-400" size={32} />
+          <h1 className="mt-3 text-lg font-bold text-white">Pick an order to dispute</h1>
+          <p className="mt-1 text-sm text-white/60">
             Disputes are tied to a specific order. Open one from your{" "}
-            <Link href="/account" className="font-semibold text-indigo-600 hover:underline">
+            <Link href="/account" className="font-semibold text-amber-300 hover:underline">
               order list
             </Link>
             .
@@ -75,17 +75,17 @@ function NewDisputeForm() {
   if (step === "submitted") {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16">
-        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-            <Check className="text-emerald-600" size={28} />
+        <div className="rounded-xl border border-white/10 bg-[#101012] p-8 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15">
+            <Check className="text-emerald-400" size={28} />
           </div>
-          <h1 className="mt-4 text-2xl font-black tracking-tight text-slate-900">Dispute opened</h1>
-          <p className="mt-2 text-sm text-slate-600">
-            Dispute <span className="font-mono font-bold text-slate-900">{disputeId}</span> is now
+          <h1 className="mt-4 text-2xl font-black tracking-tight text-white">Dispute opened</h1>
+          <p className="mt-2 text-sm text-white/60">
+            Dispute <span className="font-mono font-bold text-white">{disputeId}</span> is now
             open. Funds for {formatUSDFull(order.total)} stay held in escrow until it&apos;s resolved.
           </p>
-          <div className="mx-auto mt-4 max-w-md rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-            <strong className="text-slate-800">What happens next:</strong> {order.seller} has 48
+          <div className="mx-auto mt-4 max-w-md rounded-md border border-white/10 bg-white/[0.02] p-3 text-xs text-white/60">
+            <strong className="text-white/90">What happens next:</strong> {order.seller} has 48
             hours to respond. WaxMarket Support reviews both sides within 3 business days.
             You&apos;ll get a notification at every step.
           </div>
@@ -98,7 +98,7 @@ function NewDisputeForm() {
             </Link>
             <Link
               href={`/account/orders/${order.id}`}
-              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-md border border-white/15 bg-[#101012] px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
             >
               Back to order
             </Link>
@@ -110,19 +110,19 @@ function NewDisputeForm() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
-      <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
-        <Link href={`/account/orders/${order.id}`} className="inline-flex items-center gap-1 hover:text-slate-900">
+      <div className="mb-2 flex items-center gap-2 text-sm text-white/50">
+        <Link href={`/account/orders/${order.id}`} className="inline-flex items-center gap-1 hover:text-white">
           <ArrowLeft size={14} /> Order {order.id}
         </Link>
         <span>/</span>
-        <span className="text-slate-900">Open dispute</span>
+        <span className="text-white">Open dispute</span>
       </div>
-      <h1 className="text-2xl font-black tracking-tight text-slate-900">Open a dispute</h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <h1 className="text-2xl font-black tracking-tight text-white">Open a dispute</h1>
+      <p className="mt-1 text-sm text-white/50">
         Tell us what went wrong. We&apos;ll hold the seller&apos;s payment until it&apos;s resolved.
       </p>
 
-      <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+      <div className="mt-4 flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-3">
         <div
           className="flex h-12 w-10 shrink-0 items-center justify-center rounded text-[8px] font-bold text-white"
           style={{ background: `linear-gradient(135deg, ${sku.gradient[0]}, ${sku.gradient[1]})` }}
@@ -130,14 +130,14 @@ function NewDisputeForm() {
           {sku.brand.slice(0, 4).toUpperCase()}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-bold text-slate-900">{formatSkuTitle(sku)}</div>
-          <div className="text-xs text-slate-500">
+          <div className="text-sm font-bold text-white">{formatSkuTitle(sku)}</div>
+          <div className="text-xs text-white/50">
             Order <span className="font-mono">{order.id}</span> · sold by {order.seller}
           </div>
         </div>
         <div className="text-right">
-          <div className="text-sm font-bold text-slate-900">{formatUSDFull(order.total)}</div>
-          <div className="text-[11px] text-slate-500">held in escrow</div>
+          <div className="text-sm font-bold text-white">{formatUSDFull(order.total)}</div>
+          <div className="text-[11px] text-white/50">held in escrow</div>
         </div>
       </div>
 
@@ -152,20 +152,20 @@ function NewDisputeForm() {
                   onClick={() => setReasonId(r.id)}
                   className={`flex w-full items-start gap-3 rounded-lg border p-4 text-left transition ${
                     reasonId === r.id
-                      ? "border-indigo-500 bg-indigo-50/50"
-                      : "border-slate-200 bg-white hover:border-slate-300"
+                      ? "border-amber-500/40 bg-amber-500/10"
+                      : "border-white/10 bg-[#101012] hover:border-white/15"
                   }`}
                 >
                   <div
                     className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${
-                      reasonId === r.id ? "border-indigo-500 bg-indigo-500" : "border-slate-300"
+                      reasonId === r.id ? "border-amber-500/40 bg-indigo-500" : "border-white/15"
                     }`}
                   >
-                    {reasonId === r.id && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
+                    {reasonId === r.id && <div className="h-1.5 w-1.5 rounded-full bg-[#101012]" />}
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-slate-900">{r.label}</div>
-                    <div className="text-xs text-slate-500">{r.description}</div>
+                    <div className="text-sm font-bold text-white">{r.label}</div>
+                    <div className="text-xs text-white/50">{r.description}</div>
                   </div>
                 </button>
               </li>
@@ -175,7 +175,7 @@ function NewDisputeForm() {
           <Footer>
             <Link
               href={`/account/orders/${order.id}`}
-              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-md border border-white/15 bg-[#101012] px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
             >
               Cancel
             </Link>
@@ -200,7 +200,7 @@ function NewDisputeForm() {
               placeholder="Walk us through what you received, what you expected, and any details (timeline, condition, packaging)."
               className={input}
             />
-            <div className="mt-1 flex justify-between text-[11px] text-slate-400">
+            <div className="mt-1 flex justify-between text-[11px] text-white/40">
               <span>{description.length < 30 ? `Add at least ${30 - description.length} more characters` : "Looks good"}</span>
               <span>{description.length} / 1000</span>
             </div>
@@ -213,13 +213,13 @@ function NewDisputeForm() {
           >
             <div className="grid grid-cols-3 gap-2">
               {photos.map((p, i) => (
-                <div key={i} className="relative aspect-square overflow-hidden rounded-md bg-slate-100">
-                  <div className="flex h-full items-center justify-center text-xs text-slate-400">
+                <div key={i} className="relative aspect-square overflow-hidden rounded-md bg-white/5">
+                  <div className="flex h-full items-center justify-center text-xs text-white/40">
                     {p}
                   </div>
                   <button
                     onClick={() => setPhotos((arr) => arr.filter((_, idx) => idx !== i))}
-                    className="absolute top-1 right-1 rounded-full bg-white/90 p-0.5 text-slate-600 hover:bg-white"
+                    className="absolute top-1 right-1 rounded-full bg-[#101012]/90 p-0.5 text-white/60 hover:bg-[#101012]"
                     aria-label="Remove"
                   >
                     <X size={12} />
@@ -229,7 +229,7 @@ function NewDisputeForm() {
               {photos.length < 6 && (
                 <button
                   onClick={() => setPhotos((arr) => [...arr, `photo-${arr.length + 1}.jpg`])}
-                  className="flex aspect-square flex-col items-center justify-center gap-1 rounded-md border border-dashed border-slate-300 text-xs text-slate-400 hover:border-slate-400 hover:text-slate-600"
+                  className="flex aspect-square flex-col items-center justify-center gap-1 rounded-md border border-dashed border-white/15 text-xs text-white/40 hover:border-white/30 hover:text-white/60"
                 >
                   <ImagePlus size={20} />
                   Add photo
@@ -250,12 +250,12 @@ function NewDisputeForm() {
                   onClick={() => setOutcome(opt.id as typeof outcome)}
                   className={`rounded-lg border p-3 text-left text-xs transition ${
                     outcome === opt.id
-                      ? "border-indigo-500 bg-indigo-50/50"
-                      : "border-slate-200 bg-white hover:border-slate-300"
+                      ? "border-amber-500/40 bg-amber-500/10"
+                      : "border-white/10 bg-[#101012] hover:border-white/15"
                   }`}
                 >
-                  <div className="text-sm font-bold text-slate-900">{opt.label}</div>
-                  <div className="mt-0.5 text-slate-500">{opt.description}</div>
+                  <div className="text-sm font-bold text-white">{opt.label}</div>
+                  <div className="mt-0.5 text-white/50">{opt.description}</div>
                 </button>
               ))}
             </div>
@@ -264,7 +264,7 @@ function NewDisputeForm() {
           <Footer>
             <button
               onClick={() => setStep("reason")}
-              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-md border border-white/15 bg-[#101012] px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
             >
               ← Back
             </button>
@@ -281,25 +281,25 @@ function NewDisputeForm() {
 
       {step === "review" && (
         <Card title="Review and submit" subtitle="Last look before we notify the seller.">
-          <dl className="divide-y divide-slate-100 rounded-lg border border-slate-200">
+          <dl className="divide-y divide-white/5 rounded-lg border border-white/10">
             <Row label="Reason" value={reason?.label ?? "—"} />
             <Row label="Preferred outcome" value={outcome === "refund" ? "Full refund" : outcome === "replacement" ? "Replacement" : "Partial refund"} />
             <Row label="Photos attached" value={String(photos.length)} />
           </dl>
 
-          <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <div className="text-xs font-semibold text-slate-700">Your description</div>
-            <p className="mt-1 text-sm whitespace-pre-line text-slate-700">{description}</p>
+          <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.02] p-3">
+            <div className="text-xs font-semibold text-white/80">Your description</div>
+            <p className="mt-1 text-sm whitespace-pre-line text-white/80">{description}</p>
           </div>
 
-          <label className="mt-4 flex cursor-pointer items-start gap-2 rounded-md border border-slate-200 bg-slate-50 p-3">
+          <label className="mt-4 flex cursor-pointer items-start gap-2 rounded-md border border-white/10 bg-white/[0.02] p-3">
             <input
               type="checkbox"
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}
               className="mt-0.5"
             />
-            <span className="text-xs text-slate-700">
+            <span className="text-xs text-white/80">
               I confirm the information above is accurate. I understand that filing a fraudulent
               dispute can result in account suspension and that WaxMarket Support reviews each
               dispute to determine the outcome.
@@ -309,7 +309,7 @@ function NewDisputeForm() {
           <Footer>
             <button
               onClick={() => setStep("details")}
-              className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-md border border-white/15 bg-[#101012] px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
             >
               ← Back
             </button>
@@ -322,8 +322,8 @@ function NewDisputeForm() {
             </button>
           </Footer>
 
-          <div className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400">
-            <ShieldCheck size={11} className="text-emerald-600" />
+          <div className="mt-3 flex items-center gap-1.5 text-[11px] text-white/40">
+            <ShieldCheck size={11} className="text-emerald-400" />
             Funds stay held in escrow throughout the dispute process.
           </div>
         </Card>
@@ -333,7 +333,7 @@ function NewDisputeForm() {
 }
 
 const input =
-  "w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
+  "w-full rounded-md border border-white/15 px-3 py-2.5 text-sm focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-400/20";
 
 function Stepper({ step }: { step: Step }) {
   const steps: Step[] = ["reason", "details", "review"];
@@ -352,14 +352,14 @@ function Stepper({ step }: { step: Step }) {
                   ? "bg-emerald-600 text-white"
                   : isCurrent
                     ? "bg-slate-900 text-white"
-                    : "bg-slate-200 text-slate-500"
+                    : "bg-slate-200 text-white/50"
               }`}
             >
               {isDone ? <Check size={14} /> : i + 1}
             </div>
             <span
               className={`hidden text-xs font-semibold sm:inline ${
-                isCurrent ? "text-slate-900" : "text-slate-500"
+                isCurrent ? "text-white" : "text-white/50"
               }`}
             >
               {labels[s]}
@@ -376,9 +376,9 @@ function Stepper({ step }: { step: Step }) {
 
 function Card({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6">
-      <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-      <p className="mt-0.5 text-sm text-slate-500">{subtitle}</p>
+    <div className="rounded-xl border border-white/10 bg-[#101012] p-6">
+      <h2 className="text-lg font-bold text-white">{title}</h2>
+      <p className="mt-0.5 text-sm text-white/50">{subtitle}</p>
       <div className="mt-5 space-y-4">{children}</div>
     </div>
   );
@@ -398,11 +398,11 @@ function Field({
   return (
     <label className="block">
       <div className="mb-1 flex items-baseline justify-between">
-        <span className="text-sm font-semibold text-slate-700">
+        <span className="text-sm font-semibold text-white/80">
           {label}
           {required && <span className="ml-0.5 text-rose-500">*</span>}
         </span>
-        {hint && <span className="text-xs text-slate-400">{hint}</span>}
+        {hint && <span className="text-xs text-white/40">{hint}</span>}
       </div>
       {children}
     </label>
@@ -416,8 +416,8 @@ function Footer({ children }: { children: React.ReactNode }) {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between px-4 py-2.5">
-      <dt className="text-sm text-slate-600">{label}</dt>
-      <dd className="text-sm font-semibold text-slate-900">{value}</dd>
+      <dt className="text-sm text-white/60">{label}</dt>
+      <dd className="text-sm font-semibold text-white">{value}</dd>
     </div>
   );
 }

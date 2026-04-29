@@ -37,7 +37,7 @@ export function CartDrawer() {
       >
         <ShoppingBag size={18} />
         {hydrated && itemCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-amber-400 px-1 text-[10px] font-bold text-slate-900">
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-amber-400 px-1 text-[10px] font-bold text-white">
             {itemCount}
           </span>
         )}
@@ -88,7 +88,7 @@ export function CartDrawer() {
                   <Link
                     href="/"
                     onClick={() => setOpen(false)}
-                    className="mt-4 rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2 text-sm font-bold text-slate-900 shadow-md shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
+                    className="mt-4 rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2 text-sm font-bold text-white shadow-md shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
                   >
                     Browse marketplace
                   </Link>
@@ -97,7 +97,7 @@ export function CartDrawer() {
                 <ul className="divide-y divide-white/5">
                   {groupBySeller(items).map(([seller, sellerItems]) => (
                     <li key={seller}>
-                      <div className="bg-white/[0.02] px-5 py-2 text-[11px] font-semibold tracking-wider text-white/60">
+                      <div className="bg-[#101012]/[0.02] px-5 py-2 text-[11px] font-semibold tracking-wider text-white/60">
                         Sold by <span className="text-white">{seller}</span>
                       </div>
                       {sellerItems.map((it) => (
@@ -127,7 +127,7 @@ export function CartDrawer() {
                 <Link
                   href="/cart"
                   onClick={() => setOpen(false)}
-                  className="mt-4 flex w-full items-center justify-between rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-3 font-bold text-slate-900 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
+                  className="mt-4 flex w-full items-center justify-between rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-3 font-bold text-white shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400"
                 >
                   <span>Checkout</span>
                   <span>{formatUSD(total)}</span>

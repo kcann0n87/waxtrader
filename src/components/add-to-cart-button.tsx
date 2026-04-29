@@ -32,14 +32,14 @@ export function AddToCartButton({
 
   const cls =
     size === "sm"
-      ? "rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-      : "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50";
+      ? "rounded-md border border-white/15 bg-[#101012] px-2.5 py-1 text-xs font-semibold text-white/80 hover:bg-white/[0.02]"
+      : "rounded-md border border-white/15 bg-[#101012] px-3 py-1.5 text-xs font-semibold text-white/80 hover:bg-white/[0.02]";
 
   return (
     <button onClick={handle} className={`${cls} inline-flex items-center gap-1`}>
       {added ? (
         <>
-          <Check size={12} className="text-emerald-600" /> Added
+          <Check size={12} className="text-emerald-400" /> Added
         </>
       ) : (
         <>

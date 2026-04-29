@@ -35,21 +35,21 @@ export default function PayoutsOnboardingPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/sell" className="hover:text-slate-900">
+      <div className="mb-2 flex items-center gap-2 text-sm text-white/50">
+        <Link href="/sell" className="hover:text-white">
           Sell
         </Link>
         <span>/</span>
-        <span className="text-slate-900">Payout setup</span>
+        <span className="text-white">Payout setup</span>
       </div>
-      <h1 className="text-3xl font-black tracking-tight text-slate-900">Get paid for your sales</h1>
-      <p className="mt-1 text-slate-600">
+      <h1 className="text-3xl font-black tracking-tight text-white">Get paid for your sales</h1>
+      <p className="mt-1 text-white/60">
         We pay you via weekly ACH every Friday for sales released that week. Setup takes about 4
         minutes.
       </p>
 
-      <div className="mt-4 flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-        <Lock size={14} className="text-emerald-600" />
+      <div className="mt-4 flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.02] px-3 py-2 text-xs text-white/60">
+        <Lock size={14} className="text-emerald-400" />
         <span>
           Your information is securely processed by our payments partner. WaxMarket never stores
           full bank or SSN data.
@@ -178,11 +178,11 @@ export default function PayoutsOnboardingPage() {
               className={input}
             />
             {accountConfirm && account !== accountConfirm && (
-              <p className="mt-1 text-xs text-rose-600">Account numbers don&apos;t match.</p>
+              <p className="mt-1 text-xs text-rose-400">Account numbers don&apos;t match.</p>
             )}
           </Field>
-          <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-            <strong className="text-slate-800">First payout heads-up:</strong> The first ACH after
+          <div className="mt-4 rounded-md border border-white/10 bg-white/[0.02] p-3 text-xs text-white/60">
+            <strong className="text-white/90">First payout heads-up:</strong> The first ACH after
             verification can take 2-3 business days to clear. After that, payouts arrive every
             Friday for sales released the prior week.
           </div>
@@ -200,11 +200,11 @@ export default function PayoutsOnboardingPage() {
       {step === "tax" && (
         <Card icon={<FileText size={20} />} title="Tax information" subtitle="Required for IRS 1099-K reporting on US sellers earning $600+">
           <fieldset>
-            <legend className="mb-2 text-sm font-semibold text-slate-700">I&apos;m selling as</legend>
+            <legend className="mb-2 text-sm font-semibold text-white/80">I&apos;m selling as</legend>
             <div className="grid grid-cols-2 gap-2">
               <label
                 className={`flex cursor-pointer items-start gap-2 rounded-lg border p-3 transition ${
-                  tin === "ssn" ? "border-indigo-500 bg-indigo-50/50" : "border-slate-200"
+                  tin === "ssn" ? "border-amber-500/40 bg-amber-500/10" : "border-white/10"
                 }`}
               >
                 <input
@@ -215,13 +215,13 @@ export default function PayoutsOnboardingPage() {
                   className="mt-0.5"
                 />
                 <div>
-                  <div className="text-sm font-semibold text-slate-900">Individual</div>
-                  <div className="text-xs text-slate-500">Use my SSN. 1099-K issued in my name.</div>
+                  <div className="text-sm font-semibold text-white">Individual</div>
+                  <div className="text-xs text-white/50">Use my SSN. 1099-K issued in my name.</div>
                 </div>
               </label>
               <label
                 className={`flex cursor-pointer items-start gap-2 rounded-lg border p-3 transition ${
-                  tin === "ein" ? "border-indigo-500 bg-indigo-50/50" : "border-slate-200"
+                  tin === "ein" ? "border-amber-500/40 bg-amber-500/10" : "border-white/10"
                 }`}
               >
                 <input
@@ -232,8 +232,8 @@ export default function PayoutsOnboardingPage() {
                   className="mt-0.5"
                 />
                 <div>
-                  <div className="text-sm font-semibold text-slate-900">Business</div>
-                  <div className="text-xs text-slate-500">Use an EIN. 1099-K issued to the entity.</div>
+                  <div className="text-sm font-semibold text-white">Business</div>
+                  <div className="text-xs text-white/50">Use an EIN. 1099-K issued to the entity.</div>
                 </div>
               </label>
             </div>
@@ -251,7 +251,7 @@ export default function PayoutsOnboardingPage() {
             </div>
           )}
 
-          <div className="mt-5 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+          <div className="mt-5 rounded-md border border-amber-700/40 bg-amber-500/10 p-3 text-xs text-amber-200">
             We&apos;ll mail your 1099-K by January 31 of the following year if you crossed the IRS
             threshold. You&apos;re responsible for reporting and paying tax on your sales.
           </div>
@@ -269,7 +269,7 @@ export default function PayoutsOnboardingPage() {
 
       {step === "review" && (
         <Card icon={<ShieldCheck size={20} />} title="Review & submit" subtitle="One last look before we verify your account">
-          <dl className="divide-y divide-slate-100 rounded-lg border border-slate-200">
+          <dl className="divide-y divide-white/5 rounded-lg border border-white/10">
             <Row label="Legal name" value={`${legalFirst} ${legalLast}`} />
             <Row label="Date of birth" value={dob || "—"} />
             <Row label="SSN (last 4)" value={`•••-••-${ssnLast4}`} />
@@ -279,20 +279,20 @@ export default function PayoutsOnboardingPage() {
             <Row label="Tax filing as" value={tin === "ssn" ? "Individual (SSN)" : `Business — ${businessName}`} />
           </dl>
 
-          <label className="mt-4 flex cursor-pointer items-start gap-2 rounded-md border border-slate-200 bg-slate-50 p-3">
+          <label className="mt-4 flex cursor-pointer items-start gap-2 rounded-md border border-white/10 bg-white/[0.02] p-3">
             <input
               type="checkbox"
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}
               className="mt-0.5"
             />
-            <span className="text-xs text-slate-700">
+            <span className="text-xs text-white/80">
               I agree to the{" "}
-              <a href="#" className="text-indigo-600 underline">
+              <a href="#" className="text-amber-300 underline">
                 Seller Agreement
               </a>
               ,{" "}
-              <a href="#" className="text-indigo-600 underline">
+              <a href="#" className="text-amber-300 underline">
                 Payout Terms
               </a>
               , and confirm the information above is accurate. I authorize WaxMarket to initiate ACH
@@ -318,11 +318,11 @@ export default function PayoutsOnboardingPage() {
       {step === "done" && (
         <Card icon={<Check size={20} />} title="You're verified" subtitle="Your payout setup is complete">
           <div className="flex flex-col items-center py-6 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-              <Check className="text-emerald-600" size={28} />
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15">
+              <Check className="text-emerald-400" size={28} />
             </div>
-            <div className="mt-4 text-lg font-bold text-slate-900">All set, {legalFirst}</div>
-            <div className="mt-1 max-w-sm text-sm text-slate-600">
+            <div className="mt-4 text-lg font-bold text-white">All set, {legalFirst}</div>
+            <div className="mt-1 max-w-sm text-sm text-white/60">
               Sales will be paid out via ACH to {bankName} •••{account.slice(-4)} every Friday for
               the prior week&apos;s released sales. Your first payout may take 2-3 business days to
               clear.
@@ -331,7 +331,7 @@ export default function PayoutsOnboardingPage() {
               <Link href="/sell" className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">
                 List a box
               </Link>
-              <Link href="/account/payouts" className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+              <Link href="/account/payouts" className="rounded-md border border-white/15 bg-[#101012] px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]">
                 View payouts
               </Link>
             </div>
@@ -339,20 +339,20 @@ export default function PayoutsOnboardingPage() {
         </Card>
       )}
 
-      <div className="mt-6 flex items-center gap-2 text-xs text-slate-500">
+      <div className="mt-6 flex items-center gap-2 text-xs text-white/50">
         <CreditCard size={14} />
-        <span>Need to update bank info later? Manage it from your <Link href="/account/payouts" className="text-indigo-600 hover:underline">Payouts dashboard</Link>.</span>
+        <span>Need to update bank info later? Manage it from your <Link href="/account/payouts" className="text-amber-300 hover:underline">Payouts dashboard</Link>.</span>
       </div>
     </div>
   );
 }
 
 const input =
-  "w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
+  "w-full rounded-md border border-white/15 px-3 py-2.5 text-sm focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-400/20";
 const primary =
   "rounded-md bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40 inline-flex items-center gap-1.5";
 const secondary =
-  "rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50";
+  "rounded-md border border-white/15 bg-[#101012] px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]";
 
 function Stepper({ step }: { step: Step }) {
   const steps: Step[] = ["identity", "bank", "tax", "review", "done"];
@@ -371,14 +371,14 @@ function Stepper({ step }: { step: Step }) {
                   ? "bg-emerald-600 text-white"
                   : isCurrent
                     ? "bg-slate-900 text-white"
-                    : "bg-slate-200 text-slate-500"
+                    : "bg-slate-200 text-white/50"
               }`}
             >
               {isDone ? <Check size={14} /> : i + 1}
             </div>
             <span
               className={`hidden text-xs font-semibold sm:inline ${
-                isCurrent ? "text-slate-900" : "text-slate-500"
+                isCurrent ? "text-white" : "text-white/50"
               }`}
             >
               {labels[s]}
@@ -405,14 +405,14 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6">
+    <div className="rounded-xl border border-white/10 bg-[#101012] p-6">
       <div className="mb-4 flex items-start gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-300">
           {icon}
         </div>
         <div>
-          <h2 className="text-lg font-bold text-slate-900">{title}</h2>
-          <p className="text-sm text-slate-500">{subtitle}</p>
+          <h2 className="text-lg font-bold text-white">{title}</h2>
+          <p className="text-sm text-white/50">{subtitle}</p>
         </div>
       </div>
       {children}
@@ -432,8 +432,8 @@ function Field({
   return (
     <label className="block">
       <div className="mb-1 flex items-center justify-between">
-        <span className="text-sm font-semibold text-slate-700">{label}</span>
-        {hint && <span className="text-xs text-slate-400">{hint}</span>}
+        <span className="text-sm font-semibold text-white/80">{label}</span>
+        {hint && <span className="text-xs text-white/40">{hint}</span>}
       </div>
       {children}
     </label>
@@ -451,8 +451,8 @@ function Footer({ children }: { children: React.ReactNode }) {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between px-4 py-3">
-      <dt className="text-sm text-slate-600">{label}</dt>
-      <dd className="text-sm font-semibold text-slate-900">{value}</dd>
+      <dt className="text-sm text-white/60">{label}</dt>
+      <dd className="text-sm font-semibold text-white">{value}</dd>
     </div>
   );
 }

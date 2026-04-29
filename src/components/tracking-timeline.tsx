@@ -21,20 +21,20 @@ export function TrackingTimeline({
   const hasMore = events.length > 4;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
       <div className="mb-4 flex items-start justify-between">
         <div>
-          <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
-            <Truck size={16} className="text-slate-400" />
+          <h2 className="flex items-center gap-2 text-base font-bold text-white">
+            <Truck size={16} className="text-white/40" />
             Shipment tracking
           </h2>
-          <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+          <div className="mt-1 flex items-center gap-2 text-xs text-white/50">
             <span>{carrier}</span>
             <span>·</span>
-            <span className="font-mono text-slate-700">{tracking}</span>
+            <span className="font-mono text-white/80">{tracking}</span>
             <a
               href="#"
-              className="font-semibold text-indigo-600 hover:underline"
+              className="font-semibold text-amber-300 hover:underline"
               onClick={(e) => e.preventDefault()}
             >
               Track on {carrier} →
@@ -42,23 +42,23 @@ export function TrackingTimeline({
           </div>
         </div>
         {latest?.isDelivered ? (
-          <span className="rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+          <span className="rounded-md bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-300">
             Delivered
           </span>
         ) : (
-          <span className="rounded-md bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-700">
+          <span className="rounded-md bg-sky-500/10 px-2.5 py-1 text-xs font-bold text-sky-300">
             In transit
           </span>
         )}
       </div>
 
       {!latest?.isDelivered && estimatedDelivery && (
-        <div className="mb-4 flex items-center gap-2 rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900">
-          <MapPin size={12} className="text-sky-700" />
+        <div className="mb-4 flex items-center gap-2 rounded-md border border-sky-700/40 bg-sky-500/10 px-3 py-2 text-xs text-sky-900">
+          <MapPin size={12} className="text-sky-300" />
           <span>
             <strong>Estimated arrival:</strong>{" "}
             {formatDateLong(estimatedDelivery)} ·{" "}
-            <span className="text-sky-700">last update {timeAgo(latest.ts)}</span>
+            <span className="text-sky-300">last update {timeAgo(latest.ts)}</span>
           </span>
         </div>
       )}
@@ -71,7 +71,7 @@ export function TrackingTimeline({
               <div className="flex flex-col items-center">
                 {e.isLatest ? (
                   e.isDelivered ? (
-                    <CheckCircle2 className="text-emerald-600" size={16} />
+                    <CheckCircle2 className="text-emerald-400" size={16} />
                   ) : (
                     <div className="flex h-4 w-4 items-center justify-center">
                       <span className="absolute h-3 w-3 animate-ping rounded-full bg-sky-400 opacity-75" />
@@ -79,7 +79,7 @@ export function TrackingTimeline({
                     </div>
                   )
                 ) : (
-                  <Circle className="text-slate-300" size={14} fill="currentColor" />
+                  <Circle className="text-white/30" size={14} fill="currentColor" />
                 )}
                 {!isLast && <div className="mt-0.5 h-full w-px flex-1 bg-slate-200" />}
               </div>
@@ -87,16 +87,16 @@ export function TrackingTimeline({
                 <div className="flex items-baseline justify-between gap-3">
                   <div
                     className={`text-sm ${
-                      e.isLatest ? "font-bold text-slate-900" : "font-semibold text-slate-700"
+                      e.isLatest ? "font-bold text-white" : "font-semibold text-white/80"
                     }`}
                   >
                     {e.status}
                   </div>
-                  <div className="shrink-0 text-[11px] text-slate-400">{formatDateTime(e.ts)}</div>
+                  <div className="shrink-0 text-[11px] text-white/40">{formatDateTime(e.ts)}</div>
                 </div>
                 {e.location && (
-                  <div className="mt-0.5 flex items-center gap-1 text-xs text-slate-500">
-                    <MapPin size={10} className="text-slate-400" />
+                  <div className="mt-0.5 flex items-center gap-1 text-xs text-white/50">
+                    <MapPin size={10} className="text-white/40" />
                     {e.location}
                   </div>
                 )}
@@ -109,7 +109,7 @@ export function TrackingTimeline({
       {hasMore && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="-mt-2 flex w-full items-center justify-center gap-1 rounded-md border border-slate-200 bg-slate-50 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+          className="-mt-2 flex w-full items-center justify-center gap-1 rounded-md border border-white/10 bg-white/[0.02] py-2 text-xs font-semibold text-white/80 hover:bg-white/5"
         >
           {expanded ? (
             <>

@@ -26,8 +26,8 @@ export default function ReleasesPage() {
     <div className="mx-auto max-w-6xl px-4 py-6">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900">Release calendar</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-3xl font-black tracking-tight text-white">Release calendar</h1>
+          <p className="mt-1 text-sm text-white/50">
             Upcoming sealed wax launches. List early, lock in the lowest ask.
           </p>
         </div>
@@ -41,17 +41,17 @@ export default function ReleasesPage() {
         {Object.entries(grouped).map(([monthKey, items]) => (
           <div key={monthKey} className="mb-8">
             <div className="mb-3 flex items-baseline justify-between">
-              <h2 className="text-base font-bold text-slate-900">{monthKey}</h2>
-              <span className="text-xs text-slate-500">{items.length} releases</span>
+              <h2 className="text-base font-bold text-white">{monthKey}</h2>
+              <span className="text-xs text-white/50">{items.length} releases</span>
             </div>
-            <ul className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <ul className="overflow-hidden rounded-xl border border-white/10 bg-[#101012]">
               {items.map(({ sku, days }) => (
-                <li key={sku.id} className="border-b border-slate-100 last:border-0">
-                  <Link href={`/product/${sku.slug}`} className="flex items-center gap-4 px-4 py-3 hover:bg-slate-50">
+                <li key={sku.id} className="border-b border-white/5 last:border-0">
+                  <Link href={`/product/${sku.slug}`} className="flex items-center gap-4 px-4 py-3 hover:bg-white/[0.02]">
                     <ProductImage sku={sku} size="sm" className="aspect-[4/5] w-12 shrink-0 rounded" showText={false} />
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-bold text-slate-900">{formatSkuTitle(sku)}</div>
-                      <div className="mt-0.5 flex items-center gap-3 text-xs text-slate-500">
+                      <div className="text-sm font-bold text-white">{formatSkuTitle(sku)}</div>
+                      <div className="mt-0.5 flex items-center gap-3 text-xs text-white/50">
                         <span>{sku.sport}</span>
                         <span>·</span>
                         <span>{formatDate(sku.releaseDate)}</span>
@@ -59,14 +59,14 @@ export default function ReleasesPage() {
                     </div>
                     <CountdownPill days={days} />
                     <div className="hidden text-right md:block">
-                      <div className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
+                      <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">
                         {lowestAsk(sku.id) !== null ? "Presale ask" : "—"}
                       </div>
-                      <div className="text-sm font-bold text-slate-900">
+                      <div className="text-sm font-bold text-white">
                         {lowestAsk(sku.id) !== null ? formatUSD(lowestAsk(sku.id)!) : "Not listed yet"}
                       </div>
                     </div>
-                    <ChevronRight size={16} className="shrink-0 text-slate-400" />
+                    <ChevronRight size={16} className="shrink-0 text-white/40" />
                   </Link>
                 </li>
               ))}
@@ -74,10 +74,10 @@ export default function ReleasesPage() {
           </div>
         ))}
         {upcoming.length === 0 && (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center">
-            <Calendar className="mx-auto text-slate-400" size={32} />
-            <p className="mt-3 text-sm font-bold text-slate-900">No upcoming releases tracked</p>
-            <p className="mt-1 text-sm text-slate-500">Check back soon — release calendars update weekly.</p>
+          <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-12 text-center">
+            <Calendar className="mx-auto text-white/40" size={32} />
+            <p className="mt-3 text-sm font-bold text-white">No upcoming releases tracked</p>
+            <p className="mt-1 text-sm text-white/50">Check back soon — release calendars update weekly.</p>
           </div>
         )}
       </section>
@@ -85,10 +85,10 @@ export default function ReleasesPage() {
       <section>
         <div className="mb-3 flex items-baseline justify-between">
           <div>
-            <h2 className="text-base font-bold text-slate-900">Recently released</h2>
-            <p className="text-xs text-slate-500">Trade is hot in the first 30 days after release</p>
+            <h2 className="text-base font-bold text-white">Recently released</h2>
+            <p className="text-xs text-white/50">Trade is hot in the first 30 days after release</p>
           </div>
-          <Link href="/" className="text-xs font-semibold text-indigo-600 hover:underline">
+          <Link href="/" className="text-xs font-semibold text-amber-300 hover:underline">
             Browse all →
           </Link>
         </div>
@@ -97,22 +97,22 @@ export default function ReleasesPage() {
             <li key={sku.id}>
               <Link
                 href={`/product/${sku.slug}`}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 transition hover:shadow-md"
+                className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#101012] px-3 py-2.5 transition hover:shadow-md"
               >
                 <ProductImage sku={sku} size="sm" className="aspect-[4/5] w-10 shrink-0 rounded" showText={false} />
                 <div className="min-w-0 flex-1">
-                  <div className="line-clamp-1 text-sm font-bold text-slate-900">
+                  <div className="line-clamp-1 text-sm font-bold text-white">
                     {formatSkuTitle(sku)}
                   </div>
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-white/50">
                     Released {Math.abs(days)} {Math.abs(days) === 1 ? "day" : "days"} ago
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm font-bold text-slate-900">
+                  <div className="text-sm font-bold text-white">
                     {lastSale(sku.id) ? formatUSD(lastSale(sku.id)!) : "—"}
                   </div>
-                  <div className="text-[11px] text-slate-500">last sale</div>
+                  <div className="text-[11px] text-white/50">last sale</div>
                 </div>
               </Link>
             </li>
@@ -125,11 +125,11 @@ export default function ReleasesPage() {
 
 function Counter({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent?: boolean }) {
   return (
-    <div className={`flex items-center gap-2 rounded-md border px-3 py-1.5 ${accent ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-white"}`}>
-      <span className={accent ? "text-amber-600" : "text-slate-400"}>{icon}</span>
+    <div className={`flex items-center gap-2 rounded-md border px-3 py-1.5 ${accent ? "border-amber-700/40 bg-amber-500/10" : "border-white/10 bg-[#101012]"}`}>
+      <span className={accent ? "text-amber-400" : "text-white/40"}>{icon}</span>
       <div>
-        <div className={`text-xs font-semibold tracking-wider uppercase ${accent ? "text-amber-700" : "text-slate-500"}`}>{label}</div>
-        <div className={`text-sm font-bold ${accent ? "text-amber-900" : "text-slate-900"}`}>{value}</div>
+        <div className={`text-xs font-semibold tracking-wider uppercase ${accent ? "text-amber-300" : "text-white/50"}`}>{label}</div>
+        <div className={`text-sm font-bold ${accent ? "text-amber-100" : "text-white"}`}>{value}</div>
       </div>
     </div>
   );
@@ -138,22 +138,22 @@ function Counter({ icon, label, value, accent }: { icon: React.ReactNode; label:
 function CountdownPill({ days }: { days: number }) {
   if (days === 0) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md bg-rose-100 px-2 py-1 text-xs font-bold text-rose-800">
+      <span className="inline-flex items-center gap-1 rounded-md bg-rose-500/15 px-2 py-1 text-xs font-bold text-rose-200">
         <TrendingUp size={11} />
         Today
       </span>
     );
   }
   if (days === 1) {
-    return <span className="inline-flex items-center gap-1 rounded-md bg-rose-100 px-2 py-1 text-xs font-bold text-rose-800"><Bell size={11} />Tomorrow</span>;
+    return <span className="inline-flex items-center gap-1 rounded-md bg-rose-500/15 px-2 py-1 text-xs font-bold text-rose-200"><Bell size={11} />Tomorrow</span>;
   }
   if (days <= 7) {
-    return <span className="rounded-md bg-amber-100 px-2 py-1 text-xs font-bold text-amber-800">{days}d</span>;
+    return <span className="rounded-md bg-amber-500/15 px-2 py-1 text-xs font-bold text-amber-200">{days}d</span>;
   }
   if (days <= 30) {
-    return <span className="rounded-md bg-sky-100 px-2 py-1 text-xs font-bold text-sky-800">{days}d</span>;
+    return <span className="rounded-md bg-sky-500/15 px-2 py-1 text-xs font-bold text-sky-800">{days}d</span>;
   }
-  return <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">{days}d</span>;
+  return <span className="rounded-md bg-white/5 px-2 py-1 text-xs font-semibold text-white/80">{days}d</span>;
 }
 
 function groupByMonth(items: { sku: typeof skus[number]; date: Date; days: number }[]) {

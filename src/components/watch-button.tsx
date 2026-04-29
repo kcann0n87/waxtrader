@@ -22,8 +22,8 @@ export function WatchButton({
           toggle(skuId);
         }}
         aria-label={watching ? "Remove from watchlist" : "Add to watchlist"}
-        className={`flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur transition hover:bg-white ${
-          watching ? "text-rose-600" : "text-slate-400 hover:text-rose-600"
+        className={`flex h-8 w-8 items-center justify-center rounded-full bg-[#101012]/90 backdrop-blur transition hover:bg-[#101012] ${
+          watching ? "text-rose-400" : "text-white/40 hover:text-rose-400"
         }`}
       >
         <Heart size={16} fill={watching ? "currentColor" : "none"} />
@@ -37,8 +37,8 @@ export function WatchButton({
         onClick={() => toggle(skuId)}
         className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold transition ${
           watching
-            ? "border-rose-200 bg-rose-50 text-rose-700"
-            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+            ? "border-rose-700/40 bg-rose-500/10 text-rose-300"
+            : "border-white/15 bg-[#101012] text-white/80 hover:bg-white/[0.02]"
         }`}
       >
         <Heart size={12} fill={watching ? "currentColor" : "none"} />
@@ -52,8 +52,8 @@ export function WatchButton({
       onClick={() => toggle(skuId)}
       className={`inline-flex items-center justify-center gap-2 rounded-md border px-4 py-2.5 text-sm font-semibold transition ${
         watching
-          ? "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
-          : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+          ? "border-rose-700/40 bg-rose-500/10 text-rose-300 hover:bg-rose-500/15"
+          : "border-white/15 bg-[#101012] text-white/80 hover:bg-white/[0.02]"
       }`}
     >
       <Heart size={16} fill={watching ? "currentColor" : "none"} />
