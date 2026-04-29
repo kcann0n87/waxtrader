@@ -2,8 +2,6 @@ import "server-only";
 import { createClient } from "./supabase/server";
 import type { Sport, Sku, Listing } from "./data";
 
-type Row<T> = T extends null | undefined ? never : T;
-
 function rowToSku(row: {
   id: string;
   slug: string;
@@ -64,16 +62,20 @@ export async function getListingsForSku(skuId: string): Promise<Listing[]> {
     .eq("status", "Active")
     .order("price_cents", { ascending: true });
   if (error) throw error;
-  return (data ?? []).map((r: Row<typeof data>[number]) => ({
-    id: r.id,
-    skuId: r.sku_id,
-    seller: (r.seller as { username: string } | null)?.username ?? "unknown",
-    sellerRating: 100, // TODO compute from reviews
-    sellerSales: 0, // TODO compute from completed orders
-    price: r.price_cents / 100,
-    shipping: r.shipping_cents / 100,
-    quantity: r.quantity,
-  }));
+  return (data ?? []).map((r) => {
+    // Supabase types joined relations as arrays even when 1:1 — normalize.
+    const sellerObj = Array.isArray(r.seller) ? r.seller[0] : r.seller;
+    return {
+      id: r.id,
+      skuId: r.sku_id,
+      seller: (sellerObj as { username?: string } | null)?.username ?? "unknown",
+      sellerRating: 100, // TODO compute from reviews
+      sellerSales: 0, // TODO compute from completed orders
+      price: r.price_cents / 100,
+      shipping: r.shipping_cents / 100,
+      quantity: r.quantity,
+    };
+  });
 }
 
 export async function getLowestAsk(skuId: string): Promise<number | null> {
@@ -115,7 +117,7 @@ export async function getRecentSales(
     .order("sold_at", { ascending: false })
     .limit(limit);
   if (error) throw error;
-  return (data ?? []).map((r: Row<typeof data>[number]) => ({
+  return (data ?? []).map((r) => ({
     id: r.id,
     date: r.sold_at.slice(0, 10),
     price: r.price_cents / 100,

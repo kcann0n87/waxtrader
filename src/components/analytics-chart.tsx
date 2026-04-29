@@ -36,9 +36,10 @@ export function SalesChart({ data }: { data: { date: string; revenue: number; or
             const [y, m, day] = d.split("-").map(Number);
             return new Date(y, m - 1, day).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
           }}
-          formatter={(value: number, name: string) => {
-            if (name === "revenue") return [`$${value.toLocaleString()}`, "Revenue"];
-            return [value, "Orders"];
+          formatter={(value, name) => {
+            const v = Number(value);
+            if (name === "revenue") return [`$${v.toLocaleString()}`, "Revenue"];
+            return [String(v), "Orders"];
           }}
         />
         <Bar dataKey="revenue" fill="#10b981" radius={[4, 4, 0, 0]} />

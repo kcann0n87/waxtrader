@@ -268,7 +268,7 @@ function PayoutBadge({ status }: { status: import("@/lib/payouts").PayoutStatus 
   }[status];
   return (
     <span className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold ${cfg}`}>
-      {status === "InTransit" ? "In transit" : status === "PaidOut" ? "Paid out" : status}
+      {status === "InTransit" ? "In transit" : status}
     </span>
   );
 }

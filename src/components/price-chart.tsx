@@ -49,7 +49,7 @@ export function PriceChart({ data }: { data: { date: string; price: number }[] }
               year: "numeric",
             })
           }
-          formatter={(value: number) => [`$${value.toLocaleString()}`, "Sale"]}
+          formatter={(value) => [`$${Number(value).toLocaleString()}`, "Sale"]}
         />
         <Area
           type="monotone"

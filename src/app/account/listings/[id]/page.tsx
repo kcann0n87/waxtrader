@@ -111,7 +111,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 </div>
                 <div>
                   <div className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Fees</div>
-                  <div className="mt-0.5 font-bold text-rose-600">-{formatUSDFull(fee + processing)}</div>
+                  <div className="mt-0.5 font-bold text-rose-600">-{formatUSDFull(fee)}</div>
                 </div>
                 <div>
                   <div className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Net to you</div>
