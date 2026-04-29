@@ -127,37 +127,51 @@ export async function getRecentSales(
 /**
  * Returns all SKUs along with their lowest ask + last sale in a single round-trip.
  * Used by the homepage and search to avoid N+1 queries.
+ *
+ * Falls back to an empty array if Supabase is unreachable (so the marketing
+ * shell still renders).
  */
 export async function getCatalogWithPricing(): Promise<
   (Sku & { lowestAsk: number | null; lastSale: number | null })[]
 > {
-  const supabase = await createClient();
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return [];
 
-  const [skusRes, listingsRes, salesRes] = await Promise.all([
-    supabase.from("skus").select("*").order("release_date", { ascending: false }),
-    supabase.from("listings").select("sku_id, price_cents").eq("status", "Active"),
-    supabase.from("sales").select("sku_id, price_cents, sold_at").order("sold_at", { ascending: false }),
-  ]);
-  if (skusRes.error) throw skusRes.error;
-  if (listingsRes.error) throw listingsRes.error;
-  if (salesRes.error) throw salesRes.error;
+  try {
+    const supabase = await createClient();
 
-  const lowestBySku = new Map<string, number>();
-  for (const l of listingsRes.data ?? []) {
-    const cur = lowestBySku.get(l.sku_id);
-    if (cur === undefined || l.price_cents < cur) lowestBySku.set(l.sku_id, l.price_cents);
+    const [skusRes, listingsRes, salesRes] = await Promise.all([
+      supabase.from("skus").select("*").order("release_date", { ascending: false }),
+      supabase.from("listings").select("sku_id, price_cents").eq("status", "Active"),
+      supabase
+        .from("sales")
+        .select("sku_id, price_cents, sold_at")
+        .order("sold_at", { ascending: false }),
+    ]);
+    if (skusRes.error) throw skusRes.error;
+    if (listingsRes.error) throw listingsRes.error;
+    if (salesRes.error) throw salesRes.error;
+
+    const lowestBySku = new Map<string, number>();
+    for (const l of listingsRes.data ?? []) {
+      const cur = lowestBySku.get(l.sku_id);
+      if (cur === undefined || l.price_cents < cur)
+        lowestBySku.set(l.sku_id, l.price_cents);
+    }
+    const lastBySku = new Map<string, number>();
+    for (const s of salesRes.data ?? []) {
+      if (!lastBySku.has(s.sku_id)) lastBySku.set(s.sku_id, s.price_cents);
+    }
+
+    return (skusRes.data ?? []).map((row) => {
+      const sku = rowToSku(row);
+      return {
+        ...sku,
+        lowestAsk: lowestBySku.has(sku.id) ? lowestBySku.get(sku.id)! / 100 : null,
+        lastSale: lastBySku.has(sku.id) ? lastBySku.get(sku.id)! / 100 : null,
+      };
+    });
+  } catch (e) {
+    console.error("getCatalogWithPricing failed:", e);
+    return [];
   }
-  const lastBySku = new Map<string, number>();
-  for (const s of salesRes.data ?? []) {
-    if (!lastBySku.has(s.sku_id)) lastBySku.set(s.sku_id, s.price_cents);
-  }
-
-  return (skusRes.data ?? []).map((row) => {
-    const sku = rowToSku(row);
-    return {
-      ...sku,
-      lowestAsk: lowestBySku.has(sku.id) ? lowestBySku.get(sku.id)! / 100 : null,
-      lastSale: lastBySku.has(sku.id) ? lastBySku.get(sku.id)! / 100 : null,
-    };
-  });
 }
