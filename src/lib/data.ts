@@ -89,6 +89,7 @@ export const skus: Sku[] = [
     releaseDate: "2024-08-21",
     gradient: ["#16a34a", "#84cc16"],
     description: "2024 Topps Chrome Baseball Hobby. 2 autos per box, refractor parallels, the chrome flagship.",
+    imageUrl: "/products/2024-topps-chrome-baseball-hobby-box.jpg"
   },
   {
     id: "5",
@@ -101,6 +102,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-12-10",
     gradient: ["#1e40af", "#a855f7"],
     description: "Prizm Football Hobby. The hobby's flagship NFL product. Look for Cam Ward, Travis Hunter rookies.",
+    imageUrl: "/products/2025-panini-prizm-football-hobby-box.jpg"
   },
   {
     id: "6",
@@ -113,6 +115,7 @@ export const skus: Sku[] = [
     releaseDate: "2024-11-13",
     gradient: ["#0891b2", "#1e3a8a"],
     description: "Upper Deck Series 1 Hockey Hobby. Young Guns rookies, 24 packs per box.",
+    imageUrl: "/products/2024-25-upper-deck-series-1-hockey-hobby-box.jpg"
   },
   {
     id: "7",
@@ -125,6 +128,7 @@ export const skus: Sku[] = [
     releaseDate: "2024-11-06",
     gradient: ["#0d9488", "#06b6d4"],
     description: "Bowman Chrome Baseball Hobby. 2 autos per box, chrome refractor prospect cards.",
+    imageUrl: "/products/2024-bowman-chrome-baseball-hobby-box.jpg"
   },
   {
     id: "8",
@@ -137,6 +141,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-11-19",
     gradient: ["#dc2626", "#1e3a8a"],
     description: "Select Football Hobby. Concourse, Premier, Club Level tiers. 12 packs per box.",
+    imageUrl: "/products/2025-panini-select-football-hobby-box.jpg"
   },
   {
     id: "9",
@@ -149,6 +154,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-01-22",
     gradient: ["#ea580c", "#fbbf24"],
     description: "Donruss Optic Basketball. Holo prizm parallels, rated rookies, 20 packs per box.",
+    imageUrl: "/products/2024-25-panini-donruss-optic-basketball-hobby-box.jpg"
   },
   {
     id: "10",
@@ -161,6 +167,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-02-12",
     gradient: ["#0369a1", "#fbbf24"],
     description: "The flagship. Topps Series 1 Baseball Hobby. 1 auto or relic per box, 24 packs.",
+    imageUrl: "/products/2025-topps-series-1-baseball-hobby-box.jpg"
   },
   {
     id: "11",
@@ -185,6 +192,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-12-17",
     gradient: ["#1d4ed8", "#34d399"],
     description: "Bowman Draft Jumbo. First Bowman cards of MLB draft picks. Prospector's favorite.",
+    imageUrl: "/products/2025-bowman-draft-baseball-jumbo-box.jpg"
   },
   {
     id: "13",
@@ -197,6 +205,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-04-02",
     gradient: ["#0f172a", "#7c3aed"],
     description: "Panini Select Basketball Hobby. Concourse, Premier, Courtside tiers. 12 packs per box.",
+    imageUrl: "/products/2024-25-panini-select-basketball-hobby-box.jpg"
   },
   {
     id: "14",
@@ -209,6 +218,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-05-14",
     gradient: ["#831843", "#fb7185"],
     description: "Panini Mosaic Basketball. Vibrant prizm-style parallels. 24 packs per box.",
+    imageUrl: "/products/2024-25-panini-mosaic-basketball-hobby-box.jpg"
   },
   {
     id: "15",
@@ -233,6 +243,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-06-18",
     gradient: ["#1c1917", "#fbbf24"],
     description: "National Treasures Basketball. Premier high-end product. 8 autos or memorabilia per box.",
+    imageUrl: "/products/2024-25-panini-national-treasures-basketball-hobby-box.jpg"
   },
   {
     id: "17",
@@ -257,6 +268,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-05-28",
     gradient: ["#0c4a6e", "#f59e0b"],
     description: "Court Kings Basketball. Painted artwork-style cards, 4 autos or memorabilia per box.",
+    imageUrl: "/products/2024-25-panini-court-kings-basketball-hobby-box.jpg"
   },
   {
     id: "19",
@@ -281,6 +293,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-03-05",
     gradient: ["#15803d", "#fde047"],
     description: "Topps Heritage Baseball. Throwback designs based on the 1976 Topps set. 24 packs.",
+    imageUrl: "/products/2025-topps-heritage-baseball-hobby-box.jpg"
   },
   {
     id: "21",
@@ -293,6 +306,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-07-23",
     gradient: ["#0f172a", "#fbbf24"],
     description: "Topps Tier One Baseball. 3 hits per box, premium on-card autographs.",
+    imageUrl: "/products/2025-topps-tier-one-baseball-hobby-box.jpg"
   },
   {
     id: "22",
@@ -341,6 +355,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-12-17",
     gradient: ["#7f1d1d", "#0ea5e9"],
     description: "Panini Mosaic Football. Vibrant prizm-style parallels, 12 packs per box.",
+    imageUrl: "/products/2025-panini-mosaic-football-hobby-box.jpg"
   },
   {
     id: "26",
@@ -365,6 +380,7 @@ export const skus: Sku[] = [
     releaseDate: "2026-02-25",
     gradient: ["#171717", "#a16207"],
     description: "National Treasures Football. Ultra-premium with patch autos and 1/1s.",
+    imageUrl: "/products/2025-panini-national-treasures-football-hobby-box.jpg"
   },
   {
     id: "28",
@@ -389,6 +405,7 @@ export const skus: Sku[] = [
     releaseDate: "2026-02-19",
     gradient: ["#1e40af", "#0ea5e9"],
     description: "Upper Deck Series 2 Hockey. More Young Guns rookies, 24 packs per box.",
+    imageUrl: "/products/2025-26-upper-deck-series-2-hockey-hobby-box.jpg"
   },
   {
     id: "30",
@@ -425,6 +442,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-09-17",
     gradient: ["#000000", "#fbbf24"],
     description: "Upper Deck The Cup Hockey. The crown jewel — 1 pack of 6 cards, all hits.",
+    imageUrl: "/products/2024-25-upper-deck-the-cup-hockey-hobby-box.jpg"
   },
   {
     id: "33",
@@ -437,6 +455,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-01-17",
     gradient: ["#7c3aed", "#fbbf24"],
     description: "Pokemon TCG Prismatic Evolutions ETB. Eevee-themed special set, 9 booster packs included.",
+    imageUrl: "/products/2025-pokemon-tcg-prismatic-evolutions-elite-trainer-box.jpg"
   },
   {
     id: "34",
@@ -473,6 +492,7 @@ export const skus: Sku[] = [
     releaseDate: "2026-02-11",
     gradient: ["#0369a1", "#fde047"],
     description: "Topps Series 1 Baseball Jumbo. 6 autos or relics per box, 32-card packs.",
+    imageUrl: "/products/2026-topps-series-1-baseball-jumbo-box.jpg"
   },
   {
     id: "37",
@@ -485,6 +505,7 @@ export const skus: Sku[] = [
     releaseDate: "2026-04-29",
     gradient: ["#2563eb", "#06b6d4"],
     description: "Bowman Baseball Hobby. The flagship prospecting product. 1 auto per box.",
+    imageUrl: "/products/2026-bowman-baseball-hobby-box.jpg"
   },
   {
     id: "38",
@@ -509,6 +530,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-12-03",
     gradient: ["#1e3a8a", "#dc2626"],
     description: "Prizm Football First Off The Line. Exclusive parallels, on-card autos. Limited release.",
+    imageUrl: "/products/2025-panini-prizm-football-fotl-hobby-box.jpg"
   },
   {
     id: "40",
@@ -521,6 +543,7 @@ export const skus: Sku[] = [
     releaseDate: "2025-07-09",
     gradient: ["#0e7490", "#facc15"],
     description: "Topps Allen & Ginter Baseball. Vintage-style minis and cross-sport autos. 24 packs.",
+    imageUrl: "/products/2025-topps-allen-and-ginter-baseball-hobby-box.jpg"
   },
 ];
 
