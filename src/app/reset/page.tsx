@@ -1,13 +1,17 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { SignupForm } from "./signup-form";
+import { getUser } from "@/lib/supabase/user";
+import { ResetForm } from "./reset-form";
 
-export default async function SignupPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ next?: string }>;
-}) {
-  const { next = "/welcome" } = await searchParams;
+export default async function ResetPage() {
+  // The user gets here via /auth/callback?code=...&next=/reset, which
+  // exchanges the recovery code into a session. If there's no session,
+  // the link expired or was tampered — bounce them to /forgot.
+  const user = await getUser();
+  if (!user) {
+    redirect("/forgot?expired=1");
+  }
 
   return (
     <div className="relative mx-auto flex min-h-[calc(100vh-180px)] max-w-md items-center justify-center px-4 py-8">
@@ -23,21 +27,15 @@ export default async function SignupPage({
             </span>
           </Link>
           <h1 className="font-display mt-6 text-3xl font-black tracking-tight text-white">
-            Join the marketplace
+            Set a new password
           </h1>
           <p className="mt-1 text-sm text-white/50">
-            Already have an account?{" "}
-            <Link
-              href={`/login?next=${encodeURIComponent(next)}`}
-              className="font-semibold text-amber-300 transition hover:text-amber-200"
-            >
-              Sign in
-            </Link>
+            Pick something at least 8 characters long.
           </p>
         </div>
 
         <Suspense fallback={null}>
-          <SignupForm next={next} />
+          <ResetForm />
         </Suspense>
       </div>
     </div>

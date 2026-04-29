@@ -19,6 +19,11 @@ export const metadata: Metadata = {
   description: "Buy and sell sealed sports card boxes with the transparency of a stock market. Real bid/ask, real escrow, real provenance.",
 };
 
+// The header reads auth state from cookies, so every page is dynamic.
+// Marking this explicitly skips Next's static-prerender attempts and
+// silences the resulting DYNAMIC_SERVER_USAGE log noise during build.
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable} h-full antialiased`}>

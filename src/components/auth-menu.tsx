@@ -8,14 +8,24 @@ export async function AuthMenu() {
 
   if (!profile) {
     return (
-      <Link
-        href="/login"
-        className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-semibold text-white transition hover:border-amber-400/40 hover:bg-amber-500/10 hover:text-amber-300"
-        aria-label="Log in"
-      >
-        <LogIn size={14} />
-        <span className="hidden sm:inline">Sign in</span>
-      </Link>
+      <div className="flex items-center gap-1.5">
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold text-white/70 transition hover:text-white"
+          aria-label="Log in"
+        >
+          <LogIn size={14} />
+          <span className="hidden sm:inline">Sign in</span>
+        </Link>
+        <Link
+          href="/signup"
+          className="inline-flex items-center rounded-md border border-amber-400/40 bg-amber-500/10 px-3 py-1.5 text-sm font-bold text-amber-300 transition hover:border-amber-400/70 hover:bg-amber-500/20 hover:text-amber-200"
+          aria-label="Sign up"
+        >
+          <span className="hidden sm:inline">Sign up</span>
+          <span className="sm:hidden">Join</span>
+        </Link>
+      </div>
     );
   }
 

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Loader2, Lock, Mail } from "lucide-react";
-import { signIn } from "../auth/actions";
+import { Loader2, Lock } from "lucide-react";
+import { updatePassword } from "../auth/actions";
 
-export function LoginForm({ next }: { next: string }) {
+export function ResetForm() {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -13,57 +13,43 @@ export function LoginForm({ next }: { next: string }) {
       action={(formData) => {
         setError(null);
         startTransition(async () => {
-          const result = await signIn(formData);
+          const result = await updatePassword(formData);
           if (result?.error) setError(result.error);
         });
       }}
       className="space-y-4 rounded-2xl border border-white/10 bg-[#101012] p-7 shadow-2xl shadow-black/40"
     >
-      <input type="hidden" name="next" value={next} />
-
       <label className="block">
         <span className="mb-1.5 block text-[11px] font-semibold tracking-[0.18em] text-white/50 uppercase">
-          Email
+          New password
         </span>
         <div className="relative">
-          <Mail
-            size={14}
-            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/30"
-          />
+          <Lock size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/30" />
           <input
-            type="email"
-            name="email"
+            type="password"
+            name="password"
             required
-            autoComplete="email"
-            placeholder="you@example.com"
+            minLength={8}
+            autoComplete="new-password"
+            placeholder="At least 8 characters"
             className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
       </label>
 
       <label className="block">
-        <div className="mb-1.5 flex items-center justify-between">
-          <span className="block text-[11px] font-semibold tracking-[0.18em] text-white/50 uppercase">
-            Password
-          </span>
-          <a
-            href="/forgot"
-            className="text-[11px] font-semibold text-amber-300 transition hover:text-amber-200"
-          >
-            Forgot?
-          </a>
-        </div>
+        <span className="mb-1.5 block text-[11px] font-semibold tracking-[0.18em] text-white/50 uppercase">
+          Confirm password
+        </span>
         <div className="relative">
-          <Lock
-            size={14}
-            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/30"
-          />
+          <Lock size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/30" />
           <input
             type="password"
-            name="password"
+            name="confirm"
             required
-            autoComplete="current-password"
-            placeholder="••••••••"
+            minLength={8}
+            autoComplete="new-password"
+            placeholder="Type it again"
             className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
@@ -81,20 +67,8 @@ export function LoginForm({ next }: { next: string }) {
         className="flex w-full items-center justify-center gap-2 rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-3 text-sm font-bold text-slate-900 shadow-lg shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? <Loader2 size={14} className="animate-spin" /> : null}
-        Sign in
+        Update password
       </button>
-
-      <div className="text-center text-[11px] text-white/40">
-        By signing in you agree to our{" "}
-        <a href="#" className="text-white/60 transition hover:text-amber-300">
-          Terms
-        </a>{" "}
-        and{" "}
-        <a href="#" className="text-white/60 transition hover:text-amber-300">
-          Privacy Policy
-        </a>
-        .
-      </div>
     </form>
   );
 }
