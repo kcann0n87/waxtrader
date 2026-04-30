@@ -151,9 +151,14 @@ export default async function ListingDetailPage({
             </div>
           </div>
 
-          {listing.status === "Active" && (
+          {(listing.status === "Active" || listing.status === "Paused") && (
             <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
               <h2 className="font-display mb-3 text-base font-black text-white">Listing details</h2>
+              {listing.status === "Paused" && (
+                <div className="mb-3 rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/60">
+                  This listing is paused. Buyers can&apos;t see it. Resume to put it back live.
+                </div>
+              )}
               <dl className="divide-y divide-white/5 rounded-lg border border-white/10">
                 <Row label="Asking price" value={formatUSDFull(ask)} />
                 <Row
@@ -171,7 +176,19 @@ export default async function ListingDetailPage({
                 />
                 <Row label="Payout per box" value={formatUSDFull(payout)} bold />
               </dl>
-              <ListingActions listingId={listing.id} currentAsk={ask} />
+              <ListingActions
+                listingId={listing.id}
+                currentAsk={ask}
+                currentQty={listing.quantity}
+                currentStatus={listing.status}
+              />
+            </div>
+          )}
+
+          {listing.status === "Expired" && (
+            <div className="rounded-xl border border-white/10 bg-[#101012] p-5 text-sm text-white/60">
+              This listing has ended. It&apos;s no longer visible on the marketplace. To list this
+              product again, head to <Link href="/sell" className="font-semibold text-amber-300 hover:underline">/sell</Link>.
             </div>
           )}
 
