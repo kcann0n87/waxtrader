@@ -1,9 +1,25 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import type Stripe from "stripe";
+import { createClient as createSbAdmin } from "@supabase/supabase-js";
 import { stripe } from "@/lib/stripe";
-import { createClient } from "@/lib/supabase/server";
 import { emailPaymentReceived } from "@/lib/email";
+
+/**
+ * Webhooks have no user session, so we can't use the cookie-based server
+ * client (RLS would silently block writes). Use the service role for all
+ * DB operations triggered by Stripe events.
+ */
+function adminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error("Supabase service credentials not configured");
+  }
+  return createSbAdmin(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
 
 /**
  * Stripe webhook handler. Listens for events Stripe pushes after Checkout
@@ -70,7 +86,7 @@ export async function POST(request: Request) {
 }
 
 async function handleEvent(event: Stripe.Event) {
-  const supabase = await createClient();
+  const supabase = adminClient();
 
   switch (event.type) {
     case "account.updated": {
@@ -281,7 +297,7 @@ async function handleEvent(event: Stripe.Event) {
 }
 
 async function lookupOrderByPaymentIntent(piId: string): Promise<string | undefined> {
-  const supabase = await createClient();
+  const supabase = adminClient();
   const { data } = await supabase
     .from("orders")
     .select("id")
