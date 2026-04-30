@@ -124,6 +124,72 @@ export async function getRecentSales(
   }));
 }
 
+export async function getActiveBidsForSku(skuId: string, limit = 20) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("bids")
+    .select("id, price_cents, expires_at, created_at")
+    .eq("sku_id", skuId)
+    .eq("status", "Active")
+    .order("price_cents", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id as string,
+    price: (r.price_cents as number) / 100,
+    expiresAt: r.expires_at as string,
+    createdAt: r.created_at as string,
+  }));
+}
+
+export async function getHighestBidForSku(skuId: string): Promise<number | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("bids")
+    .select("price_cents")
+    .eq("sku_id", skuId)
+    .eq("status", "Active")
+    .order("price_cents", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? (data.price_cents as number) / 100 : null;
+}
+
+/**
+ * Aggregates the sales table into a daily price-history series for the chart.
+ * Returns up to `days` data points (one per day with at least one sale).
+ */
+export async function getPriceHistoryForSku(
+  skuId: string,
+  days = 90,
+): Promise<{ date: string; price: number }[]> {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("sales")
+    .select("price_cents, sold_at")
+    .eq("sku_id", skuId)
+    .gte("sold_at", since)
+    .order("sold_at", { ascending: true });
+  if (error) throw error;
+
+  const byDay = new Map<string, { sum: number; count: number }>();
+  for (const r of data ?? []) {
+    const day = r.sold_at.slice(0, 10);
+    const acc = byDay.get(day) ?? { sum: 0, count: 0 };
+    acc.sum += r.price_cents;
+    acc.count += 1;
+    byDay.set(day, acc);
+  }
+  return Array.from(byDay.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, { sum, count }]) => ({
+      date,
+      price: Math.round(sum / count) / 100,
+    }));
+}
+
 /**
  * Returns all SKUs along with their lowest ask + last sale in a single round-trip.
  * Used by the homepage and search to avoid N+1 queries.

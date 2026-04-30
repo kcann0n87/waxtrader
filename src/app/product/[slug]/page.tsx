@@ -10,30 +10,34 @@ import { RecentlyViewed } from "@/components/recently-viewed";
 import { TrackView } from "@/components/track-view";
 import { WatchButton } from "@/components/watch-button";
 import {
-  bidsForSku,
-  highestBid,
-  lastSale,
-  listingsForSku,
-  lowestAsk,
-  priceHistoryForSku,
-  recentSalesForSku,
-  skus,
-} from "@/lib/data";
+  getActiveBidsForSku,
+  getHighestBidForSku,
+  getLastSale,
+  getListingsForSku,
+  getLowestAsk,
+  getPriceHistoryForSku,
+  getRecentSales,
+  getSkuBySlug,
+} from "@/lib/db";
 import { formatSkuTitle, formatUSD, formatUSDFull, isPresale } from "@/lib/utils";
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const sku = skus.find((s) => s.slug === slug);
+  const sku = await getSkuBySlug(slug);
   if (!sku) notFound();
 
-  const listings = listingsForSku(sku.id);
-  const bids = bidsForSku(sku.id);
-  const history = priceHistoryForSku(sku.id);
-  const sales = recentSalesForSku(sku.id);
-  const ask = lowestAsk(sku.id);
-  const bid = highestBid(sku.id);
-  const last = lastSale(sku.id);
-  const previous = history[history.length - 8]?.price ?? last ?? 0;
+  // Parallel fetch everything the page needs for this SKU.
+  const [listings, bids, history, sales, ask, bid, last] = await Promise.all([
+    getListingsForSku(sku.id),
+    getActiveBidsForSku(sku.id, 20),
+    getPriceHistoryForSku(sku.id, 90),
+    getRecentSales(sku.id, 6),
+    getLowestAsk(sku.id),
+    getHighestBidForSku(sku.id),
+    getLastSale(sku.id),
+  ]);
+
+  const previous = history.length >= 8 ? history[history.length - 8].price : last ?? 0;
   const change = last && previous ? last - previous : 0;
   const changePct = previous ? (change / previous) * 100 : 0;
 
@@ -97,33 +101,35 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-white/10 bg-[#101012] p-6">
-            <div className="mb-4 flex items-end justify-between">
-              <div>
-                <div className="text-[10px] font-semibold tracking-[0.18em] text-amber-400/80 uppercase">
-                  Price history
+          {history.length > 0 && (
+            <div className="mt-6 rounded-2xl border border-white/10 bg-[#101012] p-6">
+              <div className="mb-4 flex items-end justify-between">
+                <div>
+                  <div className="text-[10px] font-semibold tracking-[0.18em] text-amber-400/80 uppercase">
+                    Price history
+                  </div>
+                  <h2 className="font-display mt-1 text-2xl font-black tracking-tight text-white">
+                    Last 90 days
+                  </h2>
                 </div>
-                <h2 className="font-display mt-1 text-2xl font-black tracking-tight text-white">
-                  Last 90 days
-                </h2>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-bold ${
+                      change >= 0
+                        ? "border-emerald-700/40 bg-emerald-500/10 text-emerald-400"
+                        : "border-rose-700/40 bg-rose-500/10 text-rose-400"
+                    }`}
+                  >
+                    {change >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                    {change >= 0 ? "+" : ""}
+                    {formatUSD(Math.abs(change))} ({changePct.toFixed(1)}%)
+                  </span>
+                  <span className="text-xs text-white/40">7d</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-bold ${
-                    change >= 0
-                      ? "border-emerald-700/40 bg-emerald-500/10 text-emerald-400"
-                      : "border-rose-700/40 bg-rose-500/10 text-rose-400"
-                  }`}
-                >
-                  {change >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                  {change >= 0 ? "+" : ""}
-                  {formatUSD(Math.abs(change))} ({changePct.toFixed(1)}%)
-                </span>
-                <span className="text-xs text-white/40">7d</span>
-              </div>
+              <PriceChart data={history} />
             </div>
-            <PriceChart data={history} />
-          </div>
+          )}
 
           <div className="mt-6 rounded-2xl border border-white/10 bg-[#101012] p-6">
             <div className="mb-4 flex items-end justify-between">
@@ -135,62 +141,71 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   Available listings
                 </h2>
               </div>
-              <span className="text-xs text-white/50">{listings.length} sellers · lowest first</span>
+              <span className="text-xs text-white/50">
+                {listings.length} {listings.length === 1 ? "seller" : "sellers"} · lowest first
+              </span>
             </div>
-            <div className="overflow-x-auto rounded-lg border border-white/5">
-              <table className="w-full min-w-[640px] text-sm">
-                <thead className="bg-white/5 text-left text-[10px] font-semibold tracking-[0.15em] text-white/50 uppercase">
-                  <tr>
-                    <th className="px-4 py-3">Seller</th>
-                    <th className="px-4 py-3">Price</th>
-                    <th className="px-4 py-3">Shipping</th>
-                    <th className="px-4 py-3">Qty</th>
-                    <th className="px-4 py-3 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {listings.map((l) => (
-                    <tr key={l.id} className="transition hover:bg-white/[0.02]">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5">
-                          <Link
-                            href={`/seller/${l.seller}`}
-                            className="font-semibold text-white transition hover:text-amber-300"
-                          >
-                            {l.seller}
-                          </Link>
-                          <Link
-                            href={`/account/messages/new?to=${l.seller}&sku=${sku.id}`}
-                            className="rounded-md p-1 text-white/30 transition hover:bg-white/5 hover:text-amber-300"
-                            aria-label={`Message ${l.seller}`}
-                            title={`Message ${l.seller}`}
-                          >
-                            <MessageCircle size={12} />
-                          </Link>
-                        </div>
-                        <div className="text-xs text-emerald-400">
-                          {l.sellerRating}% · {l.sellerSales.toLocaleString()} sales
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 font-display font-black text-amber-400">
-                        {formatUSDFull(l.price)}
-                      </td>
-                      <td className="px-4 py-3 text-white/60">
-                        {l.shipping === 0 ? (
-                          <span className="font-semibold text-emerald-400">Free</span>
-                        ) : (
-                          formatUSD(l.shipping)
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-white/60">{l.quantity}</td>
-                      <td className="px-4 py-3 text-right">
-                        <AddToCartButton listing={l} size="sm" />
-                      </td>
+            {listings.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.02] px-6 py-8 text-center text-sm text-white/50">
+                No active listings yet. Be the first —{" "}
+                <Link href="/sell" className="font-semibold text-amber-300 hover:underline">
+                  list yours
+                </Link>
+                .
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-lg border border-white/5">
+                <table className="w-full min-w-[640px] text-sm">
+                  <thead className="bg-white/5 text-left text-[10px] font-semibold tracking-[0.15em] text-white/50 uppercase">
+                    <tr>
+                      <th className="px-4 py-3">Seller</th>
+                      <th className="px-4 py-3">Price</th>
+                      <th className="px-4 py-3">Shipping</th>
+                      <th className="px-4 py-3">Qty</th>
+                      <th className="px-4 py-3 text-right">Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {listings.map((l) => (
+                      <tr key={l.id} className="transition hover:bg-white/[0.02]">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1.5">
+                            <Link
+                              href={`/seller/${l.seller}`}
+                              className="font-semibold text-white transition hover:text-amber-300"
+                            >
+                              {l.seller}
+                            </Link>
+                            <Link
+                              href={`/account/messages/new?to=${l.seller}&sku=${sku.id}`}
+                              className="rounded-md p-1 text-white/30 transition hover:bg-white/5 hover:text-amber-300"
+                              aria-label={`Message ${l.seller}`}
+                              title={`Message ${l.seller}`}
+                            >
+                              <MessageCircle size={12} />
+                            </Link>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 font-display font-black text-amber-400">
+                          {formatUSDFull(l.price)}
+                        </td>
+                        <td className="px-4 py-3 text-white/60">
+                          {l.shipping === 0 ? (
+                            <span className="font-semibold text-emerald-400">Free</span>
+                          ) : (
+                            formatUSD(l.shipping)
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-white/60">{l.quantity}</td>
+                        <td className="px-4 py-3 text-right">
+                          <AddToCartButton listing={l} size="sm" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -201,18 +216,30 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <h2 className="font-display mt-1 mb-3 text-xl font-black tracking-tight text-white">
                 Recent sales
               </h2>
-              <ul className="divide-y divide-white/5">
-                {sales.slice(0, 6).map((s) => (
-                  <li key={s.id} className="flex items-center justify-between py-2.5 text-sm">
-                    <span className="text-white/50">
-                      {new Date(s.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                    </span>
-                    <span className="font-display font-black text-amber-300">
-                      {formatUSDFull(s.price)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              {sales.length === 0 ? (
+                <div className="rounded-md border border-dashed border-white/10 bg-white/[0.02] px-3 py-4 text-center text-xs text-white/40">
+                  No recorded sales yet.
+                </div>
+              ) : (
+                <ul className="divide-y divide-white/5">
+                  {sales.map((s) => (
+                    <li
+                      key={s.id}
+                      className="flex items-center justify-between py-2.5 text-sm"
+                    >
+                      <span className="text-white/50">
+                        {new Date(s.date).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                      <span className="font-display font-black text-amber-300">
+                        {formatUSDFull(s.price)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div className="rounded-2xl border border-white/10 bg-[#101012] p-6">
               <div className="text-[10px] font-semibold tracking-[0.18em] text-amber-400/80 uppercase">
@@ -221,14 +248,25 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <h2 className="font-display mt-1 mb-3 text-xl font-black tracking-tight text-white">
                 Open bids
               </h2>
-              <ul className="divide-y divide-white/5">
-                {bids.map((b) => (
-                  <li key={b.id} className="flex items-center justify-between py-2.5 text-sm">
-                    <span className="text-white/50">expires in {b.expires}</span>
-                    <span className="font-display font-black text-white">{formatUSDFull(b.price)}</span>
-                  </li>
-                ))}
-              </ul>
+              {bids.length === 0 ? (
+                <div className="rounded-md border border-dashed border-white/10 bg-white/[0.02] px-3 py-4 text-center text-xs text-white/40">
+                  No active bids.
+                </div>
+              ) : (
+                <ul className="divide-y divide-white/5">
+                  {bids.slice(0, 6).map((b) => (
+                    <li
+                      key={b.id}
+                      className="flex items-center justify-between py-2.5 text-sm"
+                    >
+                      <span className="text-white/50">{expiresIn(b.expiresAt)}</span>
+                      <span className="font-display font-black text-white">
+                        {formatUSDFull(b.price)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </div>
@@ -252,10 +290,19 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 function Spec({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[10px] font-semibold tracking-[0.18em] text-white/40 uppercase">
+      <dt className="text-[10px] font-semibold tracking-[0.15em] text-white/40 uppercase">
         {label}
       </dt>
-      <dd className="mt-0.5 text-sm font-medium text-white">{value}</dd>
+      <dd className="mt-0.5 text-sm font-semibold text-white">{value}</dd>
     </div>
   );
+}
+
+function expiresIn(iso: string) {
+  const diff = new Date(iso).getTime() - Date.now();
+  if (diff <= 0) return "expired";
+  const day = Math.floor(diff / (24 * 60 * 60 * 1000));
+  if (day >= 1) return `expires in ${day}d`;
+  const hr = Math.floor(diff / (60 * 60 * 1000));
+  return `expires in ${hr}h`;
 }
