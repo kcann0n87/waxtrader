@@ -3,8 +3,8 @@ import { ArrowUpRight, Hammer, ShieldCheck, Star } from "lucide-react";
 import { ProductCard } from "@/components/product-card";
 import { RecentSalesTicker } from "@/components/recent-sales-ticker";
 import { RecentlyViewed } from "@/components/recently-viewed";
-import { getCatalogWithPricing } from "@/lib/db";
-import { isPresale } from "@/lib/utils";
+import { getCatalogWithPricing, getMarketplaceStats } from "@/lib/db";
+import { formatUSD, isPresale } from "@/lib/utils";
 
 export default async function Home({
   searchParams,
@@ -12,13 +12,19 @@ export default async function Home({
   searchParams: Promise<{ sport?: string }>;
 }) {
   const { sport } = await searchParams;
-  const all = await getCatalogWithPricing();
+  const [all, stats] = await Promise.all([
+    getCatalogWithPricing(),
+    getMarketplaceStats(),
+  ]);
   const filtered = sport ? all.filter((s) => s.sport === sport) : all;
   const presaleSkus = filtered.filter((s) => isPresale(s.releaseDate));
   const releasedSkus = filtered.filter((s) => !isPresale(s.releaseDate));
   const releases = presaleSkus.length > 0 ? presaleSkus.slice(0, 4) : filtered.slice(0, 4);
   const trending = releasedSkus.slice(0, 4);
   const justDropped = releasedSkus.slice(4, 8);
+
+  const showStats =
+    stats.escrowUsd !== null || stats.sellerCount !== null || stats.positivePct !== null;
 
   return (
     <div>
@@ -58,22 +64,34 @@ export default async function Home({
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="border-b border-white/5">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-px bg-white/5 sm:grid-cols-3">
-          {[
-            { k: "$2.4M", v: "in escrow", sub: "across active orders" },
-            { k: "8,400+", v: "verified sellers", sub: "Pro & Elite tiers" },
-            { k: "99.7%", v: "positive feedback", sub: "rolling 30 days" },
-          ].map((s) => (
-            <div key={s.v} className="bg-[#0a0a0b] px-8 py-10">
-              <div className="font-display text-4xl font-black text-amber-400">{s.k}</div>
-              <div className="mt-1 text-sm font-semibold text-white">{s.v}</div>
-              <div className="mt-0.5 text-xs text-white/50">{s.sub}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Stats — only shown once real numbers cross meaningful thresholds */}
+      {showStats && (
+        <section className="border-b border-white/5">
+          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-px bg-white/5 sm:grid-cols-3">
+            {stats.escrowUsd !== null && (
+              <Stat
+                k={formatStatMoney(stats.escrowUsd)}
+                v="in escrow"
+                sub="across active orders"
+              />
+            )}
+            {stats.sellerCount !== null && (
+              <Stat
+                k={`${stats.sellerCount.toLocaleString()}+`}
+                v="active sellers"
+                sub="Stripe-verified"
+              />
+            )}
+            {stats.positivePct !== null && (
+              <Stat
+                k={`${stats.positivePct.toFixed(1)}%`}
+                v="positive feedback"
+                sub="across all reviews"
+              />
+            )}
+          </div>
+        </section>
+      )}
 
       <div className="mx-auto max-w-7xl px-4 py-16 lg:px-6">
         {sport && (
@@ -89,44 +107,54 @@ export default async function Home({
 
         <RecentlyViewed />
 
-        <Section
-          id="featured"
-          eyebrow={presaleSkus.length > 0 ? "Now open" : "Open Market"}
-          title={presaleSkus.length > 0 ? "Pre-orders open" : "Tonight's book"}
-          subtitle={presaleSkus.length > 0 ? "List early to lock the lowest ask" : "Hot boxes this week"}
-        >
-          <Grid>
-            {releases.map((s) => (
-              <ProductCard
-                key={s.id}
-                sku={s}
-                lowestAsk={s.lowestAsk}
-                lastSale={s.lastSale}
-                presale={isPresale(s.releaseDate)}
-              />
-            ))}
-          </Grid>
-        </Section>
+        {releases.length > 0 && (
+          <Section
+            id="featured"
+            eyebrow={presaleSkus.length > 0 ? "Now open" : "Open Market"}
+            title={presaleSkus.length > 0 ? "Pre-orders open" : "Tonight's book"}
+            subtitle={
+              presaleSkus.length > 0
+                ? "List early to lock the lowest ask"
+                : "Hot boxes this week"
+            }
+          >
+            <Grid>
+              {releases.map((s) => (
+                <ProductCard
+                  key={s.id}
+                  sku={s}
+                  lowestAsk={s.lowestAsk}
+                  lastSale={s.lastSale}
+                  presale={isPresale(s.releaseDate)}
+                />
+              ))}
+            </Grid>
+          </Section>
+        )}
 
-        <Section
-          eyebrow="Trending"
-          title="New lowest ask"
-          subtitle="Sellers just dropped prices"
-        >
-          <Grid>
-            {trending.map((s) => (
-              <ProductCard key={s.id} sku={s} lowestAsk={s.lowestAsk} lastSale={s.lastSale} />
-            ))}
-          </Grid>
-        </Section>
+        {trending.length > 0 && (
+          <Section
+            eyebrow="Trending"
+            title="New lowest ask"
+            subtitle="Sellers just dropped prices"
+          >
+            <Grid>
+              {trending.map((s) => (
+                <ProductCard key={s.id} sku={s} lowestAsk={s.lowestAsk} lastSale={s.lastSale} />
+              ))}
+            </Grid>
+          </Section>
+        )}
 
-        <Section eyebrow="Just dropped" title="Newest releases" subtitle="Hot off the printer">
-          <Grid>
-            {justDropped.map((s) => (
-              <ProductCard key={s.id} sku={s} lowestAsk={s.lowestAsk} lastSale={s.lastSale} />
-            ))}
-          </Grid>
-        </Section>
+        {justDropped.length > 0 && (
+          <Section eyebrow="Just dropped" title="Newest releases" subtitle="Hot off the printer">
+            <Grid>
+              {justDropped.map((s) => (
+                <ProductCard key={s.id} sku={s} lowestAsk={s.lowestAsk} lastSale={s.lastSale} />
+              ))}
+            </Grid>
+          </Section>
+        )}
       </div>
 
       {/* Value props */}
@@ -202,4 +230,20 @@ function Section({
 
 function Grid({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">{children}</div>;
+}
+
+function Stat({ k, v, sub }: { k: string; v: string; sub: string }) {
+  return (
+    <div className="bg-[#0a0a0b] px-8 py-10">
+      <div className="font-display text-4xl font-black text-amber-400">{k}</div>
+      <div className="mt-1 text-sm font-semibold text-white">{v}</div>
+      <div className="mt-0.5 text-xs text-white/50">{sub}</div>
+    </div>
+  );
+}
+
+function formatStatMoney(usd: number): string {
+  if (usd >= 1_000_000) return `$${(usd / 1_000_000).toFixed(1)}M`;
+  if (usd >= 10_000) return `$${(usd / 1000).toFixed(0)}K`;
+  return formatUSD(usd);
 }

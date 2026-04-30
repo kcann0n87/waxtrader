@@ -47,7 +47,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-white/5">
         <div className="mx-auto max-w-7xl px-4 py-4 text-[11px] text-white/30">
-          © {new Date().getFullYear()} WaxDepot · Demo build
+          © {new Date().getFullYear()} WaxDepot · waxdepot.io
         </div>
       </div>
     </footer>

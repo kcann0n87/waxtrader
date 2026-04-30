@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "wire-images": "node scripts/wire-images.mjs"
+    "wire-images": "node scripts/wire-images.mjs",
+    "wipe-fake-data": "node --env-file=.env.local scripts/wipe-fake-data.mjs"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.3.1",

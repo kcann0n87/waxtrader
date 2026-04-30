@@ -124,6 +124,100 @@ export async function getRecentSales(
   }));
 }
 
+/**
+ * Returns the N most recent sales across the whole marketplace, joined with
+ * the SKU for display. Used by the live "tape" on the homepage.
+ */
+export async function getRecentSalesGlobal(limit = 8): Promise<
+  {
+    id: string;
+    soldAt: string;
+    price: number;
+    sku: { slug: string; year: number; brand: string; product: string; gradient_from: string | null; gradient_to: string | null } | null;
+  }[]
+> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("sales")
+      .select(
+        "id, sold_at, price_cents, sku:skus!sales_sku_id_fkey(slug, year, brand, product, gradient_from, gradient_to)",
+      )
+      .order("sold_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []).map((r) => {
+      const skuRel = Array.isArray(r.sku) ? r.sku[0] : r.sku;
+      return {
+        id: r.id as string,
+        soldAt: r.sold_at as string,
+        price: (r.price_cents as number) / 100,
+        sku: (skuRel as {
+          slug: string;
+          year: number;
+          brand: string;
+          product: string;
+          gradient_from: string | null;
+          gradient_to: string | null;
+        } | null) ?? null,
+      };
+    });
+  } catch (e) {
+    console.error("getRecentSalesGlobal failed:", e);
+    return [];
+  }
+}
+
+/**
+ * Aggregate marketplace stats for the hero banner. Returns null fields when
+ * the threshold isn't met (homepage will hide the stats block in that case).
+ */
+export async function getMarketplaceStats(): Promise<{
+  escrowUsd: number | null;
+  sellerCount: number | null;
+  positivePct: number | null;
+}> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    return { escrowUsd: null, sellerCount: null, positivePct: null };
+  }
+  try {
+    const supabase = await createClient();
+    const [escrowRes, sellersRes, reviewsRes] = await Promise.all([
+      supabase
+        .from("orders")
+        .select("total_cents")
+        .in("status", ["Charged", "InEscrow", "Shipped", "Delivered"])
+        .eq("payment_status", "paid"),
+      supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("stripe_charges_enabled", true),
+      supabase.from("reviews").select("verdict"),
+    ]);
+
+    const escrowCents = (escrowRes.data ?? []).reduce(
+      (sum: number, r) => sum + (r.total_cents as number),
+      0,
+    );
+    const sellerCount = sellersRes.count ?? 0;
+    const reviewRows = (reviewsRes.data ?? []) as { verdict: string }[];
+    const totalReviews = reviewRows.length;
+    const positiveReviews = reviewRows.filter((r) => r.verdict === "positive").length;
+    const positivePct = totalReviews > 0 ? (positiveReviews / totalReviews) * 100 : null;
+
+    // Hide each stat unless it's meaningful enough to show without embarrassment.
+    return {
+      escrowUsd: escrowCents > 0 ? escrowCents / 100 : null,
+      sellerCount: sellerCount >= 3 ? sellerCount : null,
+      positivePct: totalReviews >= 10 ? positivePct : null,
+    };
+  } catch (e) {
+    console.error("getMarketplaceStats failed:", e);
+    return { escrowUsd: null, sellerCount: null, positivePct: null };
+  }
+}
+
 export async function getActiveBidsForSku(skuId: string, limit = 20) {
   const supabase = await createClient();
   const { data, error } = await supabase
