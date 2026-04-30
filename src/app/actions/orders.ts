@@ -265,6 +265,145 @@ export async function markShipped(formData: FormData): Promise<ActionResult> {
   }
 }
 
+/**
+ * Seller (or buyer) action: mark a Shipped order as Delivered. Starts the
+ * 2-day auto-release timer (the /api/cron/auto-release job picks up
+ * Delivered orders past 2 days and triggers Stripe Transfer).
+ *
+ * Buyers can short-circuit by clicking Confirm delivery (confirmDelivery
+ * below) which releases funds immediately.
+ */
+export async function markDelivered(formData: FormData): Promise<ActionResult> {
+  const orderId = String(formData.get("orderId") || "").trim();
+  if (!orderId) return { error: "Missing order id." };
+
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { error: "You must be signed in." };
+
+    const { data: order } = await supabase
+      .from("orders")
+      .select(
+        "id, buyer_id, seller_id, status, sku:skus!orders_sku_id_fkey(year, brand, product)",
+      )
+      .eq("id", orderId)
+      .maybeSingle();
+    if (!order) return { error: "Order not found." };
+    if (order.buyer_id !== user.id && order.seller_id !== user.id)
+      return { error: "Not your order." };
+    if (order.status !== "Shipped")
+      return { error: `Order is ${order.status} — can't mark delivered.` };
+
+    const now = new Date().toISOString();
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: "Delivered", delivered_at: now })
+      .eq("id", orderId);
+    if (error) throw error;
+
+    const skuRel = Array.isArray(order.sku) ? order.sku[0] : order.sku;
+    const skuMeta = skuRel as { year?: number; brand?: string; product?: string } | null;
+    if (skuMeta) {
+      await supabase.from("notifications").insert({
+        user_id: order.buyer_id,
+        type: "order-delivered",
+        title: "Package delivered",
+        body: `${skuMeta.year} ${skuMeta.brand} ${skuMeta.product} marked delivered. Funds auto-release in 2 days unless you open a dispute.`,
+        href: `/account/orders/${orderId}`,
+      });
+    }
+
+    revalidatePath(`/account/orders/${orderId}`);
+    revalidatePath("/account");
+    return { ok: true };
+  } catch (e) {
+    console.error("markDelivered failed:", e);
+    return { error: "Could not mark delivered." };
+  }
+}
+
+/**
+ * Internal helper: actually fire the Stripe Transfer to release escrowed
+ * funds to the seller. Used by both buyer-initiated confirmDelivery and the
+ * /api/cron/auto-release job. Idempotent on stripe_transfer_id.
+ */
+export async function releaseOrderToSeller(orderId: string): Promise<ActionResult> {
+  try {
+    const supabase = await createClient();
+    const { data: order } = await supabase
+      .from("orders")
+      .select(
+        "id, seller_id, status, payment_status, total_cents, price_cents, stripe_charge_id, stripe_transfer_id, sku:skus!orders_sku_id_fkey(year, brand, product)",
+      )
+      .eq("id", orderId)
+      .maybeSingle();
+    if (!order) return { error: "Order not found." };
+    if (["Released", "Completed", "Canceled"].includes(order.status))
+      return { error: `Already ${order.status}.` };
+    if (order.stripe_transfer_id) return { error: "Transfer already created." };
+
+    const now = new Date().toISOString();
+    const { error: statusErr } = await supabase
+      .from("orders")
+      .update({
+        status: "Released",
+        released_at: now,
+        delivered_at: order.status === "Delivered" ? undefined : now,
+      })
+      .eq("id", orderId);
+    if (statusErr) throw statusErr;
+
+    if (stripe && order.payment_status === "paid" && order.stripe_charge_id) {
+      try {
+        const { data: seller } = await supabase
+          .from("profiles")
+          .select("stripe_account_id, stripe_charges_enabled")
+          .eq("id", order.seller_id)
+          .maybeSingle();
+        if (seller?.stripe_account_id && seller.stripe_charges_enabled) {
+          const tier: SellerTier = "Starter";
+          const feeCents = Math.round(order.price_cents * TIER_FEE[tier]);
+          const transferAmount = order.price_cents - feeCents;
+          if (transferAmount > 0) {
+            await stripe.transfers.create({
+              amount: transferAmount,
+              currency: "usd",
+              destination: seller.stripe_account_id,
+              source_transaction: order.stripe_charge_id,
+              metadata: { waxdepot_order_id: order.id },
+              description: `Payout for ${order.id} (${tier} tier · ${(TIER_FEE[tier] * 100).toFixed(0)}% fee)`,
+            });
+          }
+        }
+      } catch (e) {
+        console.error("releaseOrderToSeller transfer failed:", e);
+      }
+    }
+
+    const skuRel = Array.isArray(order.sku) ? order.sku[0] : order.sku;
+    const skuMeta = skuRel as { year?: number; brand?: string; product?: string } | null;
+    if (skuMeta) {
+      await supabase.from("notifications").insert({
+        user_id: order.seller_id,
+        type: "payout-sent",
+        title: "Funds released",
+        body: `${skuMeta.year} ${skuMeta.brand} ${skuMeta.product} · $${(order.total_cents / 100).toFixed(2)} released to your pending balance.`,
+        href: `/account/orders/${orderId}`,
+      });
+    }
+
+    revalidatePath(`/account/orders/${orderId}`);
+    revalidatePath("/account");
+    return { ok: true };
+  } catch (e) {
+    console.error("releaseOrderToSeller failed:", e);
+    return { error: "Could not release funds." };
+  }
+}
+
 export async function confirmDelivery(formData: FormData): Promise<ActionResult> {
   const orderId = String(formData.get("orderId") || "").trim();
   if (!orderId) return { error: "Missing order id." };

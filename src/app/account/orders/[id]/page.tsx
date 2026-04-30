@@ -18,6 +18,7 @@ import { payOrderAndRedirect } from "@/app/actions/stripe-checkout";
 import { CancelOrderButton } from "./cancel-order";
 import { ConfirmDeliveryButton } from "./confirm-delivery";
 import { LeaveReview } from "./leave-review";
+import { MarkDeliveredButton } from "./mark-delivered";
 import { ShipForm } from "../../listings/[id]/ship-form";
 import { formatUSDFull } from "@/lib/utils";
 
@@ -367,12 +368,33 @@ export default async function OrderDetailPage({
               ))}
             </ol>
 
-            {/* Buyer: confirm delivery once shipped */}
-            {isBuyer && order.status === "Shipped" && (
+            {/* Either party can mark delivered once shipped — kicks off the
+                2-day auto-release timer. */}
+            {order.status === "Shipped" && (
+              <MarkDeliveredButton orderId={order.id} isSeller={isSeller} />
+            )}
+
+            {/* Buyer can short-circuit by confirming immediately */}
+            {isBuyer && (order.status === "Shipped" || order.status === "Delivered") && (
               <ConfirmDeliveryButton orderId={order.id} />
             )}
-            {isBuyer && order.status === "Delivered" && (
-              <ConfirmDeliveryButton orderId={order.id} />
+
+            {/* Auto-release timer countdown */}
+            {order.status === "Delivered" && order.delivered_at && (
+              <div className="mt-2 rounded-md border border-amber-700/30 bg-amber-500/5 p-3 text-xs text-amber-200/80">
+                <strong className="text-amber-100">Delivered.</strong> Funds auto-release on{" "}
+                <strong className="text-amber-100">
+                  {new Date(
+                    new Date(order.delivered_at).getTime() + 2 * 24 * 60 * 60 * 1000,
+                  ).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </strong>{" "}
+                unless the buyer disputes.
+                {isBuyer && " Confirm now to release immediately."}
+              </div>
             )}
             {isReleased && (
               <div className="mt-2 rounded-md border border-emerald-700/40 bg-emerald-500/10 p-3 text-xs text-emerald-200">
