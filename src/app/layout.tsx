@@ -14,9 +14,52 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://waxdepot.io";
+const TITLE = "WaxDepot — The marketplace for serious collectors";
+const DESCRIPTION =
+  "Buy and sell sealed sports card boxes with the transparency of a stock market. Real bid/ask, real escrow, real provenance.";
+
 export const metadata: Metadata = {
-  title: "WaxDepot — The marketplace for serious collectors",
-  description: "Buy and sell sealed sports card boxes with the transparency of a stock market. Real bid/ask, real escrow, real provenance.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: TITLE,
+    template: "%s · WaxDepot",
+  },
+  description: DESCRIPTION,
+  applicationName: "WaxDepot",
+  keywords: [
+    "sealed sports cards",
+    "sealed wax",
+    "sports card marketplace",
+    "trading card boxes",
+    "card auction",
+    "P2P card marketplace",
+  ],
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "WaxDepot",
+    title: TITLE,
+    description: DESCRIPTION,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    creator: "@waxdepot",
+    site: "@waxdepot",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+    },
+  },
 };
 
 // The header reads auth state from cookies, so every page is dynamic.
