@@ -27,7 +27,7 @@ export default function ForgotPage() {
           <ForgotForm />
         </Suspense>
 
-        <div className="mt-6 text-center text-xs text-white/40">
+        <div className="mt-6 text-center text-xs text-white/60">
           Remember it after all?{" "}
           <Link href="/login" className="font-semibold text-amber-300 transition hover:text-amber-200">
             Back to sign in

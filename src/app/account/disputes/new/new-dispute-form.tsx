@@ -157,9 +157,9 @@ export function NewDisputeForm({ orderId }: { orderId: string }) {
           onChange={(e) => setDescription(e.target.value)}
           rows={5}
           placeholder="What did you receive? What did you expect? Timeline, condition, packaging — the more detail, the faster support can resolve."
-          className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+          className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
         />
-        <div className="mt-1 flex justify-between text-[11px] text-white/40">
+        <div className="mt-1 flex justify-between text-[11px] text-white/60">
           <span>
             {description.length < 30
               ? `Add at least ${30 - description.length} more characters`
@@ -218,7 +218,7 @@ export function NewDisputeForm({ orderId }: { orderId: string }) {
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 text-[11px] text-white/40">
+        <div className="flex items-center gap-1.5 text-[11px] text-white/60">
           <ShieldCheck size={11} className="text-emerald-400" />
           Funds stay held in escrow throughout the dispute process.
         </div>

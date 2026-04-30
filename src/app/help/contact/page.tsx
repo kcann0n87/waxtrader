@@ -143,7 +143,7 @@ export default function ContactPage() {
         >
           Send to support
         </button>
-        <p className="text-center text-[11px] text-white/40">
+        <p className="text-center text-[11px] text-white/60">
           By submitting, you agree to our support terms. Don&apos;t send card numbers, passwords, or
           full SSN.
         </p>
@@ -178,8 +178,8 @@ function Field({
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="rounded-lg border border-white/10 bg-[#101012] p-3">
-      <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-white/40 uppercase">
-        <span className="text-white/30">{icon}</span>
+      <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-white/60 uppercase">
+        <span className="text-white/50">{icon}</span>
         {label}
       </div>
       <div className="mt-0.5 text-base font-bold text-white">{value}</div>

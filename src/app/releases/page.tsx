@@ -59,14 +59,14 @@ export default function ReleasesPage() {
                     </div>
                     <CountdownPill days={days} />
                     <div className="hidden text-right md:block">
-                      <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">
+                      <div className="text-[10px] font-semibold tracking-wider text-white/60 uppercase">
                         {lowestAsk(sku.id) !== null ? "Presale ask" : "—"}
                       </div>
                       <div className="text-sm font-bold text-white">
                         {lowestAsk(sku.id) !== null ? formatUSD(lowestAsk(sku.id)!) : "Not listed yet"}
                       </div>
                     </div>
-                    <ChevronRight size={16} className="shrink-0 text-white/40" />
+                    <ChevronRight size={16} className="shrink-0 text-white/60" />
                   </Link>
                 </li>
               ))}
@@ -75,7 +75,7 @@ export default function ReleasesPage() {
         ))}
         {upcoming.length === 0 && (
           <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-12 text-center">
-            <Calendar className="mx-auto text-white/40" size={32} />
+            <Calendar className="mx-auto text-white/60" size={32} />
             <p className="mt-3 text-sm font-bold text-white">No upcoming releases tracked</p>
             <p className="mt-1 text-sm text-white/50">Check back soon — release calendars update weekly.</p>
           </div>
@@ -126,7 +126,7 @@ export default function ReleasesPage() {
 function Counter({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent?: boolean }) {
   return (
     <div className={`flex items-center gap-2 rounded-md border px-3 py-1.5 ${accent ? "border-amber-700/40 bg-amber-500/10" : "border-white/10 bg-[#101012]"}`}>
-      <span className={accent ? "text-amber-400" : "text-white/40"}>{icon}</span>
+      <span className={accent ? "text-amber-400" : "text-white/60"}>{icon}</span>
       <div>
         <div className={`text-xs font-semibold tracking-wider uppercase ${accent ? "text-amber-300" : "text-white/50"}`}>{label}</div>
         <div className={`text-sm font-bold ${accent ? "text-amber-100" : "text-white"}`}>{value}</div>

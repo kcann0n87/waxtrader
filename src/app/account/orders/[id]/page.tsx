@@ -278,53 +278,54 @@ export default async function OrderDetailPage({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
           {/* Product card */}
-          <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
-            <div className="flex items-start gap-4">
+          <div className="rounded-xl border border-white/10 bg-[#101012] p-4 sm:p-5">
+            <div className="flex flex-wrap items-start gap-3 sm:flex-nowrap sm:gap-4">
               <Link
                 href={`/product/${sku.slug}`}
                 className="block h-20 w-16 shrink-0 overflow-hidden rounded text-[8px] font-bold text-white"
                 style={{
                   background: `linear-gradient(135deg, ${sku.gradient_from ?? "#475569"}, ${sku.gradient_to ?? "#0f172a"})`,
                 }}
+                aria-label={`View ${sku.year} ${sku.brand} ${sku.product}`}
               >
                 <div className="flex h-full items-center justify-center">
                   {sku.brand.slice(0, 4).toUpperCase()}
                 </div>
               </Link>
-              <div className="flex-1">
+              <div className="min-w-0 flex-1">
                 <Link
                   href={`/product/${sku.slug}`}
-                  className="text-base font-bold text-white transition hover:text-amber-300"
+                  className="text-sm font-bold text-white transition hover:text-amber-300 sm:text-base"
                 >
                   {sku.year} {sku.brand} {sku.product}
                 </Link>
-                <div className="text-xs text-white/50">
+                <div className="text-xs text-white/60">
                   {sku.sport} · Factory Sealed · Qty {order.qty}
-                </div>
-                <div className="mt-3 grid grid-cols-3 gap-3 text-xs">
-                  <Spec label="Item" value={formatUSDFull(order.price_cents / 100)} />
-                  <Spec
-                    label="Shipping"
-                    value={
-                      order.shipping_cents === 0
-                        ? "Free"
-                        : formatUSDFull(order.shipping_cents / 100)
-                    }
-                  />
-                  <Spec label="Tax" value={formatUSDFull(order.tax_cents / 100)} />
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">
+                <div className="text-[10px] font-semibold tracking-wider text-white/60 uppercase">
                   Total
                 </div>
-                <div className="font-display text-xl font-black text-amber-400">
+                <div className="font-display text-lg font-black text-amber-400 sm:text-xl">
                   {formatUSDFull(total)}
                 </div>
-                <div className="mt-1 text-xs text-white/50">
+                <div className="mt-1 text-[11px] text-white/60 sm:text-xs">
                   {order.card_last4 ? `Card •••${order.card_last4}` : "Payment pending"}
                 </div>
               </div>
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-3 border-t border-white/5 pt-3 text-xs">
+              <Spec label="Item" value={formatUSDFull(order.price_cents / 100)} />
+              <Spec
+                label="Shipping"
+                value={
+                  order.shipping_cents === 0
+                    ? "Free"
+                    : formatUSDFull(order.shipping_cents / 100)
+                }
+              />
+              <Spec label="Tax" value={formatUSDFull(order.tax_cents / 100)} />
             </div>
           </div>
 
@@ -343,7 +344,7 @@ export default async function OrderDetailPage({
                         <span className="relative h-2.5 w-2.5 rounded-full bg-amber-500" />
                       </div>
                     ) : (
-                      <Circle className="text-white/30" size={18} />
+                      <Circle className="text-white/50" size={18} />
                     )}
                     {i < events.length - 1 && (
                       <div
@@ -356,13 +357,13 @@ export default async function OrderDetailPage({
                   <div className="flex-1 pb-4">
                     <div
                       className={`text-sm font-semibold ${
-                        e.state === "pending" ? "text-white/40" : "text-white"
+                        e.state === "pending" ? "text-white/60" : "text-white"
                       }`}
                     >
                       {e.label}
                     </div>
                     {e.detail && <div className="mt-0.5 text-xs text-white/50">{e.detail}</div>}
-                    {e.ts && <div className="mt-0.5 text-[11px] text-white/40">{e.ts}</div>}
+                    {e.ts && <div className="mt-0.5 text-[11px] text-white/60">{e.ts}</div>}
                   </div>
                 </li>
               ))}
@@ -471,7 +472,7 @@ export default async function OrderDetailPage({
                   {existingReview.text}
                 </p>
               )}
-              <div className="mt-2 text-[11px] text-white/40">
+              <div className="mt-2 text-[11px] text-white/60">
                 Posted {new Date(existingReview.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
               </div>
             </div>
@@ -482,7 +483,7 @@ export default async function OrderDetailPage({
           {/* Shipping address */}
           <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
             <div className="mb-3 flex items-center gap-2 text-sm font-bold text-white">
-              <MapPin size={16} className="text-white/40" />
+              <MapPin size={16} className="text-white/60" />
               Shipping to
             </div>
             {addressPending ? (
@@ -504,14 +505,14 @@ export default async function OrderDetailPage({
           {order.tracking && (
             <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
               <div className="mb-3 flex items-center gap-2 text-sm font-bold text-white">
-                <Truck size={16} className="text-white/40" />
+                <Truck size={16} className="text-white/60" />
                 Tracking
               </div>
               <div className="text-xs text-white/50">{order.carrier}</div>
               <div className="font-mono text-sm font-semibold text-white">{order.tracking}</div>
               {order.estimated_delivery && (
                 <div className="mt-3 flex items-center gap-1.5 text-xs text-white/60">
-                  <Clock size={12} className="text-white/40" />
+                  <Clock size={12} className="text-white/60" />
                   Est. delivery {formatDate(order.estimated_delivery)}
                 </div>
               )}
@@ -611,7 +612,7 @@ function StatusBadge({ status, isBuyer }: { status: OrderStatus; isBuyer: boolea
 function Spec({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">{label}</dt>
+      <dt className="text-[10px] font-semibold tracking-wider text-white/60 uppercase">{label}</dt>
       <dd className="text-sm font-semibold text-white">{value}</dd>
     </div>
   );

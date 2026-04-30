@@ -33,7 +33,7 @@ export default async function SearchPage({
     <div className="mx-auto max-w-7xl px-4 py-8 lg:px-6">
       <form action="/search" method="get" className="relative mb-8">
         <Search
-          className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-white/30"
+          className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-white/50"
           size={18}
         />
         <input
@@ -41,7 +41,7 @@ export default async function SearchPage({
           defaultValue={q}
           autoFocus
           placeholder='Search "2025 Bowman Hobby" or "Prizm Football"'
-          className="w-full rounded-lg border border-white/10 bg-white/5 py-3.5 pr-3 pl-11 text-base text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none"
+          className="w-full rounded-lg border border-white/10 bg-white/5 py-3.5 pr-3 pl-11 text-base text-white placeholder:text-white/50 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none"
         />
       </form>
 
@@ -152,7 +152,7 @@ function Facet({
                 }`}
               >
                 <span>{value}</span>
-                <span className={`text-xs ${isActive ? "text-amber-300/70" : "text-white/40"}`}>
+                <span className={`text-xs ${isActive ? "text-amber-300/70" : "text-white/60"}`}>
                   {count}
                 </span>
               </Link>

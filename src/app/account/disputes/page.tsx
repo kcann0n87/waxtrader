@@ -177,7 +177,7 @@ function Stat({
       <div className="font-display mt-1.5 text-2xl font-black tracking-tight text-white">
         {value}
       </div>
-      <div className="text-xs text-white/40">{sub}</div>
+      <div className="text-xs text-white/60">{sub}</div>
     </div>
   );
 }

@@ -107,7 +107,7 @@ export function SettingsClient({
               className={`${input} cursor-not-allowed opacity-60`}
               type="email"
             />
-            <p className="mt-1 text-[11px] text-white/40">
+            <p className="mt-1 text-[11px] text-white/60">
               To change your email, contact support.
             </p>
           </Field>
@@ -163,7 +163,7 @@ export function SettingsClient({
                 )}
                 <button
                   onClick={() => setAddresses((arr) => arr.filter((x) => x.id !== a.id))}
-                  className="rounded-md p-1.5 text-white/40 hover:bg-rose-500/10 hover:text-rose-400"
+                  className="rounded-md p-1.5 text-white/60 hover:bg-rose-500/10 hover:text-rose-400"
                   aria-label="Delete"
                 >
                   <Trash2 size={13} />
@@ -182,7 +182,7 @@ export function SettingsClient({
         icon={<CreditCard size={16} />}
         title="Payment methods"
         subtitle="Cards on file"
-        right={<Lock size={11} className="text-white/40" />}
+        right={<Lock size={11} className="text-white/60" />}
       >
         <ul className="divide-y divide-white/5 rounded-lg border border-white/10">
           {cards.map((c) => (
@@ -212,7 +212,7 @@ export function SettingsClient({
                 )}
                 <button
                   onClick={() => setCards((arr) => arr.filter((x) => x.id !== c.id))}
-                  className="rounded-md p-1.5 text-white/40 hover:bg-rose-500/10 hover:text-rose-400"
+                  className="rounded-md p-1.5 text-white/60 hover:bg-rose-500/10 hover:text-rose-400"
                   aria-label="Delete"
                 >
                   <Trash2 size={13} />
@@ -262,7 +262,7 @@ export function SettingsClient({
 }
 
 const input =
-  "w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20";
+  "w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/50 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20";
 
 function Section({
   icon,
@@ -289,7 +289,7 @@ function Section({
             <p className="text-xs text-white/50">{subtitle}</p>
           </div>
         </div>
-        {right && <div className="text-xs text-white/40">{right}</div>}
+        {right && <div className="text-xs text-white/60">{right}</div>}
       </div>
       {children}
     </section>

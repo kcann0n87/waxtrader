@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, Loader2, ShieldCheck, X } from "lucide-react";
@@ -39,6 +39,16 @@ export function BuyBidActions({
     setBidError(null);
   };
   const bidNum = parseFloat(bidAmount) || 0;
+
+  // Close modal on Escape so keyboard users can dismiss it.
+  useEffect(() => {
+    if (mode === "closed") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mode]);
 
   const submitBid = (price: number, days: number, onSuccess: () => void) => {
     setBidError(null);
@@ -126,13 +136,15 @@ export function BuyBidActions({
           <span>Seller fee ({CURRENT_USER_TIER} tier)</span>
           <span className="font-semibold text-amber-300">{(FEE_RATE * 100).toFixed(0)}% flat</span>
         </div>
-        <div className="text-[10px] text-white/40">No buyer fees · payment processing absorbed</div>
+        <div className="text-[10px] text-white/60">No buyer fees · payment processing absorbed</div>
       </div>
 
       {mode !== "closed" && (
         <div
           className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4"
           onClick={close}
+          role="dialog"
+          aria-modal="true"
         >
           <div
             className="w-full max-w-md rounded-xl bg-[#101012] shadow-xl"
@@ -198,7 +210,7 @@ export function BuyBidActions({
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div className="px-2">
-      <div className="text-[10px] font-semibold tracking-[0.15em] text-white/40 uppercase">
+      <div className="text-[10px] font-semibold tracking-[0.15em] text-white/60 uppercase">
         {label}
       </div>
       <div
@@ -216,7 +228,7 @@ function ModalHeader({ title, onClose }: { title: string; onClose: () => void })
       <h3 className="text-lg font-bold text-white">{title}</h3>
       <button
         onClick={onClose}
-        className="rounded-md p-1 text-white/40 hover:bg-white/5 hover:text-white/60"
+        className="rounded-md p-1 text-white/60 hover:bg-white/5 hover:text-white/60"
         aria-label="Close"
       >
         <X size={18} />
@@ -342,13 +354,13 @@ function BidModal({
 
         <div className="grid grid-cols-2 divide-x divide-white/10 rounded-lg border border-white/10 bg-white/[0.02] text-center">
           <div className="px-3 py-3">
-            <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">Highest Bid</div>
+            <div className="text-[10px] font-semibold tracking-wider text-white/60 uppercase">Highest Bid</div>
             <div className="mt-1 text-base font-bold text-white">
               {currentHighest !== null ? formatUSD(currentHighest) : "—"}
             </div>
           </div>
           <div className="px-3 py-3">
-            <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">Lowest Ask</div>
+            <div className="text-[10px] font-semibold tracking-wider text-white/60 uppercase">Lowest Ask</div>
             <div className="mt-1 text-base font-bold text-emerald-300">
               {lowestAsk !== null ? formatUSD(lowestAsk) : "—"}
             </div>
@@ -358,7 +370,7 @@ function BidModal({
         <label className="mt-5 block">
           <span className="text-sm font-semibold text-white/80">Your bid</span>
           <div className="relative mt-1">
-            <span className="absolute top-1/2 left-3 -translate-y-1/2 text-white/40">$</span>
+            <span className="absolute top-1/2 left-3 -translate-y-1/2 text-white/60">$</span>
             <input
               type="number"
               value={bidAmount}
@@ -441,7 +453,7 @@ function BidModal({
           </button>
         </div>
 
-        <div className="mt-3 text-[11px] text-white/40">
+        <div className="mt-3 text-[11px] text-white/60">
           Flat {(FEE_RATE * 100).toFixed(0)}% seller fee — no buyer fees, no separate processing.
           {meetsAsk && " Use Buy Now if you want to take the lowest ask immediately."}
         </div>

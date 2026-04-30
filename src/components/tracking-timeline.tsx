@@ -25,7 +25,7 @@ export function TrackingTimeline({
       <div className="mb-4 flex items-start justify-between">
         <div>
           <h2 className="flex items-center gap-2 text-base font-bold text-white">
-            <Truck size={16} className="text-white/40" />
+            <Truck size={16} className="text-white/60" />
             Shipment tracking
           </h2>
           <div className="mt-1 flex items-center gap-2 text-xs text-white/50">
@@ -79,7 +79,7 @@ export function TrackingTimeline({
                     </div>
                   )
                 ) : (
-                  <Circle className="text-white/30" size={14} fill="currentColor" />
+                  <Circle className="text-white/50" size={14} fill="currentColor" />
                 )}
                 {!isLast && <div className="mt-0.5 h-full w-px flex-1 bg-slate-200" />}
               </div>
@@ -92,11 +92,11 @@ export function TrackingTimeline({
                   >
                     {e.status}
                   </div>
-                  <div className="shrink-0 text-[11px] text-white/40">{formatDateTime(e.ts)}</div>
+                  <div className="shrink-0 text-[11px] text-white/60">{formatDateTime(e.ts)}</div>
                 </div>
                 {e.location && (
                   <div className="mt-0.5 flex items-center gap-1 text-xs text-white/50">
-                    <MapPin size={10} className="text-white/40" />
+                    <MapPin size={10} className="text-white/60" />
                     {e.location}
                   </div>
                 )}

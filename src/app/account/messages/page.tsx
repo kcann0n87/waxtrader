@@ -36,7 +36,7 @@ export default async function MessagesPage() {
 
       {conversations.length === 0 ? (
         <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-12 text-center">
-          <MessageCircle className="mx-auto text-white/40" size={32} />
+          <MessageCircle className="mx-auto text-white/60" size={32} />
           <p className="mt-3 font-display text-base font-bold text-white">No messages yet</p>
           <p className="mt-1 text-sm text-white/50">
             When you contact a seller or have an order question, the conversation lives here.
@@ -64,14 +64,14 @@ export default async function MessagesPage() {
                   <div className="flex items-baseline justify-between gap-2">
                     <div className="flex items-center gap-1.5 text-sm font-bold text-white">
                       {c.withDisplayName}
-                      <span className="text-[11px] font-normal text-white/40">@{c.withUsername}</span>
+                      <span className="text-[11px] font-normal text-white/60">@{c.withUsername}</span>
                       {c.withRole === "support" && (
                         <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-400">
                           STAFF
                         </span>
                       )}
                     </div>
-                    <span className="shrink-0 text-[11px] text-white/40">
+                    <span className="shrink-0 text-[11px] text-white/60">
                       {ago(c.lastMessageAt)}
                     </span>
                   </div>

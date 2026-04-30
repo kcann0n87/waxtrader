@@ -26,14 +26,14 @@ export function SignupForm({ next }: { next: string }) {
           Display name
         </span>
         <div className="relative">
-          <User size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/30" />
+          <User size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/50" />
           <input
             type="text"
             name="displayName"
             required
             autoComplete="nickname"
             placeholder="What should we call you?"
-            className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+            className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/50 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
       </label>
@@ -43,14 +43,14 @@ export function SignupForm({ next }: { next: string }) {
           Email
         </span>
         <div className="relative">
-          <Mail size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/30" />
+          <Mail size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/50" />
           <input
             type="email"
             name="email"
             required
             autoComplete="email"
             placeholder="you@example.com"
-            className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+            className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/50 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
       </label>
@@ -60,7 +60,7 @@ export function SignupForm({ next }: { next: string }) {
           Password
         </span>
         <div className="relative">
-          <Lock size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/30" />
+          <Lock size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/50" />
           <input
             type="password"
             name="password"
@@ -68,7 +68,7 @@ export function SignupForm({ next }: { next: string }) {
             minLength={8}
             autoComplete="new-password"
             placeholder="At least 8 characters"
-            className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+            className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/50 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
       </label>
@@ -88,7 +88,7 @@ export function SignupForm({ next }: { next: string }) {
         Create account
       </button>
 
-      <div className="text-center text-[11px] text-white/40">
+      <div className="text-center text-[11px] text-white/60">
         By creating an account you agree to our{" "}
         <a href="#" className="text-white/60 transition hover:text-amber-300">Terms</a> and{" "}
         <a href="#" className="text-white/60 transition hover:text-amber-300">Privacy Policy</a>.

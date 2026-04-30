@@ -69,7 +69,7 @@ export function ShipForm({
   return (
     <div className="rounded-md border border-white/10 bg-[#101012] p-4">
       <div className="mb-3 flex items-center gap-2 text-sm font-bold text-white">
-        <Truck size={16} className="text-white/40" />
+        <Truck size={16} className="text-white/60" />
         Mark as shipped
       </div>
       {needsShipBy && (

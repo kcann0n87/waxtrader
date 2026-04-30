@@ -31,7 +31,7 @@ export default async function HelpCategoryPage({ params }: { params: Promise<{ c
                 <div className="text-base font-semibold text-white">{a.title}</div>
                 <div className="mt-0.5 line-clamp-1 text-sm text-white/50">{a.body}</div>
               </div>
-              <ChevronRight size={18} className="shrink-0 text-white/40" />
+              <ChevronRight size={18} className="shrink-0 text-white/60" />
             </Link>
           </li>
         ))}

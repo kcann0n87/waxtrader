@@ -268,7 +268,7 @@ function Capability({ label, ok }: { label: string; ok: boolean }) {
           : "border-white/10 bg-white/[0.02] text-white/50"
       }`}
     >
-      {ok ? <Check size={11} /> : <span className="text-white/30">○</span>}
+      {ok ? <Check size={11} /> : <span className="text-white/50">○</span>}
       <span className="text-[11px] font-semibold">{label}</span>
     </div>
   );

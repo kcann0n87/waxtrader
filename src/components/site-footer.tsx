@@ -12,7 +12,7 @@ export function SiteFooter() {
               Wax<span className="text-amber-400">Depot</span>
             </span>
           </div>
-          <p className="mt-3 max-w-xs text-xs leading-relaxed text-white/40">
+          <p className="mt-3 max-w-xs text-xs leading-relaxed text-white/60">
             The marketplace for serious collectors. Real bid/ask, real escrow, no eBay tax.
           </p>
         </div>
@@ -46,7 +46,7 @@ export function SiteFooter() {
         />
       </div>
       <div className="border-t border-white/5">
-        <div className="mx-auto max-w-7xl px-4 py-4 text-[11px] text-white/30">
+        <div className="mx-auto max-w-7xl px-4 py-4 text-[11px] text-white/50">
           © {new Date().getFullYear()} WaxDepot · waxdepot.io
         </div>
       </div>

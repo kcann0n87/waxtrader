@@ -24,7 +24,7 @@ export function ResetForm() {
           New password
         </span>
         <div className="relative">
-          <Lock size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/30" />
+          <Lock size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/50" />
           <input
             type="password"
             name="password"
@@ -32,7 +32,7 @@ export function ResetForm() {
             minLength={8}
             autoComplete="new-password"
             placeholder="At least 8 characters"
-            className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+            className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/50 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
       </label>
@@ -42,7 +42,7 @@ export function ResetForm() {
           Confirm password
         </span>
         <div className="relative">
-          <Lock size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/30" />
+          <Lock size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/50" />
           <input
             type="password"
             name="confirm"
@@ -50,7 +50,7 @@ export function ResetForm() {
             minLength={8}
             autoComplete="new-password"
             placeholder="Type it again"
-            className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+            className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/50 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
       </label>

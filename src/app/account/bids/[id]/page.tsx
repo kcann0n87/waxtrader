@@ -96,7 +96,7 @@ export default async function BidDetailPage({ params }: { params: Promise<{ id: 
             )}
             {ask !== null && askGap > 0 && (
               <div className="mt-2 flex items-center gap-2 text-xs text-white/50">
-                <Calendar size={12} className="text-white/40" />
+                <Calendar size={12} className="text-white/60" />
                 Buy instantly at the lowest ask: {formatUSD(ask)} ({formatUSD(askGap)} above your bid)
               </div>
             )}
@@ -157,7 +157,7 @@ function Pillar({
     accent === "indigo" ? "text-amber-400" : accent === "emerald" ? "text-emerald-300" : "text-white";
   return (
     <div className="rounded-md border border-white/10 bg-white/[0.02] p-2 text-center">
-      <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">{label}</div>
+      <div className="text-[10px] font-semibold tracking-wider text-white/60 uppercase">{label}</div>
       <div className={`mt-0.5 text-base font-bold ${tone}`}>{value}</div>
     </div>
   );

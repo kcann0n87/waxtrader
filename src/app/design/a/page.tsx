@@ -108,7 +108,7 @@ export default function DesignA() {
                   {p.change}
                 </div>
               </div>
-              <div className="mt-1 text-xs text-white/40">Last sold ${p.last}</div>
+              <div className="mt-1 text-xs text-white/60">Last sold ${p.last}</div>
             </article>
           ))}
         </div>

@@ -64,7 +64,7 @@ export default function CartPage() {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16">
         <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-12 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#101012] text-white/40">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#101012] text-white/60">
             <ShoppingBag size={24} />
           </div>
           <h1 className="mt-4 text-xl font-bold text-white">Your cart is empty</h1>
@@ -151,7 +151,7 @@ export default function CartPage() {
                             </div>
                             <button
                               onClick={() => remove(item.id)}
-                              className="inline-flex items-center gap-1 text-xs text-white/40 hover:text-rose-400"
+                              className="inline-flex items-center gap-1 text-xs text-white/60 hover:text-rose-400"
                             >
                               <Trash2 size={12} />
                               Remove
@@ -163,7 +163,7 @@ export default function CartPage() {
                             {formatUSDFull(item.price * item.qty)}
                           </div>
                           {item.qty > 1 && (
-                            <div className="text-xs text-white/40">{formatUSDFull(item.price)} ea</div>
+                            <div className="text-xs text-white/60">{formatUSDFull(item.price)} ea</div>
                           )}
                           <div className="mt-1 text-xs text-emerald-400">
                             {item.shipping === 0 ? "Free shipping" : `+${formatUSD(item.shipping)} shipping`}
@@ -203,10 +203,10 @@ export default function CartPage() {
             </div>
           </Section>
 
-          <Section icon={<CreditCard size={16} />} title="Payment" right={<Lock size={11} className="text-white/40" />}>
+          <Section icon={<CreditCard size={16} />} title="Payment" right={<Lock size={11} className="text-white/60" />}>
             <div className="rounded-lg border border-white/15 bg-[#101012] p-3">
               <div className="flex items-center gap-2">
-                <CreditCard size={16} className="text-white/40" />
+                <CreditCard size={16} className="text-white/60" />
                 <input
                   inputMode="numeric"
                   value={cardNumber}
@@ -303,9 +303,9 @@ function Section({
   return (
     <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
       <div className="mb-3 flex items-center gap-2 text-sm font-bold text-white">
-        <span className="text-white/40">{icon}</span>
+        <span className="text-white/60">{icon}</span>
         {title}
-        {right && <span className="ml-auto inline-flex items-center gap-1 text-xs text-white/40">{right} Encrypted</span>}
+        {right && <span className="ml-auto inline-flex items-center gap-1 text-xs text-white/60">{right} Encrypted</span>}
       </div>
       <div className="space-y-3">{children}</div>
     </div>

@@ -28,6 +28,16 @@ export function CartDrawer() {
     };
   }, [open]);
 
+  // Close on Escape so keyboard users can dismiss the drawer.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   return (
     <>
       <button
@@ -44,7 +54,7 @@ export function CartDrawer() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex h-screen">
+        <div className="fixed inset-0 z-50 flex h-screen" role="dialog" aria-modal="true" aria-labelledby="cart-drawer-title">
           <div className="flex-1 bg-black/70 backdrop-blur-sm" onClick={() => setOpen(false)} aria-hidden />
           <aside className="flex h-screen w-full max-w-md flex-col border-l border-white/10 bg-[#101012] shadow-2xl">
             <header className="flex items-center justify-between border-b border-white/5 px-5 py-4">
@@ -53,7 +63,7 @@ export function CartDrawer() {
                   <ShoppingBag size={12} />
                   Cart
                 </div>
-                <h2 className="font-display mt-0.5 text-xl font-black tracking-tight text-white">
+                <h2 id="cart-drawer-title" className="font-display mt-0.5 text-xl font-black tracking-tight text-white">
                   Your cart
                 </h2>
                 <p className="text-xs text-white/50">
@@ -62,7 +72,7 @@ export function CartDrawer() {
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="rounded-md p-1 text-white/40 transition hover:bg-white/5 hover:text-white"
+                className="rounded-md p-1 text-white/60 transition hover:bg-white/5 hover:text-white"
                 aria-label="Close cart"
               >
                 <X size={18} />
@@ -178,7 +188,7 @@ function CartRow({
         >
           {formatSkuTitle(sku)}
         </Link>
-        <div className="mt-0.5 text-xs text-white/40">
+        <div className="mt-0.5 text-xs text-white/60">
           {item.shipping === 0 ? "Free shipping" : `${formatUSD(item.shipping)} shipping`}
         </div>
         <div className="mt-2 flex items-center gap-2">
@@ -201,7 +211,7 @@ function CartRow({
           </div>
           <button
             onClick={onRemove}
-            className="ml-auto inline-flex items-center gap-1 text-xs text-white/40 transition hover:text-rose-400"
+            className="ml-auto inline-flex items-center gap-1 text-xs text-white/60 transition hover:text-rose-400"
           >
             <Trash2 size={12} />
             Remove
@@ -213,7 +223,7 @@ function CartRow({
           {formatUSD(item.price * item.qty)}
         </div>
         {item.qty > 1 && (
-          <div className="text-[11px] text-white/40">{formatUSD(item.price)} ea</div>
+          <div className="text-[11px] text-white/60">{formatUSD(item.price)} ea</div>
         )}
       </div>
     </div>

@@ -72,7 +72,7 @@ export default function AlertsPage() {
                     onClick={() => {
                       if (confirm("Delete this saved search?")) remove(s.id);
                     }}
-                    className="rounded-md p-1.5 text-white/40 hover:bg-rose-500/10 hover:text-rose-400"
+                    className="rounded-md p-1.5 text-white/60 hover:bg-rose-500/10 hover:text-rose-400"
                     aria-label="Delete"
                   >
                     <Trash2 size={14} />

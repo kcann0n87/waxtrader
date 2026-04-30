@@ -318,7 +318,7 @@ export default async function SellerAnalyticsPage() {
                     <div className="font-display text-sm font-black text-amber-400">
                       {formatUSD(row.revenue / 100)}
                     </div>
-                    <div className="text-[10px] text-white/40">revenue</div>
+                    <div className="text-[10px] text-white/60">revenue</div>
                   </div>
                 </li>
               ))}
@@ -418,7 +418,7 @@ function KPI({
   return (
     <div className="rounded-xl border border-white/10 bg-[#101012] p-4">
       <div className="flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.15em] text-white/50 uppercase">
-        <span className="text-white/40">{icon}</span>
+        <span className="text-white/60">{icon}</span>
         {label}
       </div>
       <div className={`font-display mt-1.5 text-2xl font-black tracking-tight ${tone}`}>
@@ -436,7 +436,7 @@ function KPI({
         </div>
       )}
       {(delta === undefined || delta === null) && (
-        <div className="mt-1 text-[11px] text-white/30">No prior data</div>
+        <div className="mt-1 text-[11px] text-white/50">No prior data</div>
       )}
     </div>
   );

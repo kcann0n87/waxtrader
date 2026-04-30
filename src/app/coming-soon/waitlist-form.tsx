@@ -45,7 +45,7 @@ export function WaitlistForm() {
         <div className="relative flex-1">
           <Mail
             size={14}
-            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/30"
+            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/50"
           />
           <input
             type="email"
@@ -54,7 +54,7 @@ export function WaitlistForm() {
             autoComplete="email"
             placeholder="you@example.com"
             disabled={pending}
-            className="w-full rounded-md border border-white/15 bg-white/5 py-3 pr-3 pl-9 text-sm text-white placeholder:text-white/30 backdrop-blur transition focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20 disabled:opacity-60"
+            className="w-full rounded-md border border-white/15 bg-white/5 py-3 pr-3 pl-9 text-sm text-white placeholder:text-white/50 backdrop-blur transition focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20 disabled:opacity-60"
           />
         </div>
         <button
@@ -73,7 +73,7 @@ export function WaitlistForm() {
         </div>
       )}
 
-      <p className="mt-2 text-center text-[11px] text-white/40">
+      <p className="mt-2 text-center text-[11px] text-white/60">
         Drop your email — we&apos;ll let you in when sellers start listing.
       </p>
     </form>

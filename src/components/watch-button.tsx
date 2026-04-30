@@ -23,7 +23,7 @@ export function WatchButton({
         }}
         aria-label={watching ? "Remove from watchlist" : "Add to watchlist"}
         className={`flex h-8 w-8 items-center justify-center rounded-full bg-[#101012]/90 backdrop-blur transition hover:bg-[#101012] ${
-          watching ? "text-rose-400" : "text-white/40 hover:text-rose-400"
+          watching ? "text-rose-400" : "text-white/60 hover:text-rose-400"
         }`}
       >
         <Heart size={16} fill={watching ? "currentColor" : "none"} />

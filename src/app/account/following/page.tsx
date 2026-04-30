@@ -90,7 +90,7 @@ export default async function FollowingPage() {
                       {s.location}
                     </span>
                   )}
-                  <span className="text-white/30">@{s.username}</span>
+                  <span className="text-white/50">@{s.username}</span>
                 </div>
                 {s.bio && <div className="mt-1 line-clamp-1 text-xs text-white/60">{s.bio}</div>}
               </div>

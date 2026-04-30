@@ -36,7 +36,7 @@ export default function HelpPage() {
         </p>
 
         <form action="/help/search" method="get" className="relative mx-auto mt-6 max-w-xl">
-          <Search className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/40" size={18} />
+          <Search className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/60" size={18} />
           <input
             name="q"
             placeholder="Search the help center"
@@ -101,7 +101,7 @@ export default function HelpPage() {
             <h3 className="text-base font-bold text-white">Contact support</h3>
             <p className="text-sm text-white/50">Get a response from a real human within 24 hours.</p>
           </div>
-          <ArrowRight size={16} className="text-white/40" />
+          <ArrowRight size={16} className="text-white/60" />
         </Link>
         <Link
           href="/account/disputes"
@@ -114,7 +114,7 @@ export default function HelpPage() {
             <h3 className="text-base font-bold text-white">Open or track a dispute</h3>
             <p className="text-sm text-white/50">Resealed wax, wrong item, never arrived — we&apos;re on it.</p>
           </div>
-          <ArrowRight size={16} className="text-white/40" />
+          <ArrowRight size={16} className="text-white/60" />
         </Link>
       </div>
     </div>

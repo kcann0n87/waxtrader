@@ -84,7 +84,7 @@ function Item({ href, icon, label }: { href: string; icon: React.ReactNode; labe
         href={href}
         className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/[0.04] hover:text-amber-300"
       >
-        <span className="text-white/40">{icon}</span>
+        <span className="text-white/60">{icon}</span>
         {label}
       </Link>
     </li>

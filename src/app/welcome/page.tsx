@@ -72,7 +72,7 @@ export default function WelcomePage() {
               >
                 Get started <ArrowRight size={14} />
               </button>
-              <div className="mt-3 text-xs text-white/40">
+              <div className="mt-3 text-xs text-white/60">
                 Takes 60 seconds. Or{" "}
                 <Link href="/" className="text-amber-300 transition hover:text-amber-200">
                   skip and explore
@@ -109,7 +109,7 @@ export default function WelcomePage() {
                   >
                     <span className="text-3xl">{s.emoji}</span>
                     <span className="text-sm font-bold text-white">{s.label}</span>
-                    <span className="text-[10px] font-semibold tracking-[0.15em] text-white/40 uppercase">
+                    <span className="text-[10px] font-semibold tracking-[0.15em] text-white/60 uppercase">
                       {s.id}
                     </span>
                     {active && (
@@ -351,7 +351,7 @@ function NextStep({ label, href }: { label: string; href: string }) {
       className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3 text-sm font-semibold text-white transition hover:border-amber-400/40 hover:bg-amber-500/5 hover:text-amber-300"
     >
       {label}
-      <ArrowRight size={14} className="text-white/40" />
+      <ArrowRight size={14} className="text-white/60" />
     </Link>
   );
 }

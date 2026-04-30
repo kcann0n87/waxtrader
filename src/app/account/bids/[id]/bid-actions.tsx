@@ -95,7 +95,7 @@ export function BidActions({
           <div className="grid grid-cols-2 gap-3">
             <Field label="New bid">
               <div className="relative">
-                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-white/40">$</span>
+                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-white/60">$</span>
                 <input
                   type="number"
                   value={newPrice}

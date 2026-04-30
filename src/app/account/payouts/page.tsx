@@ -145,7 +145,7 @@ export default function PayoutsDashboard() {
                   <td className="px-4 py-3 font-bold text-white">{formatUSDFull(p.amount)}</td>
                   <td className="px-4 py-3 text-white/60">
                     <span className="inline-flex items-center gap-1.5">
-                      <Building2 size={12} className="text-white/40" />
+                      <Building2 size={12} className="text-white/60" />
                       •••{p.bankLast4}
                     </span>
                   </td>
@@ -205,7 +205,7 @@ function BigStat({
           {icon}
         </div>
         <div>
-          <div className="text-xs font-semibold tracking-wider text-white/40 uppercase">{label}</div>
+          <div className="text-xs font-semibold tracking-wider text-white/60 uppercase">{label}</div>
           <div className="text-2xl font-bold text-white">{value}</div>
         </div>
       </div>
@@ -254,7 +254,7 @@ function LifecycleBadge({
       <span className={`inline-flex w-fit rounded-md px-2 py-1 text-xs font-semibold ${cfg}`}>
         {lifecycleLabel(status)}
       </span>
-      {eta && <span className="text-[11px] text-white/40">{eta}</span>}
+      {eta && <span className="text-[11px] text-white/60">{eta}</span>}
     </div>
   );
 }

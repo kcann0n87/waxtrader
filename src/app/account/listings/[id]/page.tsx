@@ -209,7 +209,7 @@ export default async function ListingDetailPage({
                     — accept any to lock the sale.
                   </p>
                 </div>
-                <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">
+                <div className="text-[10px] font-semibold tracking-wider text-white/60 uppercase">
                   {bids.length} {bids.length === 1 ? "bid" : "bids"}
                 </div>
               </div>
@@ -230,7 +230,7 @@ export default async function ListingDetailPage({
                             <span className="text-sm font-bold text-white">
                               {b.buyerDisplayName}
                             </span>
-                            <span className="text-[11px] text-white/40">@{b.buyerUsername}</span>
+                            <span className="text-[11px] text-white/60">@{b.buyerUsername}</span>
                           </div>
                           <div className="mt-0.5 flex items-center gap-2 text-[11px] text-white/50">
                             <span>Placed {ago(b.createdAt)}</span>
@@ -251,7 +251,7 @@ export default async function ListingDetailPage({
                               Meets your ask
                             </div>
                           ) : (
-                            <div className="text-[10px] text-white/40">
+                            <div className="text-[10px] text-white/60">
                               {formatUSD(ask - b.priceUsd)} below ask
                             </div>
                           )}
@@ -307,11 +307,11 @@ export default async function ListingDetailPage({
 
         <aside className="space-y-4">
           <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
-            <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">
+            <div className="text-[10px] font-semibold tracking-wider text-white/60 uppercase">
               Listing ID
             </div>
             <div className="mt-0.5 font-mono text-xs font-semibold text-white">{listing.id}</div>
-            <div className="mt-3 text-[10px] font-semibold tracking-wider text-white/40 uppercase">
+            <div className="mt-3 text-[10px] font-semibold tracking-wider text-white/60 uppercase">
               SKU
             </div>
             <div className="mt-0.5 text-sm font-semibold text-white">
@@ -370,7 +370,7 @@ function Stat({
         : "text-white";
   return (
     <div>
-      <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">
+      <div className="text-[10px] font-semibold tracking-wider text-white/60 uppercase">
         {label}
       </div>
       <div className={`mt-0.5 font-display font-black ${tone}`}>{value}</div>

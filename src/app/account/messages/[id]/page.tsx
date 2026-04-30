@@ -41,7 +41,7 @@ export default async function MessageThreadPage({
               ) : (
                 <span>{convo.withDisplayName}</span>
               )}
-              <span className="text-xs font-normal text-white/40">@{convo.withUsername}</span>
+              <span className="text-xs font-normal text-white/60">@{convo.withUsername}</span>
               {convo.withRole === "support" && (
                 <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-400">
                   STAFF
@@ -96,8 +96,8 @@ export default async function MessageThreadPage({
                 >
                   {m.fromYou ? "You" : convo.withDisplayName}
                 </span>
-                <span className="text-white/40">·</span>
-                <span className="text-white/40">{formatTs(m.ts)}</span>
+                <span className="text-white/60">·</span>
+                <span className="text-white/60">{formatTs(m.ts)}</span>
               </div>
               <p className="text-sm whitespace-pre-line text-white/90">{m.text}</p>
               {m.systemEvent && (

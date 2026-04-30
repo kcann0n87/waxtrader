@@ -84,7 +84,7 @@ export function ListingActions({
           <label className="block">
             <span className="mb-1 block text-[11px] text-white/60">Price</span>
             <div className="relative">
-              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-white/40">$</span>
+              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-white/60">$</span>
               <input
                 type="number"
                 value={price}

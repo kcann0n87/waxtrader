@@ -93,7 +93,7 @@ export function RecentSalesTicker() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-semibold text-white">{formatSkuTitle(sku)}</div>
-                    <div className="text-[11px] text-white/40">{ago(sale.secondsAgo)}</div>
+                    <div className="text-[11px] text-white/60">{ago(sale.secondsAgo)}</div>
                   </div>
                   <div className="shrink-0 text-right">
                     <div className="font-display text-base font-black text-amber-400">

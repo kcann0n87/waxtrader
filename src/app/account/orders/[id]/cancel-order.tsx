@@ -92,7 +92,7 @@ export function CancelOrderButton({ orderId, total }: { orderId: string; total: 
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="rounded-md p-1 text-white/40 transition hover:bg-white/5"
+                className="rounded-md p-1 text-white/60 transition hover:bg-white/5"
                 aria-label="Close"
               >
                 <X size={16} />

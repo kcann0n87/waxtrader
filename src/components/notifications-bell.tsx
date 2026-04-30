@@ -73,8 +73,15 @@ export function NotificationsBell() {
         setOpen(false);
       }
     };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
   }, []);
 
   const onMarkRead = (id: string) => {
@@ -105,7 +112,11 @@ export function NotificationsBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-40 mt-2 w-[360px] overflow-hidden rounded-xl border border-white/10 bg-[#101012] shadow-xl shadow-black/40">
+        <div
+          role="dialog"
+          aria-label="Notifications"
+          className="absolute right-0 z-40 mt-2 w-[min(360px,calc(100vw-1.5rem))] overflow-hidden rounded-xl border border-white/10 bg-[#101012] shadow-xl shadow-black/40"
+        >
           <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
             <div>
               <div className="font-display text-base font-black text-white">Notifications</div>
@@ -148,7 +159,7 @@ export function NotificationsBell() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-2">
                         <div className="text-sm font-semibold text-white">{n.title}</div>
-                        <div className="shrink-0 text-[11px] text-white/40">{ago(n.createdAt)}</div>
+                        <div className="shrink-0 text-[11px] text-white/60">{ago(n.createdAt)}</div>
                       </div>
                       <div className="mt-0.5 line-clamp-2 text-xs text-white/60">{n.body}</div>
                     </div>

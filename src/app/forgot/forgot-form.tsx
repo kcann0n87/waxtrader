@@ -40,14 +40,14 @@ export function ForgotForm() {
           Email
         </span>
         <div className="relative">
-          <Mail size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/30" />
+          <Mail size={14} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/50" />
           <input
             type="email"
             name="email"
             required
             autoComplete="email"
             placeholder="you@example.com"
-            className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+            className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/50 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
       </label>

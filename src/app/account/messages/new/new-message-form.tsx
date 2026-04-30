@@ -53,11 +53,11 @@ export function NewMessageForm({
           }}
           rows={6}
           placeholder={`Write your message to ${targetDisplayName}...`}
-          className="w-full resize-none rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+          className="w-full resize-none rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/50 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
         />
       </label>
       <div className="mt-3 flex items-center justify-between">
-        <div className="text-[11px] text-white/40">Press ⌘↵ to send. Be respectful.</div>
+        <div className="text-[11px] text-white/60">Press ⌘↵ to send. Be respectful.</div>
         <button
           onClick={submit}
           disabled={!text.trim() || pending}

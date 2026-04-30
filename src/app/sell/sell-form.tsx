@@ -148,7 +148,7 @@ export function SellForm({
         <Card title="1. Find your product" subtitle="Search by year, brand, sport, or set">
           <div className="relative">
             <Search
-              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/40"
+              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/60"
               size={16}
             />
             <input
@@ -156,7 +156,7 @@ export function SellForm({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder='e.g. "2025 Bowman" or "Prizm"'
-              className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+              className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 text-sm text-white placeholder:text-white/50 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
             />
           </div>
 
@@ -190,7 +190,7 @@ export function SellForm({
                     {s.sport} · Last sale {s.lastSale !== null ? formatUSD(s.lastSale) : "—"}
                   </div>
                 </div>
-                <ChevronRight size={16} className="text-white/40" />
+                <ChevronRight size={16} className="text-white/60" />
               </button>
             ))}
           </div>
@@ -215,7 +215,7 @@ export function SellForm({
           <label className="mt-6 block">
             <span className="text-sm font-semibold text-white/80">Your asking price</span>
             <div className="relative mt-1">
-              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-white/40">$</span>
+              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-white/60">$</span>
               <input
                 type="number"
                 value={askPrice}
@@ -268,7 +268,7 @@ export function SellForm({
           </div>
 
           <div className="mt-6 rounded-lg border border-white/10 bg-[#101012] p-4">
-            <div className="text-xs font-semibold tracking-wider text-white/40 uppercase">
+            <div className="text-xs font-semibold tracking-wider text-white/60 uppercase">
               Your payout
             </div>
             <div className="mt-2 space-y-1.5 text-sm">
@@ -491,7 +491,7 @@ function Stat({
         : "text-white";
   return (
     <div className="px-3 py-3">
-      <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">
+      <div className="text-[10px] font-semibold tracking-wider text-white/60 uppercase">
         {label}
       </div>
       <div className={`font-display mt-1 text-base font-black ${tone}`}>{value}</div>

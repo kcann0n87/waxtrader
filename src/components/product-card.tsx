@@ -34,12 +34,12 @@ export function ProductCard({
         <div className="line-clamp-2 text-sm font-semibold tracking-tight text-white group-hover:text-amber-300">
           {formatSkuTitle(sku)}
         </div>
-        <div className="mt-1 text-[11px] tracking-wide text-white/40">
+        <div className="mt-1 text-[11px] tracking-wide text-white/60">
           {sku.sport} · {sku.brand} · {sku.year}
         </div>
         <div className="mt-3 flex items-end justify-between">
           <div>
-            <div className="text-[10px] font-semibold tracking-[0.15em] text-white/40 uppercase">
+            <div className="text-[10px] font-semibold tracking-[0.15em] text-white/60 uppercase">
               {lowestAsk !== null ? "Lowest Ask" : "Last Sale"}
             </div>
             <div className="font-display text-lg font-black tracking-tight text-amber-400">

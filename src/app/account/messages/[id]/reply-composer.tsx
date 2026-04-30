@@ -50,7 +50,7 @@ export function ReplyComposer({
           }}
           rows={2}
           placeholder={`Reply to ${withName}...`}
-          className="flex-1 resize-none rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+          className="flex-1 resize-none rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/50 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
         />
         <div className="flex flex-col gap-1.5">
           <button
@@ -64,7 +64,7 @@ export function ReplyComposer({
           <button
             type="button"
             disabled
-            className="rounded-md border border-white/15 bg-[#101012] p-2 text-white/30"
+            className="rounded-md border border-white/15 bg-[#101012] p-2 text-white/50"
             aria-label="Attach file"
             title="Attachments coming soon"
           >
@@ -72,7 +72,7 @@ export function ReplyComposer({
           </button>
         </div>
       </div>
-      <div className="mt-2 text-[11px] text-white/40">
+      <div className="mt-2 text-[11px] text-white/60">
         Press ⌘↵ to send. Be respectful — abusive messages can result in account suspension.
       </div>
     </div>

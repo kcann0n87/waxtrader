@@ -247,7 +247,7 @@ export default async function SellerStorefrontPage({
 
         {sellerListings.length === 0 ? (
           <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-12 text-center">
-            <Package className="mx-auto text-white/40" size={32} />
+            <Package className="mx-auto text-white/60" size={32} />
             <p className="font-display mt-3 text-sm font-bold text-white">No active listings</p>
             <p className="mt-1 text-sm text-white/50">
               {profile.display_name} doesn&apos;t have anything listed right now.
@@ -268,7 +268,7 @@ export default async function SellerStorefrontPage({
                   </div>
                   <div className="mt-3 flex items-end justify-between">
                     <div>
-                      <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">
+                      <div className="text-[10px] font-semibold tracking-wider text-white/60 uppercase">
                         Their ask
                       </div>
                       <div className="font-display text-base font-black text-amber-400">
@@ -312,10 +312,10 @@ export default async function SellerStorefrontPage({
                         <div className="text-sm font-bold text-white">
                           {r.reviewerDisplayName}
                         </div>
-                        <span className="text-[11px] text-white/40">@{r.reviewerUsername}</span>
+                        <span className="text-[11px] text-white/60">@{r.reviewerUsername}</span>
                         <VerdictTag verdict={r.verdict} />
                       </div>
-                      <div className="text-xs text-white/40">
+                      <div className="text-xs text-white/60">
                         {new Date(r.createdAt).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
@@ -368,7 +368,7 @@ function Stat({
   return (
     <div className="rounded-lg border border-white/10 bg-[#101012] p-3">
       <div className="flex items-center gap-1.5 text-[10px] font-semibold tracking-wider text-white/50 uppercase">
-        <span className="text-white/40">{icon}</span>
+        <span className="text-white/60">{icon}</span>
         {label}
       </div>
       <div className="mt-1 font-display text-base font-black text-white">{value}</div>

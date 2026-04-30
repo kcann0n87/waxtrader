@@ -43,7 +43,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 lg:px-6">
-      <nav className="mb-4 flex items-center gap-1.5 text-xs text-white/40">
+      <nav className="mb-4 flex items-center gap-1.5 text-xs text-white/60">
         <Link href="/" className="hover:text-white">
           All
         </Link>
@@ -124,7 +124,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     {change >= 0 ? "+" : ""}
                     {formatUSD(Math.abs(change))} ({changePct.toFixed(1)}%)
                   </span>
-                  <span className="text-xs text-white/40">7d</span>
+                  <span className="text-xs text-white/60">7d</span>
                 </div>
               </div>
               <PriceChart data={history} />
@@ -178,7 +178,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                             </Link>
                             <Link
                               href={`/account/messages/new?to=${l.seller}&sku=${sku.id}`}
-                              className="rounded-md p-1 text-white/30 transition hover:bg-white/5 hover:text-amber-300"
+                              className="rounded-md p-1 text-white/50 transition hover:bg-white/5 hover:text-amber-300"
                               aria-label={`Message ${l.seller}`}
                               title={`Message ${l.seller}`}
                             >
@@ -217,7 +217,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 Recent sales
               </h2>
               {sales.length === 0 ? (
-                <div className="rounded-md border border-dashed border-white/10 bg-white/[0.02] px-3 py-4 text-center text-xs text-white/40">
+                <div className="rounded-md border border-dashed border-white/10 bg-white/[0.02] px-3 py-4 text-center text-xs text-white/60">
                   No recorded sales yet.
                 </div>
               ) : (
@@ -249,7 +249,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 Open bids
               </h2>
               {bids.length === 0 ? (
-                <div className="rounded-md border border-dashed border-white/10 bg-white/[0.02] px-3 py-4 text-center text-xs text-white/40">
+                <div className="rounded-md border border-dashed border-white/10 bg-white/[0.02] px-3 py-4 text-center text-xs text-white/60">
                   No active bids.
                 </div>
               ) : (
@@ -290,7 +290,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 function Spec({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[10px] font-semibold tracking-[0.15em] text-white/40 uppercase">
+      <dt className="text-[10px] font-semibold tracking-[0.15em] text-white/60 uppercase">
         {label}
       </dt>
       <dd className="mt-0.5 text-sm font-semibold text-white">{value}</dd>

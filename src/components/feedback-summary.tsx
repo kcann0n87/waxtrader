@@ -18,7 +18,7 @@ export function FeedbackSummary({ username }: { username: string }) {
     <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="text-xs font-semibold tracking-wider text-white/40 uppercase">
+          <div className="text-xs font-semibold tracking-wider text-white/60 uppercase">
             Buyer feedback
           </div>
           <div className="mt-1 flex items-baseline gap-2">
@@ -69,7 +69,7 @@ export function FeedbackSummary({ username }: { username: string }) {
 function Window({ label, stats }: { label: string; stats: ReturnType<typeof feedbackStatsForSeller> }) {
   return (
     <div className="px-3 py-3">
-      <div className="text-[10px] font-semibold tracking-wider text-white/40 uppercase">{label}</div>
+      <div className="text-[10px] font-semibold tracking-wider text-white/60 uppercase">{label}</div>
       <div className={`mt-1 text-base font-bold ${tonePctColor(stats.positivePct)}`}>
         {stats.total > 0 ? `${stats.positivePct.toFixed(1)}%` : "—"}
       </div>

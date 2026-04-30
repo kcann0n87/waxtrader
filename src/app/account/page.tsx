@@ -388,7 +388,7 @@ function Stat({
   return (
     <div className="rounded-xl border border-white/10 bg-[#101012] p-4">
       <div className="flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.15em] text-white/50 uppercase">
-        <span className="text-white/30">{icon}</span>
+        <span className="text-white/50">{icon}</span>
         {label}
       </div>
       <div
@@ -396,7 +396,7 @@ function Stat({
       >
         {value}
       </div>
-      <div className="text-xs text-white/40">{sub}</div>
+      <div className="text-xs text-white/60">{sub}</div>
     </div>
   );
 }

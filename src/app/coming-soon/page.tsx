@@ -66,7 +66,7 @@ export default function ComingSoonPage() {
 
         {/* Secondary CTA — sign up early */}
         <div className="mt-6 inline-flex items-center gap-2 text-sm">
-          <span className="text-white/40">Or skip the wait —</span>
+          <span className="text-white/60">Or skip the wait —</span>
           <Link
             href="/signup"
             className="group inline-flex items-center gap-1 font-bold text-amber-300 transition hover:text-amber-200"
@@ -83,7 +83,7 @@ export default function ComingSoonPage() {
       {/* Footer band — what we're building (sneak peek) */}
       <section className="relative mx-auto w-full max-w-4xl">
         <div className="mb-3 text-center">
-          <div className="text-[10px] font-semibold tracking-[0.28em] text-white/40 uppercase">
+          <div className="text-[10px] font-semibold tracking-[0.28em] text-white/60 uppercase">
             What we&apos;re building
           </div>
         </div>
@@ -108,10 +108,10 @@ export default function ComingSoonPage() {
 
       {/* Bottom strip */}
       <footer className="relative mx-auto mt-12 flex w-full max-w-4xl flex-col items-center gap-4 border-t border-white/5 pt-6 sm:flex-row sm:justify-between">
-        <div className="text-[11px] text-white/30">
+        <div className="text-[11px] text-white/50">
           © {new Date().getFullYear()} WaxDepot · waxdepot.io
         </div>
-        <div className="flex items-center gap-5 text-[11px] font-semibold tracking-[0.18em] text-white/30 uppercase">
+        <div className="flex items-center gap-5 text-[11px] font-semibold tracking-[0.18em] text-white/50 uppercase">
           <SocialLink href="https://x.com/waxdepot" label="X" />
           <SocialLink href="https://instagram.com/waxdepot" label="IG" />
           <SocialLink href="https://tiktok.com/@waxdepot" label="TikTok" />

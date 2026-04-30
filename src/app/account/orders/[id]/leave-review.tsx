@@ -135,14 +135,14 @@ export function LeaveReview({
       <div className="mt-5">
         <label className="block">
           <span className="mb-1 block text-sm font-semibold text-white/80">
-            Comment <span className="font-normal text-white/40">(optional)</span>
+            Comment <span className="font-normal text-white/60">(optional)</span>
           </span>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={3}
             placeholder="Share what other buyers should know."
-            className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+            className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/50 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
           />
         </label>
       </div>
@@ -163,7 +163,7 @@ export function LeaveReview({
           Post feedback
         </button>
         {!canSubmit && (
-          <span className="text-[11px] text-white/40">
+          <span className="text-[11px] text-white/60">
             {!verdict ? "Pick an overall verdict" : "Rate every category"}
           </span>
         )}
