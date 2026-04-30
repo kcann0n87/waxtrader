@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { AuthMenu } from "./auth-menu";
 import { CartDrawer } from "./cart-drawer";
+import { LogoMark } from "./logo-mark";
 import { NotificationsBell } from "./notifications-bell";
 import { MobileSearch } from "./mobile-search";
 
@@ -12,9 +13,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-30 border-b border-white/5 bg-[#0a0a0b]/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3">
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-amber-400 to-amber-600 font-black text-slate-900">
-            W
-          </div>
+          <LogoMark size={32} />
           <span className="font-display text-lg font-black tracking-tight text-white">
             Wax<span className="text-amber-400">Depot</span>
           </span>
