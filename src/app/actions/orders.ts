@@ -438,6 +438,26 @@ export async function releaseOrderToSeller(orderId: string): Promise<ActionResul
       }
     }
 
+    // Record the sale in the public sales table so the homepage tape,
+    // product-page recent-sales, and price-history chart all reflect this
+    // completed transaction. Best-effort; we already shipped the funds —
+    // a failure here just delays public visibility.
+    {
+      const { data: orderForSku } = await supabase
+        .from("orders")
+        .select("sku_id")
+        .eq("id", orderId)
+        .maybeSingle();
+      if (orderForSku?.sku_id) {
+        const { error: salesErr } = await supabase.from("sales").insert({
+          sku_id: orderForSku.sku_id,
+          price_cents: order.price_cents,
+          sold_at: now,
+        });
+        if (salesErr) console.error("sales insert failed:", salesErr.message);
+      }
+    }
+
     const skuRel = Array.isArray(order.sku) ? order.sku[0] : order.sku;
     const skuMeta = skuRel as { year?: number; brand?: string; product?: string } | null;
     if (skuMeta) {
