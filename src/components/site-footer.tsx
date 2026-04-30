@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoMark } from "./logo-mark";
 
 export function SiteFooter() {
   return (
@@ -6,9 +7,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 py-12 sm:grid-cols-4">
         <div className="col-span-2 sm:col-span-1">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-amber-400 to-amber-600 font-black text-slate-900">
-              W
-            </div>
+            <LogoMark size={28} />
             <span className="font-display text-base font-black tracking-tight text-white">
               Wax<span className="text-amber-400">Depot</span>
             </span>
