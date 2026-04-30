@@ -22,6 +22,7 @@ import { MarkDeliveredButton } from "./mark-delivered";
 import { ShipForm } from "../../listings/[id]/ship-form";
 import { formatUSDFull } from "@/lib/utils";
 import { getTrackingUrl } from "@/lib/carriers";
+import { calcPayout } from "@/lib/fees";
 
 type OrderStatus =
   | "Charged"
@@ -312,7 +313,11 @@ export default async function OrderDetailPage({
                   {formatUSDFull(total)}
                 </div>
                 <div className="mt-1 text-[11px] text-white/60 sm:text-xs">
-                  {order.card_last4 ? `Card •••${order.card_last4}` : "Payment pending"}
+                  {order.card_last4
+                    ? `Card •••${order.card_last4}`
+                    : order.payment_status === "paid"
+                      ? "Paid · Stripe Checkout"
+                      : "Payment pending"}
                 </div>
               </div>
             </div>
@@ -408,8 +413,8 @@ export default async function OrderDetailPage({
                   </>
                 ) : (
                   <>
-                    Buyer confirmed delivery. ${formatUSDFull(total)} has been released to your
-                    pending balance.
+                    Funds released. {formatUSDFull(calcPayout(total))} has been transferred to your
+                    Stripe pending balance ({formatUSDFull(total)} sale minus platform fee).
                   </>
                 )}
               </div>
