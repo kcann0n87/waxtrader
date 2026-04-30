@@ -22,8 +22,14 @@ export async function POST(request: Request) {
   if (!stripe) {
     return NextResponse.json({ error: "Stripe not configured" }, { status: 503 });
   }
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!secret) {
+  // Support multiple signing secrets so the same /api/stripe/webhook URL can
+  // back two Stripe webhook registrations (one for Connected-account events,
+  // one for Platform-account events). Each registration has its own secret.
+  const secrets = [
+    process.env.STRIPE_WEBHOOK_SECRET,
+    process.env.STRIPE_WEBHOOK_SECRET_2,
+  ].filter((s): s is string => !!s);
+  if (secrets.length === 0) {
     return NextResponse.json(
       { error: "STRIPE_WEBHOOK_SECRET not configured" },
       { status: 503 },
@@ -34,11 +40,21 @@ export async function POST(request: Request) {
   const sig = (await headers()).get("stripe-signature");
   if (!sig) return NextResponse.json({ error: "Missing signature" }, { status: 400 });
 
-  let event: Stripe.Event;
-  try {
-    event = stripe.webhooks.constructEvent(body, sig, secret);
-  } catch (e) {
-    console.error("Stripe webhook signature failed:", e);
+  let event: Stripe.Event | null = null;
+  let lastError: unknown = null;
+  for (const candidate of secrets) {
+    try {
+      event = stripe.webhooks.constructEvent(body, sig, candidate);
+      break;
+    } catch (e) {
+      lastError = e;
+    }
+  }
+  if (!event) {
+    console.error(
+      "Stripe webhook signature failed for all configured secrets:",
+      lastError,
+    );
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
