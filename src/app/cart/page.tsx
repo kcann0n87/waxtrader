@@ -277,10 +277,14 @@ export default function CartPage() {
               <span>{formatUSD(total)}</span>
             </button>
 
-            <div className="mt-3 rounded-md border border-emerald-700/40 bg-emerald-500/10 p-2.5 text-[11px] text-emerald-200">
+            <Link
+              href="/help/buying/buyer-protection"
+              className="mt-3 block rounded-md border border-emerald-700/40 bg-emerald-500/10 p-2.5 text-[11px] text-emerald-200 transition hover:border-emerald-500/60 hover:bg-emerald-500/15"
+            >
               <ShieldCheck size={11} className="mr-1 inline align-text-bottom" />
               Buyer Protection on every order. Payment held in escrow until each box arrives sealed.
-            </div>
+              <span className="ml-1 underline decoration-emerald-400/40 underline-offset-2">Learn more</span>
+            </Link>
           </div>
         </aside>
       </div>

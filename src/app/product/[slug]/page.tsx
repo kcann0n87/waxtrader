@@ -128,13 +128,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   />
                 </dl>
 
-                <div className="mt-6 flex items-start gap-2 rounded-lg border border-emerald-700/30 bg-emerald-500/5 px-3 py-2.5 text-xs text-emerald-100/80">
+                <Link
+                  href="/help/buying/buyer-protection"
+                  className="mt-6 flex items-start gap-2 rounded-lg border border-emerald-700/30 bg-emerald-500/5 px-3 py-2.5 text-xs text-emerald-100/80 transition hover:border-emerald-500/50 hover:bg-emerald-500/10"
+                >
                   <ShieldCheck size={14} className="mt-0.5 shrink-0 text-emerald-400" />
                   <span>
                     <strong className="text-emerald-300">Buyer Protection:</strong> Held in escrow.
-                    Refund if your box doesn&apos;t arrive sealed.
+                    Refund if your box doesn&apos;t arrive sealed. <span className="text-emerald-300/70 underline decoration-emerald-500/30 underline-offset-2">Learn more →</span>
                   </span>
-                </div>
+                </Link>
               </div>
             </div>
           </div>

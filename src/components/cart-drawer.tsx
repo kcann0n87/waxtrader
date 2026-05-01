@@ -142,10 +142,14 @@ export function CartDrawer() {
                   <span>Checkout</span>
                   <span>{formatUSD(total)}</span>
                 </Link>
-                <div className="mt-3 flex items-center gap-1.5 text-[11px] text-white/50">
+                <Link
+                  href="/help/buying/buyer-protection"
+                  onClick={() => setOpen(false)}
+                  className="mt-3 flex items-center gap-1.5 text-[11px] text-white/50 transition hover:text-white"
+                >
                   <ShieldCheck size={12} className="text-emerald-400" />
                   Buyer Protection on every order · payment held in escrow
-                </div>
+                </Link>
               </footer>
             )}
           </aside>
