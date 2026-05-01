@@ -28,11 +28,16 @@ export function ProductImage({
       }}
     >
       {sku.imageUrl ? (
+        // object-contain (not cover) so the whole product is visible — box
+        // images come from a few sources at different aspect ratios, and
+        // cover ends up cropping heads/box-tops on portrait or wide shots.
+        // The gradient background fills any letterbox space so empty pixels
+        // look intentional rather than broken.
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={sku.imageUrl}
           alt={`${sku.brand} ${sku.set} ${sku.product}`}
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-contain p-2"
           loading="lazy"
         />
       ) : showText ? (
