@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { serviceRoleClient } from "@/lib/supabase/admin";
 import { stripe } from "@/lib/stripe";
 import { TIER_FEE, type SellerTier } from "@/lib/fees";
 import {
@@ -440,16 +441,20 @@ export async function releaseOrderToSeller(orderId: string): Promise<ActionResul
 
     // Record the sale in the public sales table so the homepage tape,
     // product-page recent-sales, and price-history chart all reflect this
-    // completed transaction. Best-effort; we already shipped the funds —
-    // a failure here just delays public visibility.
+    // completed transaction. Goes through the service-role client because
+    // the sales table has RLS with no public-insert policy — only trusted
+    // server paths (this one + the Stripe webhook) should be able to add
+    // entries to the price tape. Best-effort; we already shipped the funds
+    // so a failure here just delays public visibility of the trade.
     {
-      const { data: orderForSku } = await supabase
+      const admin = serviceRoleClient();
+      const { data: orderForSku } = await admin
         .from("orders")
         .select("sku_id")
         .eq("id", orderId)
         .maybeSingle();
       if (orderForSku?.sku_id) {
-        const { error: salesErr } = await supabase.from("sales").insert({
+        const { error: salesErr } = await admin.from("sales").insert({
           sku_id: orderForSku.sku_id,
           price_cents: order.price_cents,
           sold_at: now,

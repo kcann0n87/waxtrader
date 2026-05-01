@@ -16,9 +16,9 @@ const playfair = Playfair_Display({
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://waxdepot.io";
-const TITLE = "WaxDepot — The marketplace for serious collectors";
+const TITLE = "WaxDepot — The order book for sealed sports wax";
 const DESCRIPTION =
-  "Buy and sell sealed sports card boxes with the transparency of a stock market. Real bid/ask, real escrow, real provenance.";
+  "Buy and sell sealed NBA, MLB, NFL, and NHL boxes with stock-market transparency. Real bid/ask, real escrow, real provenance.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
