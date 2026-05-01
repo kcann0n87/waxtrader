@@ -1,21 +1,112 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Calendar, TrendingDown, TrendingUp } from "lucide-react";
 import { ProductImage } from "@/components/product-image";
-import { findBid } from "@/lib/bids";
-import { highestBid, listingsForSku, skus } from "@/lib/data";
+import { createClient } from "@/lib/supabase/server";
+import type { Sku } from "@/lib/data";
 import { BidActions } from "./bid-actions";
 import { formatSkuTitle, formatUSD, formatUSDFull } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
+type DbBidStatus = "Active" | "Won" | "Outbid" | "Expired" | "Canceled";
+
+type SkuRel = {
+  slug: string;
+  year: number;
+  brand: string;
+  set_name: string;
+  product: string;
+  sport: string;
+  description: string | null;
+  release_date: string;
+  image_url: string | null;
+  gradient_from: string | null;
+  gradient_to: string | null;
+};
+
+type BidRow = {
+  id: string;
+  sku_id: string;
+  buyer_id: string;
+  price_cents: number;
+  status: DbBidStatus;
+  expires_at: string;
+  created_at: string;
+  sku: SkuRel | SkuRel[] | null;
+};
+
 export default async function BidDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const bid = findBid(id);
-  if (!bid) notFound();
-  const sku = skus.find((s) => s.id === bid.skuId);
-  if (!sku) notFound();
 
-  const ask = listingsForSku(sku.id)[0]?.price ?? null;
-  const currentHighest = highestBid(sku.id);
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect(`/login?next=/account/bids/${id}`);
+
+  // The dashboard truncates UUIDs to 8 chars in URLs, so fetch all of the
+  // current user's bids and match by exact id or prefix. RLS already scopes
+  // writes; we additionally filter by buyer_id to enforce ownership on read.
+  const { data: candidates } = (await supabase
+    .from("bids")
+    .select(
+      "id, sku_id, buyer_id, price_cents, status, expires_at, created_at, sku:skus!bids_sku_id_fkey(slug, year, brand, set_name, product, sport, description, release_date, image_url, gradient_from, gradient_to)",
+    )
+    .eq("buyer_id", user.id)
+    .order("created_at", { ascending: false })) as { data: BidRow[] | null };
+
+  const bidRow = (candidates ?? []).find((b) => b.id === id || b.id.startsWith(id));
+  if (!bidRow) notFound();
+
+  const skuRel = Array.isArray(bidRow.sku) ? bidRow.sku[0] : bidRow.sku;
+  if (!skuRel) notFound();
+
+  const sku: Sku = {
+    id: bidRow.sku_id,
+    slug: skuRel.slug,
+    year: skuRel.year,
+    brand: skuRel.brand,
+    sport: skuRel.sport as Sku["sport"],
+    set: skuRel.set_name,
+    product: skuRel.product,
+    releaseDate: skuRel.release_date,
+    description: skuRel.description ?? "",
+    imageUrl: skuRel.image_url ?? undefined,
+    gradient: [skuRel.gradient_from ?? "#475569", skuRel.gradient_to ?? "#0f172a"],
+  };
+
+  const bid = {
+    id: bidRow.id.length > 8 ? bidRow.id.slice(0, 8) : bidRow.id,
+    skuId: bidRow.sku_id,
+    price: bidRow.price_cents / 100,
+    status: bidRow.status,
+    expiresAt: bidRow.expires_at,
+    placedAt: bidRow.created_at,
+  };
+
+  // Lowest active ask + highest active bid for market context.
+  const [askRes, highestRes] = await Promise.all([
+    supabase
+      .from("listings")
+      .select("price_cents")
+      .eq("sku_id", bidRow.sku_id)
+      .eq("status", "Active")
+      .order("price_cents", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("bids")
+      .select("price_cents")
+      .eq("sku_id", bidRow.sku_id)
+      .eq("status", "Active")
+      .order("price_cents", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  const ask = askRes.data ? askRes.data.price_cents / 100 : null;
+  const currentHighest = highestRes.data ? highestRes.data.price_cents / 100 : null;
   const youAreHighest = currentHighest !== null && bid.price >= currentHighest;
   const askGap = ask !== null ? ask - bid.price : 0;
 
@@ -163,7 +254,7 @@ function Pillar({
   );
 }
 
-function StatusBadge({ status }: { status: import("@/lib/bids").MyBid["status"] }) {
+function StatusBadge({ status }: { status: DbBidStatus }) {
   const cfg = {
     Active: "bg-amber-500/10 text-amber-400",
     Won: "bg-emerald-500/10 text-emerald-300",
@@ -177,6 +268,5 @@ function StatusBadge({ status }: { status: import("@/lib/bids").MyBid["status"] 
 }
 
 function formatDate(d: string) {
-  const [y, m, day] = d.split("-").map(Number);
-  return new Date(y, m - 1, day).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
