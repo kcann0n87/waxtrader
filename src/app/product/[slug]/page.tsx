@@ -5,6 +5,7 @@ import { AddToCartButton } from "@/components/add-to-cart-button";
 import { BuyBidActions } from "@/components/buy-bid-actions";
 import { OrderBookDepth } from "@/components/order-book-depth";
 import { PresaleBanner } from "@/components/presale-banner";
+import { ProductJsonLd } from "@/components/product-jsonld";
 import { PriceChart } from "@/components/price-chart";
 import { ProductImage } from "@/components/product-image";
 import { RecentlyViewed } from "@/components/recently-viewed";
@@ -21,6 +22,42 @@ import {
   getSkuBySlug,
 } from "@/lib/db";
 import { formatSkuTitle, formatUSD, formatUSDFull, isPresale } from "@/lib/utils";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const sku = await getSkuBySlug(slug);
+  if (!sku) {
+    return { title: "Product not found · WaxDepot" };
+  }
+  const ask = await getLowestAsk(sku.id);
+  const title = `${formatSkuTitle(sku)} · WaxDepot`;
+  const askLine = ask !== null ? `Lowest ask ${formatUSD(ask)}.` : "Track price + place a bid.";
+  const description =
+    `${formatSkuTitle(sku)} sealed ${sku.product.toLowerCase()} on the WaxDepot marketplace. ${askLine} Buyer Protection on every order.`.slice(0, 200);
+  const image = sku.imageUrl ?? "/opengraph-image";
+  return {
+    title,
+    description,
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: `/product/${sku.slug}`,
+      images: [{ url: image, alt: formatSkuTitle(sku) }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
+  };
+}
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -261,6 +298,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </div>
 
       <TrackView skuId={sku.id} />
+      <ProductJsonLd sku={sku} listings={listings} ask={ask} last={last} />
     </div>
   );
 }
