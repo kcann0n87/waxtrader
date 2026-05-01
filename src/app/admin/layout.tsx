@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { ShieldCheck, Receipt, AlertTriangle, Package2 } from "lucide-react";
+import {
+  ShieldCheck,
+  Receipt,
+  AlertTriangle,
+  Package2,
+  Users,
+  Tag,
+  ScrollText,
+} from "lucide-react";
 import { requireAdminOrNotFound } from "@/lib/admin";
 
 export default async function AdminLayout({
@@ -32,6 +40,17 @@ export default async function AdminLayout({
               href="/admin/catalog"
               icon={<Package2 size={14} />}
               label="Catalog"
+            />
+            <NavLink
+              href="/admin/listings"
+              icon={<Tag size={14} />}
+              label="Listings"
+            />
+            <NavLink href="/admin/users" icon={<Users size={14} />} label="Users" />
+            <NavLink
+              href="/admin/audit"
+              icon={<ScrollText size={14} />}
+              label="Audit log"
             />
           </nav>
           <p className="mt-3 px-2 text-[10px] leading-relaxed text-white/50">
