@@ -9,19 +9,44 @@ import { formatUSD, isPresale } from "@/lib/utils";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ sport?: string; year?: string }>;
+  searchParams: Promise<{ sport?: string; year?: string; sort?: string }>;
 }) {
-  const { sport, year } = await searchParams;
+  const { sport, year, sort } = await searchParams;
   const yearNum = year ? Number(year) : undefined;
+  const isBrowseMode = !!(sport || yearNum);
   const [all, stats] = await Promise.all([
     getCatalogWithPricing(),
     getMarketplaceStats(),
   ]);
-  const filtered = all.filter((s) => {
+  let filtered = all.filter((s) => {
     if (sport && s.sport !== sport) return false;
     if (yearNum && s.year !== yearNum) return false;
     return true;
   });
+  // Apply sort when in browse mode.
+  if (isBrowseMode) {
+    filtered = [...filtered].sort((a, b) => {
+      switch (sort) {
+        case "highest-ask":
+          return (b.lowestAsk ?? -Infinity) - (a.lowestAsk ?? -Infinity);
+        case "last-sale":
+          return (b.lastSale ?? -Infinity) - (a.lastSale ?? -Infinity);
+        case "newest":
+          return b.releaseDate.localeCompare(a.releaseDate);
+        case "oldest":
+          return a.releaseDate.localeCompare(b.releaseDate);
+        case "name-asc":
+          return a.set.localeCompare(b.set);
+        case "lowest-ask":
+        default:
+          // Lowest ask first; nulls (no listings) go last.
+          if (a.lowestAsk === null && b.lowestAsk === null) return 0;
+          if (a.lowestAsk === null) return 1;
+          if (b.lowestAsk === null) return -1;
+          return a.lowestAsk - b.lowestAsk;
+      }
+    });
+  }
   const presaleSkus = filtered.filter((s) => isPresale(s.releaseDate));
   const releasedSkus = filtered.filter((s) => !isPresale(s.releaseDate));
   const releases = presaleSkus.length > 0 ? presaleSkus.slice(0, 4) : filtered.slice(0, 4);
@@ -122,55 +147,62 @@ export default async function Home({
 
         {/* Hide "Pick back up" when sport-filtered — viewing history mixes sports
             and would surface the wrong-sport SKUs the filter is excluding. */}
-        {!sport && <RecentlyViewed />}
+        {!sport && !yearNum && <RecentlyViewed />}
 
-        {releases.length > 0 && (
-          <Section
-            id="featured"
-            eyebrow={presaleSkus.length > 0 ? "Now open" : "Open Market"}
-            title={presaleSkus.length > 0 ? "Pre-orders open" : "Tonight's book"}
-            subtitle={
-              presaleSkus.length > 0
-                ? "List early to lock the lowest ask"
-                : "Hot boxes this week"
-            }
-          >
-            <Grid>
-              {releases.map((s) => (
-                <ProductCard
-                  key={s.id}
-                  sku={s}
-                  lowestAsk={s.lowestAsk}
-                  lastSale={s.lastSale}
-                  presale={isPresale(s.releaseDate)}
-                />
-              ))}
-            </Grid>
-          </Section>
-        )}
+        {isBrowseMode ? (
+          /* BROWSE MODE: flat sortable grid of every product matching the filter. */
+          <BrowseGrid filtered={filtered} sort={sort} sport={sport} year={year} />
+        ) : (
+          <>
+            {releases.length > 0 && (
+              <Section
+                id="featured"
+                eyebrow={presaleSkus.length > 0 ? "Now open" : "Open Market"}
+                title={presaleSkus.length > 0 ? "Pre-orders open" : "Tonight's book"}
+                subtitle={
+                  presaleSkus.length > 0
+                    ? "List early to lock the lowest ask"
+                    : "Hot boxes this week"
+                }
+              >
+                <Grid>
+                  {releases.map((s) => (
+                    <ProductCard
+                      key={s.id}
+                      sku={s}
+                      lowestAsk={s.lowestAsk}
+                      lastSale={s.lastSale}
+                      presale={isPresale(s.releaseDate)}
+                    />
+                  ))}
+                </Grid>
+              </Section>
+            )}
 
-        {trending.length > 0 && (
-          <Section
-            eyebrow="Trending"
-            title="New lowest ask"
-            subtitle="Sellers just dropped prices"
-          >
-            <Grid>
-              {trending.map((s) => (
-                <ProductCard key={s.id} sku={s} lowestAsk={s.lowestAsk} lastSale={s.lastSale} />
-              ))}
-            </Grid>
-          </Section>
-        )}
+            {trending.length > 0 && (
+              <Section
+                eyebrow="Trending"
+                title="New lowest ask"
+                subtitle="Sellers just dropped prices"
+              >
+                <Grid>
+                  {trending.map((s) => (
+                    <ProductCard key={s.id} sku={s} lowestAsk={s.lowestAsk} lastSale={s.lastSale} />
+                  ))}
+                </Grid>
+              </Section>
+            )}
 
-        {justDropped.length > 0 && (
-          <Section eyebrow="Just dropped" title="Newest releases" subtitle="Hot off the printer">
-            <Grid>
-              {justDropped.map((s) => (
-                <ProductCard key={s.id} sku={s} lowestAsk={s.lowestAsk} lastSale={s.lastSale} />
-              ))}
-            </Grid>
-          </Section>
+            {justDropped.length > 0 && (
+              <Section eyebrow="Just dropped" title="Newest releases" subtitle="Hot off the printer">
+                <Grid>
+                  {justDropped.map((s) => (
+                    <ProductCard key={s.id} sku={s} lowestAsk={s.lowestAsk} lastSale={s.lastSale} />
+                  ))}
+                </Grid>
+              </Section>
+            )}
+          </>
         )}
       </div>
 
@@ -205,6 +237,95 @@ export default async function Home({
         </div>
       </section>
     </div>
+  );
+}
+
+type FilteredSku = Awaited<ReturnType<typeof getCatalogWithPricing>>[number];
+
+const SORT_OPTIONS: { value: string; label: string }[] = [
+  { value: "lowest-ask", label: "Lowest ask" },
+  { value: "highest-ask", label: "Highest ask" },
+  { value: "last-sale", label: "Last sale (high → low)" },
+  { value: "newest", label: "Newest releases" },
+  { value: "oldest", label: "Oldest releases" },
+  { value: "name-asc", label: "Name A → Z" },
+];
+
+function BrowseGrid({
+  filtered,
+  sort,
+  sport,
+  year,
+}: {
+  filtered: FilteredSku[];
+  sort?: string;
+  sport?: string;
+  year?: string;
+}) {
+  return (
+    <section className="mb-16">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <div className="text-[10px] font-semibold tracking-[0.2em] text-amber-400/80 uppercase">
+            Browse
+          </div>
+          <h2 className="font-display mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
+            {filtered.length} {filtered.length === 1 ? "product" : "products"}
+          </h2>
+        </div>
+        <form
+          action="/"
+          method="get"
+          className="flex items-center gap-2"
+        >
+          {/* Preserve current filter when sort changes */}
+          {sport && <input type="hidden" name="sport" value={sport} />}
+          {year && <input type="hidden" name="year" value={year} />}
+          <label htmlFor="browse-sort" className="text-xs text-white/60">
+            Sort by
+          </label>
+          <select
+            id="browse-sort"
+            name="sort"
+            defaultValue={sort ?? "lowest-ask"}
+            className="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white focus:border-amber-400/50 focus:outline-none"
+          >
+            {SORT_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            className="rounded-md bg-amber-400 px-3 py-1.5 text-xs font-bold text-slate-900 hover:bg-amber-300"
+          >
+            Apply
+          </button>
+        </form>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-16 text-center text-sm text-white/60">
+          No products match this filter.{" "}
+          <Link href="/" className="font-semibold text-amber-300 hover:underline">
+            Clear filter
+          </Link>
+        </div>
+      ) : (
+        <Grid>
+          {filtered.map((s) => (
+            <ProductCard
+              key={s.id}
+              sku={s}
+              lowestAsk={s.lowestAsk}
+              lastSale={s.lastSale}
+              presale={isPresale(s.releaseDate)}
+            />
+          ))}
+        </Grid>
+      )}
+    </section>
   );
 }
 
