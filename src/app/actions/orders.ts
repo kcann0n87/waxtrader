@@ -115,12 +115,17 @@ export async function acceptBid(formData: FormData): Promise<ActionResult> {
       ship_to_zip: "00000",
     };
 
-    let { error: orderErr } = await supabase.from("orders").insert(orderInsert);
+    // Cross-owner writes: order is for the buyer, bid is the buyer's,
+    // listing is the seller's, notification targets the buyer. RLS would
+    // block several of these via the regular client. Validation done.
+    const admin = serviceRoleClient();
+
+    let { error: orderErr } = await admin.from("orders").insert(orderInsert);
     if (orderErr && orderErr.code === "23505") {
       // PK collision — retry once with a new id.
       orderId = newOrderId();
       totalCents = bid.price_cents + listing.shipping_cents;
-      const retry = await supabase
+      const retry = await admin
         .from("orders")
         .insert({ ...orderInsert, id: orderId });
       orderErr = retry.error;
@@ -132,16 +137,16 @@ export async function acceptBid(formData: FormData): Promise<ActionResult> {
 
     // Mark this bid as Won; mark all OTHER active bids on this SKU at this
     // buyer's price or below as Outbid (so only one wins).
-    await supabase.from("bids").update({ status: "Won" }).eq("id", bid.id);
+    await admin.from("bids").update({ status: "Won" }).eq("id", bid.id);
 
     // Decrement listing qty or mark Sold when qty reaches 0.
     if (listing.quantity > 1) {
-      await supabase
+      await admin
         .from("listings")
         .update({ quantity: listing.quantity - 1, updated_at: new Date().toISOString() })
         .eq("id", listing.id);
     } else {
-      await supabase
+      await admin
         .from("listings")
         .update({ status: "Sold", updated_at: new Date().toISOString() })
         .eq("id", listing.id);
@@ -153,7 +158,7 @@ export async function acceptBid(formData: FormData): Promise<ActionResult> {
     const skuMeta = skuRel as { slug?: string; year?: number; brand?: string; product?: string } | null;
     if (skuMeta) {
       const productTitle = `${skuMeta.year} ${skuMeta.brand} ${skuMeta.product}`;
-      await supabase.from("notifications").insert({
+      await admin.from("notifications").insert({
         user_id: bid.buyer_id,
         type: "bid-accepted",
         title: "Bid accepted — complete payment",
@@ -215,12 +220,14 @@ export async function declineBid(formData: FormData): Promise<ActionResult> {
       .maybeSingle();
     if (!listing) return { error: "You don't have an active listing on this product." };
 
-    await supabase.from("bids").update({ status: "Outbid" }).eq("id", bid.id);
+    // Service role: seller updating buyer's bid + sending buyer a notification.
+    const admin = serviceRoleClient();
+    await admin.from("bids").update({ status: "Outbid" }).eq("id", bid.id);
 
     const skuRel = Array.isArray(bid.sku) ? bid.sku[0] : bid.sku;
     const skuMeta = skuRel as { slug?: string; year?: number; brand?: string; product?: string } | null;
     if (skuMeta) {
-      await supabase.from("notifications").insert({
+      await admin.from("notifications").insert({
         user_id: bid.buyer_id,
         type: "outbid",
         title: "Bid declined",
