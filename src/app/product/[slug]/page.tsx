@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ChevronRight, MessageCircle, ShieldCheck, TrendingDown, TrendingUp } from "lucide-react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { BuyBidActions } from "@/components/buy-bid-actions";
+import { OrderBookDepth } from "@/components/order-book-depth";
 import { PresaleBanner } from "@/components/presale-banner";
 import { PriceChart } from "@/components/price-chart";
 import { ProductImage } from "@/components/product-image";
@@ -131,14 +132,20 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
           )}
 
+          {(listings.length > 0 || bids.length > 0) && (
+            <div className="mt-6">
+              <OrderBookDepth listings={listings} bids={bids} last={last} />
+            </div>
+          )}
+
           <div className="mt-6 rounded-2xl border border-white/10 bg-[#101012] p-6">
             <div className="mb-4 flex items-end justify-between">
               <div>
                 <div className="text-[10px] font-semibold tracking-[0.18em] text-amber-400/80 uppercase">
-                  Order book
+                  Available listings
                 </div>
                 <h2 className="font-display mt-1 text-2xl font-black tracking-tight text-white">
-                  Available listings
+                  Buy now
                 </h2>
               </div>
               <span className="text-xs text-white/50">
@@ -208,66 +215,37 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             )}
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-[#101012] p-6">
-              <div className="text-[10px] font-semibold tracking-[0.18em] text-amber-400/80 uppercase">
-                Tape
-              </div>
-              <h2 className="font-display mt-1 mb-3 text-xl font-black tracking-tight text-white">
-                Recent sales
-              </h2>
-              {sales.length === 0 ? (
-                <div className="rounded-md border border-dashed border-white/10 bg-white/[0.02] px-3 py-4 text-center text-xs text-white/60">
-                  No recorded sales yet.
-                </div>
-              ) : (
-                <ul className="divide-y divide-white/5">
-                  {sales.map((s) => (
-                    <li
-                      key={s.id}
-                      className="flex items-center justify-between py-2.5 text-sm"
-                    >
-                      <span className="text-white/50">
-                        {new Date(s.date).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </span>
-                      <span className="font-display font-black text-amber-300">
-                        {formatUSDFull(s.price)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+          <div className="mt-6 rounded-2xl border border-white/10 bg-[#101012] p-6">
+            <div className="text-[10px] font-semibold tracking-[0.18em] text-amber-400/80 uppercase">
+              Tape
             </div>
-            <div className="rounded-2xl border border-white/10 bg-[#101012] p-6">
-              <div className="text-[10px] font-semibold tracking-[0.18em] text-amber-400/80 uppercase">
-                Standing
+            <h2 className="font-display mt-1 mb-3 text-xl font-black tracking-tight text-white">
+              Recent sales
+            </h2>
+            {sales.length === 0 ? (
+              <div className="rounded-md border border-dashed border-white/10 bg-white/[0.02] px-3 py-4 text-center text-xs text-white/60">
+                No recorded sales yet.
               </div>
-              <h2 className="font-display mt-1 mb-3 text-xl font-black tracking-tight text-white">
-                Open bids
-              </h2>
-              {bids.length === 0 ? (
-                <div className="rounded-md border border-dashed border-white/10 bg-white/[0.02] px-3 py-4 text-center text-xs text-white/60">
-                  No active bids.
-                </div>
-              ) : (
-                <ul className="divide-y divide-white/5">
-                  {bids.slice(0, 6).map((b) => (
-                    <li
-                      key={b.id}
-                      className="flex items-center justify-between py-2.5 text-sm"
-                    >
-                      <span className="text-white/50">{expiresIn(b.expiresAt)}</span>
-                      <span className="font-display font-black text-white">
-                        {formatUSDFull(b.price)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+            ) : (
+              <ul className="divide-y divide-white/5">
+                {sales.map((s) => (
+                  <li
+                    key={s.id}
+                    className="flex items-center justify-between py-2.5 text-sm"
+                  >
+                    <span className="text-white/50">
+                      {new Date(s.date).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                    <span className="font-display font-black text-amber-300">
+                      {formatUSDFull(s.price)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 
@@ -298,11 +276,3 @@ function Spec({ label, value }: { label: string; value: string }) {
   );
 }
 
-function expiresIn(iso: string) {
-  const diff = new Date(iso).getTime() - Date.now();
-  if (diff <= 0) return "expired";
-  const day = Math.floor(diff / (24 * 60 * 60 * 1000));
-  if (day >= 1) return `expires in ${day}d`;
-  const hr = Math.floor(diff / (60 * 60 * 1000));
-  return `expires in ${hr}h`;
-}
