@@ -205,7 +205,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                         </td>
                         <td className="px-4 py-3 text-white/60">{l.quantity}</td>
                         <td className="px-4 py-3 text-right">
-                          <AddToCartButton listing={l} size="sm" />
+                          <AddToCartButton listing={l} sku={sku} size="sm" />
                         </td>
                       </tr>
                     ))}

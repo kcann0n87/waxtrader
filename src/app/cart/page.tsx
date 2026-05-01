@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, Building2, Check, CreditCard, Lock, Minus, Plus, ShieldCheck, ShoppingBag, Trash2 } from "lucide-react";
 import { groupBySeller, useCart } from "@/lib/cart";
-import { skus } from "@/lib/data";
-import { formatSkuTitle, formatUSD, formatUSDFull } from "@/lib/utils";
+import { formatUSD, formatUSDFull } from "@/lib/utils";
 import { SkuThumb } from "@/components/sku-thumb";
 
 export default function CartPage() {
@@ -109,24 +108,31 @@ export default function CartPage() {
                 </div>
                 <ul className="divide-y divide-white/5">
                   {sellerItems.map((item) => {
-                    const sku = skus.find((s) => s.id === item.skuId);
-                    if (!sku) return null;
+                    const title = item.skuTitle ?? "Item";
+                    const slug = item.skuSlug ?? "";
+                    const sport = item.skuSport ?? "";
+                    const thumbSku = {
+                      brand: item.skuBrand ?? "WAX",
+                      imageUrl: item.skuImageUrl ?? null,
+                      gradient:
+                        item.skuGradient ?? (["#475569", "#0f172a"] as [string, string]),
+                    };
                     return (
                       <li key={item.id} className="flex gap-4 p-4">
                         <Link
-                          href={`/product/${sku.slug}`}
+                          href={`/product/${slug}`}
                           className="block h-20 w-16 shrink-0 overflow-hidden rounded"
                         >
-                          <SkuThumb sku={sku} className="h-full w-full" alt={formatSkuTitle(sku)} />
+                          <SkuThumb sku={thumbSku} className="h-full w-full" alt={title} />
                         </Link>
                         <div className="min-w-0 flex-1">
                           <Link
-                            href={`/product/${sku.slug}`}
+                            href={`/product/${slug}`}
                             className="text-sm font-bold text-white hover:text-amber-300"
                           >
-                            {formatSkuTitle(sku)}
+                            {title}
                           </Link>
-                          <div className="text-xs text-white/50">{sku.sport} · Factory Sealed</div>
+                          <div className="text-xs text-white/50">{sport} · Factory Sealed</div>
                           <div className="mt-3 flex items-center gap-3">
                             <div className="inline-flex items-center rounded-md border border-white/15">
                               <button

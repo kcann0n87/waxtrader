@@ -14,6 +14,15 @@ export type CartItem = {
   shipping: number;
   qty: number;
   addedAt: number;
+  // Display info — captured at add-to-cart time so the cart UI never has
+  // to look up the SKU by id (which fails when the SKU was added after the
+  // static `lib/data` snapshot).
+  skuTitle: string;
+  skuSlug: string;
+  skuBrand: string;
+  skuSport: string;
+  skuImageUrl: string | null;
+  skuGradient: [string, string];
 };
 
 function read(): CartItem[] {

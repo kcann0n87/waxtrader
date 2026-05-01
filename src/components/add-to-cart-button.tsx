@@ -3,13 +3,16 @@
 import { useState } from "react";
 import { Check, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart";
-import type { Listing } from "@/lib/data";
+import type { Listing, Sku } from "@/lib/data";
+import { formatSkuTitle } from "@/lib/utils";
 
 export function AddToCartButton({
   listing,
+  sku,
   size = "md",
 }: {
   listing: Listing;
+  sku: Sku;
   size?: "sm" | "md";
 }) {
   const { add } = useCart();
@@ -24,6 +27,13 @@ export function AddToCartButton({
       price: listing.price,
       shipping: listing.shipping,
       qty: 1,
+      // Snapshot SKU display fields so the cart never has to re-query them.
+      skuTitle: formatSkuTitle(sku),
+      skuSlug: sku.slug,
+      skuBrand: sku.brand,
+      skuSport: sku.sport,
+      skuImageUrl: sku.imageUrl ?? null,
+      skuGradient: sku.gradient,
     });
     setAdded(true);
     window.dispatchEvent(new Event("waxdepot:cart-open"));

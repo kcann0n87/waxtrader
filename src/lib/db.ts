@@ -105,6 +105,56 @@ export async function getLastSale(skuId: string): Promise<number | null> {
   return data ? data.price_cents / 100 : null;
 }
 
+/**
+ * Batch lowest-ask lookup for many SKUs in a single query. Returns a Map of
+ * skuId → lowest active ask in dollars (missing key = no listings). Use this
+ * instead of N parallel getLowestAsk calls anywhere a list of SKUs is shown.
+ */
+export async function getLowestAsksForSkus(
+  skuIds: string[],
+): Promise<Map<string, number>> {
+  if (skuIds.length === 0) return new Map();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("listings")
+    .select("sku_id, price_cents")
+    .in("sku_id", skuIds)
+    .eq("status", "Active");
+  if (error) throw error;
+  const out = new Map<string, number>();
+  for (const r of data ?? []) {
+    const cur = out.get(r.sku_id as string);
+    const price = (r.price_cents as number) / 100;
+    if (cur === undefined || price < cur) out.set(r.sku_id as string, price);
+  }
+  return out;
+}
+
+/**
+ * Batch last-sale lookup for many SKUs in a single query. Returns a Map of
+ * skuId → most-recent sale price in dollars.
+ */
+export async function getLastSalesForSkus(
+  skuIds: string[],
+): Promise<Map<string, number>> {
+  if (skuIds.length === 0) return new Map();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("sales")
+    .select("sku_id, price_cents, sold_at")
+    .in("sku_id", skuIds)
+    .order("sold_at", { ascending: false });
+  if (error) throw error;
+  const out = new Map<string, number>();
+  for (const r of data ?? []) {
+    // First (highest sold_at) row per sku_id wins.
+    if (!out.has(r.sku_id as string)) {
+      out.set(r.sku_id as string, (r.price_cents as number) / 100);
+    }
+  }
+  return out;
+}
+
 export async function getRecentSales(
   skuId: string,
   limit = 10,

@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Minus, Plus, ShieldCheck, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart, groupBySeller, type CartItem } from "@/lib/cart";
-import { skus } from "@/lib/data";
-import { formatSkuTitle, formatUSD, formatUSDFull } from "@/lib/utils";
+import { formatUSD, formatUSDFull } from "@/lib/utils";
 import { SkuThumb } from "./sku-thumb";
 
 export function CartDrawer() {
@@ -167,24 +166,31 @@ function CartRow({
   onRemove: () => void;
   onLinkClick: () => void;
 }) {
-  const sku = skus.find((s) => s.id === item.skuId);
-  if (!sku) return null;
+  // Display fields are snapshotted into each cart item at add-time, so the
+  // cart never has to look up the SKU.
+  const title = item.skuTitle ?? "Item";
+  const slug = item.skuSlug ?? "";
+  const thumbSku = {
+    brand: item.skuBrand ?? "WAX",
+    imageUrl: item.skuImageUrl ?? null,
+    gradient: item.skuGradient ?? (["#475569", "#0f172a"] as [string, string]),
+  };
   return (
     <div className="flex gap-3 px-5 py-3">
       <Link
-        href={`/product/${sku.slug}`}
+        href={`/product/${slug}`}
         onClick={onLinkClick}
         className="block h-16 w-12 shrink-0 overflow-hidden rounded border border-white/10"
       >
-        <SkuThumb sku={sku} className="h-full w-full" alt={formatSkuTitle(sku)} />
+        <SkuThumb sku={thumbSku} className="h-full w-full" alt={title} />
       </Link>
       <div className="min-w-0 flex-1">
         <Link
-          href={`/product/${sku.slug}`}
+          href={`/product/${slug}`}
           onClick={onLinkClick}
           className="line-clamp-2 text-sm font-semibold text-white transition hover:text-amber-300"
         >
-          {formatSkuTitle(sku)}
+          {title}
         </Link>
         <div className="mt-0.5 text-xs text-white/60">
           {item.shipping === 0 ? "Free shipping" : `${formatUSD(item.shipping)} shipping`}
