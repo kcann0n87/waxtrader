@@ -103,9 +103,11 @@ export default async function Home({
           </div>
         )}
 
-        <RecentSalesTicker />
+        <RecentSalesTicker sport={sport as import("@/lib/data").Sport | undefined} />
 
-        <RecentlyViewed />
+        {/* Hide "Pick back up" when sport-filtered — viewing history mixes sports
+            and would surface the wrong-sport SKUs the filter is excluding. */}
+        {!sport && <RecentlyViewed />}
 
         {releases.length > 0 && (
           <Section

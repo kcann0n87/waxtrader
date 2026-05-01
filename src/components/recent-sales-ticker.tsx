@@ -1,52 +1,30 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Zap } from "lucide-react";
-import { skus } from "@/lib/data";
-import { formatSkuTitle, formatUSD } from "@/lib/utils";
+import { Sport } from "@/lib/data";
+import { getRecentSalesGlobal } from "@/lib/db";
+import { formatSeasonYear, formatUSD } from "@/lib/utils";
 
-type Sale = { id: string; skuId: string; price: number; secondsAgo: number };
+/**
+ * Live "tape" of completed sales across the marketplace, server-rendered
+ * from the sales table. Returns null when there are no sales — the section
+ * disappears entirely so a brand-new marketplace doesn't fake activity.
+ *
+ * Optionally filters by sport so the NBA/MLB/etc. filtered homepages show
+ * only their own sport's recent sales.
+ */
+export async function RecentSalesTicker({ sport }: { sport?: Sport }) {
+  const all = await getRecentSalesGlobal(20);
+  // sku may be null (FK orphaned). Drop those.
+  const withSku = all.filter((s) => s.sku);
+  // We don't have sport on the sku join, so filter by SKU lookup. For
+  // simplicity the ticker shows global sales unless a sport filter is
+  // active — in which case we re-fetch per-sport via slug heuristic.
+  const filtered = sport
+    ? withSku.filter((s) => skuMatchesSport(s.sku!.slug, sport))
+    : withSku;
+  const sales = filtered.slice(0, 5);
 
-const seedSales: Sale[] = [
-  { id: "s1", skuId: "1", price: 985, secondsAgo: 14 },
-  { id: "s2", skuId: "3", price: 412, secondsAgo: 47 },
-  { id: "s3", skuId: "10", price: 109, secondsAgo: 96 },
-  { id: "s4", skuId: "5", price: 580, secondsAgo: 142 },
-  { id: "s5", skuId: "7", price: 487, secondsAgo: 198 },
-  { id: "s6", skuId: "12", price: 378, secondsAgo: 245 },
-  { id: "s7", skuId: "2", price: 718, secondsAgo: 320 },
-  { id: "s8", skuId: "9", price: 222, secondsAgo: 410 },
-];
-
-export function RecentSalesTicker() {
-  const [sales, setSales] = useState<Sale[]>(seedSales);
-  const [counter, setCounter] = useState(seedSales.length);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const sku = skus[Math.floor(Math.random() * skus.length)];
-      const variance = 0.92 + Math.random() * 0.16;
-      const basePrice =
-        { "1": 985, "2": 720, "3": 410, "4": 195, "5": 580, "6": 165, "7": 495,
-          "8": 295, "9": 220, "10": 110, "11": 1380, "12": 380 }[sku.id] || 200;
-      const price = Math.round(basePrice * variance);
-      setCounter((c) => c + 1);
-      setSales((prev) => {
-        const id = `s-live-${counter + 1}`;
-        const next: Sale = { id, skuId: sku.id, price, secondsAgo: 0 };
-        return [next, ...prev.slice(0, 9).map((s) => ({ ...s, secondsAgo: s.secondsAgo + 8 }))];
-      });
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [counter]);
-
-  useEffect(() => {
-    const tick = setInterval(() => {
-      setSales((prev) => prev.map((s) => ({ ...s, secondsAgo: s.secondsAgo + 1 })));
-    }, 1000);
-    return () => clearInterval(tick);
-  }, []);
+  if (sales.length === 0) return null;
 
   return (
     <section className="mb-12">
@@ -62,7 +40,7 @@ export function RecentSalesTicker() {
           <h2 className="font-display mt-1 text-2xl font-black tracking-tight text-white sm:text-3xl">
             The tape
           </h2>
-          <p className="text-xs text-white/50">Real-time sales across the marketplace</p>
+          <p className="text-xs text-white/60">Real-time sales across the marketplace</p>
         </div>
         <Link
           href="/search"
@@ -74,9 +52,8 @@ export function RecentSalesTicker() {
 
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#101012]">
         <ul className="divide-y divide-white/5">
-          {sales.slice(0, 5).map((sale) => {
-            const sku = skus.find((s) => s.id === sale.skuId);
-            if (!sku) return null;
+          {sales.map((sale) => {
+            const sku = sale.sku!;
             return (
               <li key={sale.id}>
                 <Link
@@ -86,14 +63,18 @@ export function RecentSalesTicker() {
                   <div
                     className="flex h-10 w-8 shrink-0 items-center justify-center rounded text-[7px] font-bold text-white"
                     style={{
-                      background: `linear-gradient(135deg, ${sku.gradient[0]}, ${sku.gradient[1]})`,
+                      background: `linear-gradient(135deg, ${sku.gradient_from ?? "#475569"}, ${sku.gradient_to ?? "#0f172a"})`,
                     }}
+                    aria-hidden
                   >
                     {sku.brand.slice(0, 4).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold text-white">{formatSkuTitle(sku)}</div>
-                    <div className="text-[11px] text-white/60">{ago(sale.secondsAgo)}</div>
+                    <div className="truncate text-sm font-semibold text-white">
+                      {formatSeasonYear(sku.year, sportFromSlug(sku.slug))} {sku.brand}{" "}
+                      {sku.product}
+                    </div>
+                    <div className="text-[11px] text-white/60">{ago(sale.soldAt)}</div>
                   </div>
                   <div className="shrink-0 text-right">
                     <div className="font-display text-base font-black text-amber-400">
@@ -114,9 +95,32 @@ export function RecentSalesTicker() {
   );
 }
 
-function ago(secondsAgo: number) {
-  if (secondsAgo < 5) return "just now";
-  if (secondsAgo < 60) return `${secondsAgo}s ago`;
-  if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
-  return `${Math.floor(secondsAgo / 3600)}h ago`;
+/**
+ * Heuristic sport detection from slug (we only have brand/product on the
+ * SKU join, not sport). Good enough for filtering and display.
+ */
+function sportFromSlug(slug: string): Sport | undefined {
+  const lower = slug.toLowerCase();
+  if (lower.includes("basketball") || lower.includes("nba")) return "NBA";
+  if (lower.includes("baseball") || lower.includes("mlb")) return "MLB";
+  if (lower.includes("football") || lower.includes("nfl")) return "NFL";
+  if (lower.includes("hockey") || lower.includes("nhl")) return "NHL";
+  if (lower.includes("pokemon")) return "Pokemon";
+  return undefined;
+}
+
+function skuMatchesSport(slug: string, sport: Sport) {
+  return sportFromSlug(slug) === sport;
+}
+
+function ago(soldAt: string) {
+  const seconds = Math.max(
+    1,
+    Math.floor((Date.now() - new Date(soldAt).getTime()) / 1000),
+  );
+  if (seconds < 5) return "just now";
+  if (seconds < 60) return `${seconds}s ago`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  return `${Math.floor(seconds / 86400)}d ago`;
 }
