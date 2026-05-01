@@ -3,7 +3,7 @@ import { updateSession } from "@/lib/supabase/middleware";
 import { createServerClient } from "@supabase/ssr";
 
 // Routes that REQUIRE auth (existing): redirect anon users here back to /login.
-const PROTECTED_PREFIXES = ["/account", "/sell", "/cart"];
+const PROTECTED_PREFIXES = ["/account", "/sell", "/cart", "/admin"];
 
 // Routes always reachable by anyone, even with the beta gate ON. Everything
 // else gets redirected to /coming-soon for anon visitors.
