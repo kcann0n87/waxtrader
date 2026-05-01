@@ -162,14 +162,19 @@ export async function getSellerDashboardUrl(): Promise<ConnectResult> {
 /**
  * Server-action wrapper that starts onboarding and redirects the browser
  * to Stripe's hosted page. Used directly as form action on a button.
+ *
+ * If onboarding-link creation fails, we redirect BACK to /sell/payouts
+ * with an error query param so the user actually sees what went wrong
+ * — silent failure (the previous behavior) just looks like a dead
+ * button and gives ops nothing to debug.
  */
 export async function startOnboardingAndRedirect() {
   const result = await startSellerOnboarding();
   if (result.onboardingUrl) {
     redirect(result.onboardingUrl);
   }
-  // If we got here without a URL, the page will show an error from the
-  // re-fetched server state.
+  const message = result.error ?? "Could not start Stripe onboarding.";
+  redirect(`/sell/payouts?stripe=error&message=${encodeURIComponent(message)}`);
 }
 
 /**
@@ -180,4 +185,6 @@ export async function openStripeDashboardAndRedirect() {
   if (result.onboardingUrl) {
     redirect(result.onboardingUrl);
   }
+  const message = result.error ?? "Could not open Stripe dashboard.";
+  redirect(`/sell/payouts?stripe=error&message=${encodeURIComponent(message)}`);
 }

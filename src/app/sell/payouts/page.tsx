@@ -20,9 +20,9 @@ import {
 export default async function PayoutsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ stripe?: string }>;
+  searchParams: Promise<{ stripe?: string; message?: string }>;
 }) {
-  const { stripe: stripeParam } = await searchParams;
+  const { stripe: stripeParam, message: errorMessage } = await searchParams;
 
   const supabase = await createClient();
   const {
@@ -69,6 +69,18 @@ export default async function PayoutsPage({
         minutes — Stripe handles bank verification + identity, we just route the
         sale proceeds to your account.
       </p>
+
+      {stripeParam === "error" && (
+        <div className="mt-6 rounded-md border border-rose-700/40 bg-rose-500/10 p-4 text-sm text-rose-100">
+          <strong className="text-rose-300">Stripe onboarding didn&apos;t start.</strong>{" "}
+          {errorMessage ?? "Something went wrong. Try again, or contact support."}
+          <p className="mt-2 text-xs text-rose-200/70">
+            If this keeps happening, the platform&apos;s Stripe Connect
+            capability may not be enabled yet. Check the Vercel function logs
+            for the exact error.
+          </p>
+        </div>
+      )}
 
       {/* Status card */}
       {!hasAccount && (
