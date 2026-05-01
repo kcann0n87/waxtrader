@@ -13,15 +13,32 @@ export function formatUSDFull(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
-export function formatSeasonYear(year: number) {
-  return year >= 2024 ? `${year}-${(year + 1).toString().slice(2)}` : String(year);
+/**
+ * Format a year for display as either "2025" or "2025-26" depending on the
+ * sport. Only NBA and NHL seasons span the calendar year boundary
+ * (Oct/Nov–Apr/Jun), so only those get the YYYY-YY treatment. MLB and NFL
+ * are referenced by start year (the World Series and Super Bowl are part
+ * of the same "season"); Pokemon and Soccer are single-year set releases.
+ */
+export function formatSeasonYear(year: number, sport?: string) {
+  const seasonSports = ["NBA", "NHL"];
+  if (sport && seasonSports.includes(sport) && year >= 2024) {
+    return `${year}-${(year + 1).toString().slice(2)}`;
+  }
+  return String(year);
 }
 
-export function formatSkuTitle(sku: { year: number; brand: string; set: string; product: string }) {
+export function formatSkuTitle(sku: {
+  year: number;
+  brand: string;
+  set: string;
+  product: string;
+  sport?: string;
+}) {
   const brandSet = sku.set.toLowerCase().startsWith(sku.brand.toLowerCase())
     ? sku.set
     : `${sku.brand} ${sku.set}`;
-  return `${formatSeasonYear(sku.year)} ${brandSet} ${sku.product}`;
+  return `${formatSeasonYear(sku.year, sku.sport)} ${brandSet} ${sku.product}`;
 }
 
 // Real time, not a pinned demo date. Earlier iterations froze "today" to
