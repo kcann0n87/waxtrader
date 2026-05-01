@@ -9,14 +9,19 @@ import { formatUSD, isPresale } from "@/lib/utils";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ sport?: string }>;
+  searchParams: Promise<{ sport?: string; year?: string }>;
 }) {
-  const { sport } = await searchParams;
+  const { sport, year } = await searchParams;
+  const yearNum = year ? Number(year) : undefined;
   const [all, stats] = await Promise.all([
     getCatalogWithPricing(),
     getMarketplaceStats(),
   ]);
-  const filtered = sport ? all.filter((s) => s.sport === sport) : all;
+  const filtered = all.filter((s) => {
+    if (sport && s.sport !== sport) return false;
+    if (yearNum && s.year !== yearNum) return false;
+    return true;
+  });
   const presaleSkus = filtered.filter((s) => isPresale(s.releaseDate));
   const releasedSkus = filtered.filter((s) => !isPresale(s.releaseDate));
   const releases = presaleSkus.length > 0 ? presaleSkus.slice(0, 4) : filtered.slice(0, 4);
@@ -94,9 +99,19 @@ export default async function Home({
       )}
 
       <div className="mx-auto max-w-7xl px-4 py-16 lg:px-6">
-        {sport && (
+        {(sport || yearNum) && (
           <div className="mb-6 text-sm text-white/50">
-            Filtered by <span className="font-semibold text-white">{sport}</span> ·{" "}
+            Filtered by{" "}
+            {sport && <span className="font-semibold text-white">{sport}</span>}
+            {sport && yearNum && " · "}
+            {yearNum && (
+              <span className="font-semibold text-white">
+                {sport && ["NBA", "NHL"].includes(sport)
+                  ? `${yearNum}-${(yearNum + 1).toString().slice(2)}`
+                  : yearNum}
+              </span>
+            )}
+            {" · "}
             <Link href="/" className="text-amber-400 hover:underline">
               clear
             </Link>

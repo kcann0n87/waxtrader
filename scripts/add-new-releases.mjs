@@ -122,8 +122,80 @@ const NEW_SKUS = [
     gradient: ["#0e7490", "#67e8f9"],
     stockx_key: "2025-Topps-Stadium-Club-Baseball-Hobby-Box",
   },
-  // ── Sports-focus expansion: premium NBA, missing Bowman Chrome ──
-  // (Pokemon SKUs intentionally not added — sports-only catalog.)
+  // ── More Topps 2025 baseball releases (Series 2, premium tier) ──
+  {
+    slug: "2025-topps-series-2-baseball-hobby-box",
+    year: 2025, brand: "Topps", set_name: "Series 2", product: "Hobby Box",
+    sport: "MLB", release_date: "2025-06-11",
+    description: "Topps Series 2 — second half of the flagship 350-card base set, plus retired-player hits.",
+    gradient: ["#dc2626", "#0f172a"],
+    stockx_key: "2025-Topps-Series-2-Baseball-Hobby-Box",
+  },
+  {
+    slug: "2025-topps-pristine-baseball-hobby-box",
+    year: 2025, brand: "Topps", set_name: "Pristine", product: "Hobby Box",
+    sport: "MLB", release_date: "2025-10-15",
+    description: "Premium baseball — all hits, no base. 8 cards including 4 autos and 4 mem.",
+    gradient: ["#0f172a", "#fbbf24"],
+    stockx_key: "2025-Topps-Pristine-Baseball-Hobby-Box",
+  },
+  {
+    slug: "2025-topps-five-star-baseball-hobby-box",
+    year: 2025, brand: "Topps", set_name: "Five Star", product: "Hobby Box",
+    sport: "MLB", release_date: "2025-11-19",
+    description: "Ultra-premium — 4 cards per pack, all on-card autos and patches.",
+    gradient: ["#7c2d12", "#fbbf24"],
+    stockx_key: "2025-Topps-Five-Star-Baseball-Hobby-Box",
+  },
+  {
+    slug: "2025-topps-tribute-baseball-hobby-box",
+    year: 2025, brand: "Topps", set_name: "Tribute", product: "Hobby Box",
+    sport: "MLB", release_date: "2025-09-03",
+    description: "High-end tribute set focused on legends + rookies. 4 autos + 2 relics per box.",
+    gradient: ["#1e40af", "#fde047"],
+    stockx_key: "2025-Topps-Tribute-Baseball-Hobby-Box",
+  },
+  {
+    slug: "2025-topps-sterling-baseball-hobby-box",
+    year: 2025, brand: "Topps", set_name: "Sterling", product: "Hobby Box",
+    sport: "MLB", release_date: "2025-12-10",
+    description: "Sterling silver-finished cards. 5 autos per box on average, all on-card.",
+    gradient: ["#475569", "#f5f5f4"],
+    stockx_key: "2025-Topps-Sterling-Baseball-Hobby-Box",
+  },
+  {
+    slug: "2025-topps-holiday-baseball-mega-box",
+    year: 2025, brand: "Topps", set_name: "Holiday", product: "Mega Box",
+    sport: "MLB", release_date: "2025-11-26",
+    description: "Walmart-exclusive holiday-themed Mega Box. Snow/metallic parallels.",
+    gradient: ["#dc2626", "#15803d"],
+    stockx_key: "2025-Topps-Holiday-Baseball-Mega-Box",
+  },
+  {
+    slug: "2025-topps-chrome-baseball-hobby-box",
+    year: 2025, brand: "Topps", set_name: "Chrome", product: "Hobby Box",
+    sport: "MLB", release_date: "2025-08-13",
+    description: "Topps Chrome flagship — chromium refractor parallels of Series 1+2 base.",
+    gradient: ["#475569", "#cbd5e1"],
+    stockx_key: "2025-Topps-Chrome-Baseball-Hobby-Box",
+  },
+  // ── 2025-26 NBA Topps additions (Cosmic Chrome already in catalog) ──
+  {
+    slug: "2025-26-topps-chrome-basketball-hobby-box",
+    year: 2025, brand: "Topps", set_name: "Chrome", product: "Hobby Box",
+    sport: "NBA", release_date: "2026-04-22",
+    description: "First-year Topps Chrome Basketball after the NBA license return. Wembanyama/Flagg refractors.",
+    gradient: ["#0f172a", "#cbd5e1"],
+    stockx_key: "2025-26-Topps-Chrome-Basketball-Hobby-Box",
+  },
+  {
+    slug: "2025-26-topps-finest-basketball-hobby-box",
+    year: 2025, brand: "Topps", set_name: "Finest", product: "Hobby Box",
+    sport: "NBA", release_date: "2026-06-17",
+    description: "Topps Finest Basketball — high-end refractors and on-card autos.",
+    gradient: ["#1e1b4b", "#fbbf24"],
+    stockx_key: "2025-26-Topps-Finest-Basketball-Hobby-Box",
+  },
   // Note: Soccer (Panini Prizm Premier League etc.) requires the DB enum
   // to include 'Soccer' first. Run this in the Supabase SQL editor:
   //   ALTER TYPE sport ADD VALUE IF NOT EXISTS 'Soccer';
