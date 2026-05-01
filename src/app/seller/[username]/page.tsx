@@ -14,6 +14,32 @@ import { ProductImage } from "@/components/product-image";
 import { FollowButton } from "@/components/follow-button";
 import { formatUSDFull } from "@/lib/utils";
 import type { Sport, Sku } from "@/lib/data";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}): Promise<Metadata> {
+  const { username } = await params;
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("display_name, bio, location, is_seller")
+    .eq("username", username.toLowerCase())
+    .maybeSingle();
+  if (!profile) return { title: "Seller not found · WaxDepot" };
+  const title = `${profile.display_name} (@${username}) · WaxDepot`;
+  const description =
+    profile.bio?.slice(0, 200) ??
+    `Sealed sports wax storefront for ${profile.display_name}${profile.location ? ` in ${profile.location}` : ""}. Buyer Protection on every order.`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "profile", url: `/seller/${username}` },
+    twitter: { card: "summary", title, description },
+  };
+}
 
 type SkuJoin = {
   id: string;

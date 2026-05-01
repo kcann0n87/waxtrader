@@ -11,6 +11,19 @@ import { formatSkuTitle, formatUSD } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Release calendar · WaxDepot",
+  description:
+    "Upcoming sealed sports wax releases — Topps, Panini, and Bowman launch dates with presale asks. Track new boxes the day they drop.",
+  openGraph: {
+    title: "Release calendar · WaxDepot",
+    description:
+      "Upcoming sealed sports wax releases. Topps, Panini, Bowman launch dates with presale asks.",
+    type: "website",
+    url: "/releases",
+  },
+};
+
 export default async function ReleasesPage() {
   const skus = await getAllSkus();
 
