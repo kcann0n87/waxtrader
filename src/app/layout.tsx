@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
+import { Analytics } from "@/components/analytics";
 import { MobileNav } from "@/components/mobile-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -71,6 +73,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-[#0a0a0b] pb-14 text-white md:pb-0">
+        {/* Analytics initializer + SPA route-change tracker. No-ops without
+            NEXT_PUBLIC_POSTHOG_KEY. Wrapped in Suspense because it reads
+            useSearchParams which Next requires inside a Suspense boundary. */}
+        <Suspense fallback={null}>
+          <Analytics />
+        </Suspense>
         <SiteHeader />
         <main id="main" tabIndex={-1} className="flex-1 outline-none">{children}</main>
         <SiteFooter />

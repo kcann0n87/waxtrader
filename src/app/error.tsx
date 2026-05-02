@@ -3,12 +3,13 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * App-wide error boundary. Caught when a server component throws during
- * render or a server action surfaces an unhandled exception. Logs once to
- * the console for ops visibility, then offers the user a retry or a way
- * back to the marketplace.
+ * render or a server action surfaces an unhandled exception. Forwards to
+ * Sentry (no-op without NEXT_PUBLIC_SENTRY_DSN), then offers the user a
+ * retry or a way back to the marketplace.
  *
  * Required to be a client component per Next's app-router error contract.
  */
@@ -21,6 +22,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error("App error boundary caught:", error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (
