@@ -20,6 +20,7 @@ import {
   getLowestAsk,
   getPriceHistoryForSku,
   getRecentSales,
+  getSalesCountForSku,
   getSkuBySlug,
 } from "@/lib/db";
 import { formatSkuTitle, formatUSD, formatUSDFull, isPresale } from "@/lib/utils";
@@ -68,7 +69,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   if (!sku) notFound();
 
   // Parallel fetch everything the page needs for this SKU.
-  const [listings, bids, history, sales, ask, bid, last] = await Promise.all([
+  const [listings, bids, history, sales, ask, bid, last, salesCount] = await Promise.all([
     getListingsForSku(sku.id),
     getActiveBidsForSku(sku.id, 20),
     getPriceHistoryForSku(sku.id, 90),
@@ -76,6 +77,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     getLowestAsk(sku.id),
     getHighestBidForSku(sku.id),
     getLastSale(sku.id),
+    getSalesCountForSku(sku.id),
   ]);
 
   const previous = history.length >= 8 ? history[history.length - 8].price : last ?? 0;
@@ -130,6 +132,20 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     })}
                   />
                 </dl>
+
+                {salesCount.lifetime > 0 && (
+                  <div className="mt-5 inline-flex flex-wrap items-center gap-2 text-xs text-white/70">
+                    <span className="inline-flex items-center gap-1 rounded-md border border-amber-700/40 bg-amber-500/[0.08] px-2 py-1 font-semibold text-amber-200">
+                      <TrendingUp size={11} />
+                      Sold {salesCount.lifetime} {salesCount.lifetime === 1 ? "time" : "times"}
+                    </span>
+                    {salesCount.trailing30 > 0 && (
+                      <span className="text-white/50">
+                        · {salesCount.trailing30} in the last 30 days
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 <Link
                   href="/help/buying/buyer-protection"

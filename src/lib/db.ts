@@ -175,6 +175,34 @@ export async function getRecentSales(
 }
 
 /**
+ * Lifetime sales count for a single SKU, plus a "trailing-30-days" velocity
+ * count for the social-proof badge on the product page ("Sold 47 times ·
+ * 12 in the last 30 days"). Single round-trip — service-role client isn't
+ * needed since the sales table is publicly readable.
+ */
+export async function getSalesCountForSku(
+  skuId: string,
+): Promise<{ lifetime: number; trailing30: number }> {
+  const supabase = await createClient();
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+  const [lifetimeRes, trailingRes] = await Promise.all([
+    supabase
+      .from("sales")
+      .select("id", { count: "exact", head: true })
+      .eq("sku_id", skuId),
+    supabase
+      .from("sales")
+      .select("id", { count: "exact", head: true })
+      .eq("sku_id", skuId)
+      .gte("sold_at", thirtyDaysAgo),
+  ]);
+  return {
+    lifetime: lifetimeRes.count ?? 0,
+    trailing30: trailingRes.count ?? 0,
+  };
+}
+
+/**
  * Returns the N most recent sales across the whole marketplace, joined with
  * the SKU for display. Used by the live "tape" on the homepage.
  */
