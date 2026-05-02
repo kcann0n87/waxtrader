@@ -4,6 +4,24 @@ import { useState } from "react";
 import { CheckCircle2, ChevronDown, ChevronUp, Circle, MapPin, Truck } from "lucide-react";
 import type { TrackingEvent } from "@/lib/orders";
 
+/**
+ * Build the carrier-specific public tracking URL. Falls back to a Google
+ * search of the tracking number for unknown carriers — better than a dead
+ * link. Returns null if we don't even have a tracking number.
+ */
+function carrierTrackingUrl(carrier: string, tracking: string): string | null {
+  if (!tracking) return null;
+  const t = encodeURIComponent(tracking);
+  const c = carrier.toLowerCase();
+  if (c.includes("usps")) return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${t}`;
+  if (c.includes("ups")) return `https://www.ups.com/track?tracknum=${t}`;
+  if (c.includes("fedex")) return `https://www.fedex.com/fedextrack/?trknbr=${t}`;
+  if (c.includes("dhl"))
+    return `https://www.dhl.com/us-en/home/tracking/tracking-express.html?submit=1&tracking-id=${t}`;
+  // Lyft of last resort.
+  return `https://www.google.com/search?q=${t}+tracking`;
+}
+
 export function TrackingTimeline({
   events,
   carrier,
@@ -32,13 +50,19 @@ export function TrackingTimeline({
             <span>{carrier}</span>
             <span>·</span>
             <span className="font-mono text-white/80">{tracking}</span>
-            <a
-              href="#"
-              className="font-semibold text-amber-300 hover:underline"
-              onClick={(e) => e.preventDefault()}
-            >
-              Track on {carrier} →
-            </a>
+            {(() => {
+              const url = carrierTrackingUrl(carrier, tracking);
+              return url ? (
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-amber-300 hover:underline"
+                >
+                  Track on {carrier} →
+                </a>
+              ) : null;
+            })()}
           </div>
         </div>
         {latest?.isDelivered ? (

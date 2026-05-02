@@ -135,9 +135,35 @@ const SECTIONS: Section[] = [
   },
 ];
 
+// Build a Schema.org FAQPage from the SECTIONS where the answer is a plain
+// string. Google can render these as rich FAQ results in search ("People
+// also ask"-style accordions on the SERP). Skips JSX-bodied answers since
+// those would need to be flattened to a single string and that loses links.
+const faqSchemaEntries = SECTIONS.flatMap((s) =>
+  s.questions
+    .filter((qa) => typeof qa.a === "string")
+    .map((qa) => ({
+      "@type": "Question",
+      name: qa.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: qa.a as string,
+      },
+    })),
+);
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqSchemaEntries,
+};
+
 export default function FaqPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-300">
           <HelpCircle size={22} />
