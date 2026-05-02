@@ -40,7 +40,11 @@ export async function generateMetadata({
   const askLine = ask !== null ? `Lowest ask ${formatUSD(ask)}.` : "Track price + place a bid.";
   const description =
     `${formatSkuTitle(sku)} sealed ${sku.product.toLowerCase()} on the WaxDepot marketplace. ${askLine} Buyer Protection on every order.`.slice(0, 200);
-  const image = sku.imageUrl ?? "/opengraph-image";
+  // openGraph.images and twitter.images are intentionally NOT set here —
+  // Next.js auto-picks up the colocated opengraph-image.tsx file and uses
+  // its rendered output (1200×630 dynamic card with box photo + price)
+  // as the OG image for this route. Setting images explicitly would
+  // override that convention and lose the dynamic price.
   return {
     title,
     description,
@@ -49,13 +53,11 @@ export async function generateMetadata({
       title,
       description,
       url: `/product/${sku.slug}`,
-      images: [{ url: image, alt: formatSkuTitle(sku) }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [image],
     },
   };
 }
