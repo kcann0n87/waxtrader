@@ -33,11 +33,13 @@ export async function generateMetadata({
   const description =
     profile.bio?.slice(0, 200) ??
     `Sealed sports wax storefront for ${profile.display_name}${profile.location ? ` in ${profile.location}` : ""}. Buyer Protection on every order.`;
+  // images is intentionally omitted — Next picks up opengraph-image.tsx
+  // colocated in this directory and renders a dynamic per-seller card.
   return {
     title,
     description,
     openGraph: { title, description, type: "profile", url: `/seller/${username}` },
-    twitter: { card: "summary", title, description },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
