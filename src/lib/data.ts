@@ -12,6 +12,10 @@ export type Sku = {
   gradient: [string, string];
   description: string;
   imageUrl?: string;
+  // Variant grouping (added in migration 0013). Optional on the type so
+  // legacy mock-data callsites compile without modification.
+  variantGroup?: string;
+  variantType?: string;
 };
 
 export type Listing = {

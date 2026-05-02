@@ -15,6 +15,8 @@ function rowToSku(row: {
   image_url: string | null;
   gradient_from: string | null;
   gradient_to: string | null;
+  variant_group?: string | null;
+  variant_type?: string | null;
 }): Sku & { uuid: string } {
   return {
     id: row.id, // uuid
@@ -29,6 +31,8 @@ function rowToSku(row: {
     description: row.description ?? "",
     imageUrl: row.image_url ?? undefined,
     gradient: [row.gradient_from ?? "#475569", row.gradient_to ?? "#0f172a"],
+    variantGroup: row.variant_group ?? undefined,
+    variantType: row.variant_type ?? undefined,
   };
 }
 
@@ -51,6 +55,45 @@ export async function getSkuBySlug(slug: string): Promise<Sku | null> {
     .maybeSingle();
   if (error) throw error;
   return data ? rowToSku(data) : null;
+}
+
+/**
+ * Returns every SKU in a variant_group along with its lowest-ask price
+ * (cents) so the variant selector can show "Hobby Box · $720 / Hobby Case
+ * · $8,640" style labels with real per-variant prices.
+ *
+ * Used by the product page handler to render the variant toggle. Sorted
+ * by the canonical variant order (smallest retail → flagship → case).
+ */
+export async function getVariantsForGroup(
+  group: string,
+): Promise<Array<Sku & { lowestAskCents: number | null }>> {
+  const supabase = await createClient();
+  const { data: skuRows, error } = await supabase
+    .from("skus")
+    .select("*")
+    .eq("variant_group", group);
+  if (error) throw error;
+  if (!skuRows || skuRows.length === 0) return [];
+
+  const ids = skuRows.map((r) => r.id);
+  const { data: askRows } = await supabase
+    .from("listings")
+    .select("sku_id, price_cents")
+    .in("sku_id", ids)
+    .eq("status", "Active");
+
+  // Reduce to lowest active ask per SKU.
+  const lowest: Record<string, number> = {};
+  for (const row of askRows ?? []) {
+    const cur = lowest[row.sku_id];
+    if (cur === undefined || row.price_cents < cur) lowest[row.sku_id] = row.price_cents;
+  }
+
+  return skuRows.map((row) => ({
+    ...rowToSku(row),
+    lowestAskCents: lowest[row.id] ?? null,
+  }));
 }
 
 export async function getListingsForSku(skuId: string): Promise<Listing[]> {

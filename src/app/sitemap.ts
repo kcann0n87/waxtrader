@@ -27,12 +27,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let skuEntries: MetadataRoute.Sitemap = [];
   try {
     const skus = await getAllSkus();
-    skuEntries = skus.map((s) => ({
-      url: `${BASE}/product/${s.slug}`,
-      lastModified: now,
-      changeFrequency: "daily",
-      priority: 0.7,
-    }));
+    // Collapse SKUs into one entry per variant_group — the canonical URL
+    // is /product/<group> (with each variant accessed via ?variant=<type>),
+    // so listing every SKU separately would dilute crawl budget on
+    // duplicate content. Falls back to the SKU slug for any rows that
+    // missed the variant_group backfill.
+    const seen = new Set<string>();
+    for (const s of skus) {
+      const key = s.variantGroup ?? s.slug;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      skuEntries.push({
+        url: `${BASE}/product/${key}`,
+        lastModified: now,
+        changeFrequency: "daily",
+        priority: 0.7,
+      });
+    }
   } catch (e) {
     console.error("sitemap: failed to load SKUs, returning static paths only", e);
   }

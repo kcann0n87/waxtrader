@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ChevronRight, MessageCircle, ShieldCheck, TrendingDown, TrendingUp } from "lucide-react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { BuyBidActions } from "@/components/buy-bid-actions";
@@ -12,6 +12,7 @@ import { PriceChart } from "@/components/price-chart";
 import { ProductImage } from "@/components/product-image";
 import { RecentlyViewed } from "@/components/recently-viewed";
 import { TrackView } from "@/components/track-view";
+import { VariantSelector } from "@/components/variant-selector";
 import { WatchButton } from "@/components/watch-button";
 import {
   getActiveBidsForSku,
@@ -23,30 +24,42 @@ import {
   getRecentSales,
   getSalesCountForSku,
   getSkuBySlug,
+  getVariantsForGroup,
 } from "@/lib/db";
-import { formatSkuTitle, formatUSD, formatUSDFull, isPresale } from "@/lib/utils";
+import { sortByVariantOrder, variantLabel } from "@/lib/variants";
+import { formatUSD, formatUSDFull, isPresale } from "@/lib/utils";
 import type { Metadata } from "next";
+
+/**
+ * Pretty title sans the per-variant suffix. The variant (Hobby Box / Hobby
+ * Case / Mega Box / etc.) lives in the segmented control above the order
+ * book — putting it in the H1 too would be redundant once selectors are on
+ * the page. Falls back to the full SKU title if there's only one variant.
+ */
+function groupTitle(year: number, brand: string, set: string, sport: string): string {
+  return `${year} ${brand} ${set} ${sport === "Pokemon" ? "TCG" : sport}`;
+}
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ variant?: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const sku = await getSkuBySlug(slug);
+  const sp = await searchParams;
+  const { sku } = await resolveProduct(slug, sp.variant);
   if (!sku) {
     return { title: "Product not found · WaxDepot" };
   }
   const ask = await getLowestAsk(sku.id);
-  const title = `${formatSkuTitle(sku)} · WaxDepot`;
+  const title = `${sku.year} ${sku.brand} ${sku.set} ${sku.product} · WaxDepot`;
   const askLine = ask !== null ? `Lowest ask ${formatUSD(ask)}.` : "Track price + place a bid.";
   const description =
-    `${formatSkuTitle(sku)} sealed ${sku.product.toLowerCase()} on the WaxDepot marketplace. ${askLine} Buyer Protection on every order.`.slice(0, 200);
+    `${sku.year} ${sku.brand} ${sku.set} sealed ${sku.product.toLowerCase()} on the WaxDepot marketplace. ${askLine} Buyer Protection on every order.`.slice(0, 200);
   // openGraph.images and twitter.images are intentionally NOT set here —
-  // Next.js auto-picks up the colocated opengraph-image.tsx file and uses
-  // its rendered output (1200×630 dynamic card with box photo + price)
-  // as the OG image for this route. Setting images explicitly would
-  // override that convention and lose the dynamic price.
+  // Next.js auto-picks up the colocated opengraph-image.tsx file.
   return {
     title,
     description,
@@ -54,7 +67,7 @@ export async function generateMetadata({
       type: "website",
       title,
       description,
-      url: `/product/${sku.slug}`,
+      url: `/product/${sku.variantGroup ?? sku.slug}${sku.variantType ? `?variant=${sku.variantType}` : ""}`,
     },
     twitter: {
       card: "summary_large_image",
@@ -64,9 +77,57 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
+/**
+ * Resolves the slug param into a concrete SKU. Two cases:
+ *
+ *   1. slug is a variant_group → look up all variants, pick the one
+ *      requested via ?variant or the first by canonical order
+ *   2. slug is a legacy per-SKU slug → look up directly, redirect to
+ *      the canonical /product/<group>?variant=<type> URL
+ *
+ * Returns the active SKU and (for case 1) the full variant list so the
+ * selector can render. For redirects, this never returns — `redirect()`
+ * throws.
+ */
+async function resolveProduct(
+  slug: string,
+  variantParam?: string,
+): Promise<{
+  sku: Awaited<ReturnType<typeof getSkuBySlug>>;
+  variants: Awaited<ReturnType<typeof getVariantsForGroup>>;
+}> {
+  // Case 1: treat slug as a variant_group.
+  const variants = sortByVariantOrder(await getVariantsForGroup(slug));
+  if (variants.length > 0) {
+    const requested = variantParam
+      ? variants.find((v) => v.variantType === variantParam)
+      : null;
+    const sku = requested ?? variants[0];
+    return { sku, variants };
+  }
+
+  // Case 2: legacy per-SKU slug. Redirect to the canonical group URL so
+  // any inbound link or bookmark still works without changing the API.
+  const direct = await getSkuBySlug(slug);
+  if (direct?.variantGroup && direct.variantType) {
+    redirect(`/product/${direct.variantGroup}?variant=${direct.variantType}`);
+  }
+
+  // Stranded SKU with no group/type backfill — render directly so the
+  // product page still works for any row that escaped migration 0013.
+  return { sku: direct, variants: [] };
+}
+
+export default async function ProductPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ variant?: string }>;
+}) {
   const { slug } = await params;
-  const sku = await getSkuBySlug(slug);
+  const sp = await searchParams;
+  const { sku, variants } = await resolveProduct(slug, sp.variant);
   if (!sku) notFound();
 
   // Parallel fetch everything the page needs for this SKU.
@@ -84,6 +145,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const previous = history.length >= 8 ? history[history.length - 8].price : last ?? 0;
   const change = last && previous ? last - previous : 0;
   const changePct = previous ? (change / previous) * 100 : 0;
+
+  // Group title drops the per-variant product suffix when a selector is
+  // shown. Single-variant products keep the full title (with "Hobby Box"
+  // or whatever) for clarity.
+  const showVariantSelector = variants.length > 1;
+  const titleText = showVariantSelector
+    ? groupTitle(sku.year, sku.brand, sku.set, sku.sport)
+    : `${sku.year} ${sku.brand} ${sku.set} ${sku.product}`;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 lg:px-6">
@@ -112,10 +181,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <div>
                 <div className="flex items-start justify-between gap-3">
                   <h1 className="font-display text-3xl leading-[1.1] font-black tracking-tight text-white">
-                    {formatSkuTitle(sku)}
+                    {titleText}
                   </h1>
                   <WatchButton skuId={sku.id} variant="compact" />
                 </div>
+                {showVariantSelector && (
+                  <p className="mt-2 text-xs text-white/50">
+                    Currently viewing{" "}
+                    <strong className="text-white/80">{variantLabel(sku.variantType)}</strong>
+                  </p>
+                )}
                 <p className="mt-3 text-sm leading-relaxed text-white/60">{sku.description}</p>
 
                 <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
@@ -161,6 +236,21 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               </div>
             </div>
           </div>
+
+          {/* Variant selector — only renders when there's more than one
+              variant in the group (Hobby Box + Hobby Case + Mega etc.). */}
+          {showVariantSelector && sku.variantGroup && sku.variantType && (
+            <div className="mt-6">
+              <VariantSelector
+                groupSlug={sku.variantGroup}
+                activeType={sku.variantType}
+                variants={variants.map((v) => ({
+                  variantType: v.variantType ?? "box",
+                  lowestAskCents: v.lowestAskCents,
+                }))}
+              />
+            </div>
+          )}
 
           {history.length > 0 && (
             <div className="mt-6 rounded-2xl border border-white/10 bg-[#101012] p-6">
@@ -340,4 +430,3 @@ function Spec({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-

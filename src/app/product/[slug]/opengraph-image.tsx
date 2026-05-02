@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
-import { getLowestAsk, getSkuBySlug } from "@/lib/db";
+import { getLowestAsk, getSkuBySlug, getVariantsForGroup } from "@/lib/db";
+import { sortByVariantOrder } from "@/lib/variants";
 import { formatSkuTitle, formatUSDFull } from "@/lib/utils";
 
 // Edge runtime so the OG image generation doesn't cold-start a Node lambda
@@ -23,7 +24,15 @@ const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://waxdepot.io";
  */
 export default async function OG({ params }: { params: { slug: string } }) {
   const { slug } = params;
-  const sku = await getSkuBySlug(slug);
+  // Slug can be either a per-SKU slug (legacy URLs) or a variant_group
+  // slug (canonical post-0013). Try direct lookup first; fall back to
+  // the first variant in the group so the OG card still renders for
+  // canonical URLs that the page handler resolves via group lookup.
+  let sku = await getSkuBySlug(slug);
+  if (!sku) {
+    const variants = sortByVariantOrder(await getVariantsForGroup(slug));
+    sku = variants[0] ?? null;
+  }
 
   // Sku not found — render a fallback card so the share doesn't break.
   if (!sku) {
