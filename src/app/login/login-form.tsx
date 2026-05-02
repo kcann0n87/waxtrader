@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { Loader2, Lock, Mail } from "lucide-react";
-import { signIn } from "../auth/actions";
+import { resendConfirmation, signIn } from "../auth/actions";
 
 export function LoginForm({ next }: { next: string }) {
   const [error, setError] = useState<string | null>(null);
+  const [resendMsg, setResendMsg] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [resendPending, startResend] = useTransition();
+  const emailRef = useRef<HTMLInputElement>(null);
 
   return (
     <form
@@ -31,6 +34,7 @@ export function LoginForm({ next }: { next: string }) {
             className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-white/50"
           />
           <input
+            ref={emailRef}
             type="email"
             name="email"
             required
@@ -75,6 +79,12 @@ export function LoginForm({ next }: { next: string }) {
         </div>
       )}
 
+      {resendMsg && (
+        <div className="rounded-md border border-emerald-700/40 bg-emerald-500/10 p-3 text-xs text-emerald-200">
+          {resendMsg}
+        </div>
+      )}
+
       <button
         type="submit"
         disabled={pending}
@@ -84,13 +94,44 @@ export function LoginForm({ next }: { next: string }) {
         Sign in
       </button>
 
+      <div className="flex flex-col items-center gap-1 text-center text-[11px] text-white/50">
+        <button
+          type="button"
+          disabled={resendPending}
+          onClick={() => {
+            const email = emailRef.current?.value?.trim();
+            if (!email) {
+              setResendMsg(null);
+              setError("Enter your email above first, then resend.");
+              return;
+            }
+            setError(null);
+            setResendMsg(null);
+            startResend(async () => {
+              const fd = new FormData();
+              fd.set("email", email);
+              fd.set("next", next);
+              const res = await resendConfirmation(fd);
+              if (res?.error) setError(res.error);
+              else
+                setResendMsg(
+                  "Confirmation email sent — check your inbox (and spam).",
+                );
+            });
+          }}
+          className="text-white/60 underline decoration-white/20 underline-offset-2 transition hover:text-amber-300 disabled:opacity-50"
+        >
+          {resendPending ? "Sending…" : "Didn't get the confirmation email? Resend"}
+        </button>
+      </div>
+
       <div className="text-center text-[11px] text-white/60">
         By signing in you agree to our{" "}
-        <a href="#" className="text-white/60 transition hover:text-amber-300">
+        <a href="/terms" target="_blank" rel="noopener" className="text-white/60 underline decoration-white/20 transition hover:text-amber-300">
           Terms
         </a>{" "}
         and{" "}
-        <a href="#" className="text-white/60 transition hover:text-amber-300">
+        <a href="/privacy" target="_blank" rel="noopener" className="text-white/60 underline decoration-white/20 transition hover:text-amber-300">
           Privacy Policy
         </a>
         .

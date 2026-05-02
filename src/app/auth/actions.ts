@@ -70,6 +70,28 @@ export async function signOut() {
   redirect("/");
 }
 
+/**
+ * Re-sends the email confirmation for a signup that didn't go through (user
+ * lost the email, typo'd, etc). Always returns ok=true regardless of whether
+ * the email exists, to avoid enumeration.
+ */
+export async function resendConfirmation(formData: FormData): Promise<AuthResult> {
+  const email = String(formData.get("email") || "").trim().toLowerCase();
+  const next = String(formData.get("next") || "/") || "/";
+  if (!email) return { error: "Enter your email address." };
+
+  const origin = await getOrigin();
+  const supabase = await createClient();
+  await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+    },
+  });
+  return { ok: true };
+}
+
 export async function requestPasswordReset(formData: FormData): Promise<AuthResult> {
   const email = String(formData.get("email") || "").trim().toLowerCase();
   if (!email) return { error: "Enter your email address." };
