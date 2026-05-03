@@ -46,7 +46,7 @@ values
   -- Soccer — 8 net-new (Road to FIFA WC heavy)
   -- =====================================================================
 
-  ('2025-26-topps-chrome-uefa-club-competitions-2-soccer-hobby-box', 2025, 'Topps', 'Soccer', 'Chrome UEFA Club Competitions', 'Hobby Box', '2026-05-07',
+  ('2025-26-topps-chrome-uefa-club-competitions-soccer-hobby-box', 2025, 'Topps', 'Soccer', 'Chrome UEFA Club Competitions', 'Hobby Box', '2026-05-07',
     '2025-26 Topps Chrome UEFA Club Competitions Hobby Box. Champions League / Europa League / Conference League. 18 packs per box, 1 auto + Refractor parallels.',
     null, '#0ea5e9', '#1e3a8a', true),
 
