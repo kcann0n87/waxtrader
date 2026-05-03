@@ -13,13 +13,15 @@
  * (e.g. mega-box / mega-case). Cases are real SKUs with their own market
  * — a sealed mega case isn't priced as 6× the per-box rate; it has its
  * own bid/ask.
+ *
+ * NOTE: Value Box was removed — they're functionally identical to Blaster
+ * Box in this market and were just adding noise to the variant selector.
  */
 
 export const VARIANT_LABELS: Record<string, string> = {
   // Single-box variants
   "blaster-box": "Blaster Box",
   "hanger-box": "Hanger Box",
-  "value-box": "Value Box",
   "mega-box": "Mega Box",
   "hobby-box": "Hobby Box",
   "fotl-hobby-box": "FOTL Hobby Box",
@@ -30,10 +32,9 @@ export const VARIANT_LABELS: Record<string, string> = {
   "booster-box": "Booster Box",
   "elite-trainer-box": "Elite Trainer Box",
   "inner-case": "Inner Case",
-  // Sealed-case variants (one per box config above)
+  // Sealed-case variants
   "blaster-case": "Blaster Case",
   "hanger-case": "Hanger Case",
-  "value-case": "Value Case",
   "mega-case": "Mega Case",
   "hobby-case": "Hobby Case",
   "fotl-hobby-case": "FOTL Hobby Case",
@@ -51,78 +52,64 @@ export const VARIANT_LABELS: Record<string, string> = {
 // selector in the order most buyers expect to see it. Single-box variants
 // listed first; case variants follow in the same order.
 const VARIANT_ORDER: string[] = [
-  // Single boxes — retail
+  // Single boxes
   "blaster-box",
   "hanger-box",
-  "value-box",
   "mega-box",
-  // Single boxes — hobby
   "hobby-box",
   "fotl-hobby-box",
   "first-day-issue-hobby-box",
   "jumbo-box",
   "hobby-jumbo-box",
   "first-day-issue-hobby-jumbo-box",
-  // TCG single
   "booster-box",
   "elite-trainer-box",
-  // Special
   "inner-case",
-  // Cases — retail
+  // Cases (same order, mirrored)
   "blaster-case",
   "hanger-case",
-  "value-case",
   "mega-case",
-  // Cases — hobby
   "hobby-case",
   "fotl-hobby-case",
   "first-day-issue-hobby-case",
   "jumbo-case",
   "hobby-jumbo-case",
-  // TCG case
   "booster-box-case",
   "elite-trainer-box-case",
 ];
 
 /**
- * Visual grouping for the variant selector — five buckets so buyers
- * see a clean "single box vs case, hobby vs retail" decision instead of
- * one long row of chips. Order within each group still follows
- * VARIANT_ORDER.
+ * Visual grouping for the variant selector — three buckets so buyers
+ * see a clean "single box vs case" decision instead of one long row of
+ * chips. Order within each group still follows VARIANT_ORDER (cheapest
+ * box configurations show first).
  */
-export type VariantGroup =
-  | "hobby-box"
-  | "retail-box"
-  | "hobby-case"
-  | "retail-case"
-  | "tcg";
+export type VariantGroup = "box" | "case" | "tcg";
 
 const VARIANT_GROUP_MAP: Record<string, VariantGroup> = {
-  // Hobby / premium single-box product
-  "hobby-box": "hobby-box",
-  "fotl-hobby-box": "hobby-box",
-  "first-day-issue-hobby-box": "hobby-box",
-  "jumbo-box": "hobby-box",
-  "hobby-jumbo-box": "hobby-box",
-  "first-day-issue-hobby-jumbo-box": "hobby-box",
-  // Retail single-box product (Walmart / Target shelf SKUs)
-  "blaster-box": "retail-box",
-  "hanger-box": "retail-box",
-  "value-box": "retail-box",
-  "mega-box": "retail-box",
-  // Sealed cases — hobby
-  "hobby-case": "hobby-case",
-  "fotl-hobby-case": "hobby-case",
-  "first-day-issue-hobby-case": "hobby-case",
-  "jumbo-case": "hobby-case",
-  "hobby-jumbo-case": "hobby-case",
-  "inner-case": "hobby-case",
-  // Sealed cases — retail
-  "blaster-case": "retail-case",
-  "hanger-case": "retail-case",
-  "value-case": "retail-case",
-  "mega-case": "retail-case",
-  // TCG (Pokemon, etc.)
+  // Single boxes — all configs land in one group, the chip ordering
+  // (Blaster → Hanger → Mega → Hobby → FOTL → FDI → Jumbo) keeps the
+  // visual hierarchy from cheap retail to expensive hobby.
+  "blaster-box": "box",
+  "hanger-box": "box",
+  "mega-box": "box",
+  "hobby-box": "box",
+  "fotl-hobby-box": "box",
+  "first-day-issue-hobby-box": "box",
+  "jumbo-box": "box",
+  "hobby-jumbo-box": "box",
+  "first-day-issue-hobby-jumbo-box": "box",
+  // Sealed cases — same logic mirrored
+  "blaster-case": "case",
+  "hanger-case": "case",
+  "mega-case": "case",
+  "hobby-case": "case",
+  "fotl-hobby-case": "case",
+  "first-day-issue-hobby-case": "case",
+  "jumbo-case": "case",
+  "hobby-jumbo-case": "case",
+  "inner-case": "case",
+  // TCG (Pokemon, etc.) stays separate — different audience.
   "booster-box": "tcg",
   "elite-trainer-box": "tcg",
   "booster-box-case": "tcg",
@@ -130,16 +117,14 @@ const VARIANT_GROUP_MAP: Record<string, VariantGroup> = {
 };
 
 export const VARIANT_GROUP_LABEL: Record<VariantGroup, string> = {
-  "hobby-box": "Hobby box",
-  "retail-box": "Retail box",
-  "hobby-case": "Hobby case",
-  "retail-case": "Retail case",
+  box: "Single box",
+  case: "Sealed case",
   tcg: "TCG",
 };
 
 export function variantGroupOf(type: string | null | undefined): VariantGroup {
-  if (!type) return "hobby-box";
-  return VARIANT_GROUP_MAP[type] ?? "hobby-box";
+  if (!type) return "box";
+  return VARIANT_GROUP_MAP[type] ?? "box";
 }
 
 export function variantLabel(type: string | null | undefined): string {

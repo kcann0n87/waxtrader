@@ -17,6 +17,7 @@ const SRC = path.join(ROOT, "public", "products");
 const SEED = path.join(ROOT, "scripts", "seed-data.mjs");
 
 // Variants ordered longest-suffix-first so suffix matching is greedy.
+// Value Box was dropped — same as Blaster Box in this market.
 const VARIANTS = [
   // Case variants (longest suffixes first)
   "first-day-issue-hobby-jumbo-case",
@@ -30,7 +31,6 @@ const VARIANTS = [
   "mega-case",
   "blaster-case",
   "hanger-case",
-  "value-case",
   "inner-case",
   // Box variants
   "first-day-issue-hobby-jumbo-box",
@@ -44,7 +44,6 @@ const VARIANTS = [
   "mega-box",
   "blaster-box",
   "hanger-box",
-  "value-box",
 ];
 
 const PRODUCT_LABELS = {
@@ -55,7 +54,6 @@ const PRODUCT_LABELS = {
   "mega-box": "Mega Box",
   "blaster-box": "Blaster Box",
   "hanger-box": "Hanger Box",
-  "value-box": "Value Box",
   "fotl-hobby-box": "FOTL Hobby Box",
   "first-day-issue-hobby-box": "First Day Issue Hobby Box",
   "first-day-issue-hobby-jumbo-box": "First Day Issue Jumbo Box",
@@ -68,7 +66,6 @@ const PRODUCT_LABELS = {
   "mega-case": "Mega Case",
   "blaster-case": "Blaster Case",
   "hanger-case": "Hanger Case",
-  "value-case": "Value Case",
   "fotl-hobby-case": "FOTL Hobby Case",
   "first-day-issue-hobby-case": "First Day Issue Hobby Case",
   "first-day-issue-hobby-jumbo-case": "First Day Issue Jumbo Case",

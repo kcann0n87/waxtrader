@@ -14,19 +14,11 @@ export type VariantOption = {
   lowestAskCents: number | null;
 };
 
-const GROUP_ORDER: VariantGroup[] = [
-  "hobby-box",
-  "retail-box",
-  "hobby-case",
-  "retail-case",
-  "tcg",
-];
+const GROUP_ORDER: VariantGroup[] = ["box", "case", "tcg"];
 
 const GROUP_ACCENT: Record<VariantGroup, string> = {
-  "hobby-box": "text-amber-400/80",
-  "retail-box": "text-sky-400/80",
-  "hobby-case": "text-fuchsia-400/80",
-  "retail-case": "text-rose-400/80",
+  box: "text-amber-400/80",
+  case: "text-fuchsia-400/80",
   tcg: "text-emerald-400/80",
 };
 

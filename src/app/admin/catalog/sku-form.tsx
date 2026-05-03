@@ -183,14 +183,18 @@ export function SkuForm({
             className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
           >
             <option>Hobby Box</option>
+            <option>FOTL Hobby Box</option>
+            <option>First Day Issue Hobby Box</option>
             <option>Jumbo Box</option>
             <option>Mega Box</option>
-            <option>Value Box</option>
             <option>Blaster Box</option>
             <option>Hanger Box</option>
             <option>Booster Box</option>
             <option>Elite Trainer Box</option>
             <option>Hobby Case</option>
+            <option>Mega Case</option>
+            <option>Blaster Case</option>
+            <option>Jumbo Case</option>
             <option>Inner Case</option>
           </select>
         </Field>
