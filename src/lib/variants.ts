@@ -3,6 +3,11 @@
  * table. Each release has 1-N variants (Hobby Box, Hobby Case, Mega Box,
  * etc.); the product page groups them under a shared variant_group slug
  * and lets buyers toggle between markets.
+ *
+ * Brand-naming notes:
+ *   - Topps uses "First Day Issue" (FDI) for early-print variants
+ *   - Panini uses "First Off The Line" (FOTL) for the same idea
+ * The two are distinct variant_types so display labels stay accurate.
  */
 
 export const VARIANT_LABELS: Record<string, string> = {
@@ -12,6 +17,8 @@ export const VARIANT_LABELS: Record<string, string> = {
   "mega-box": "Mega Box",
   "hobby-box": "Hobby Box",
   "fotl-hobby-box": "FOTL Hobby Box",
+  "first-day-issue-hobby-box": "First Day Issue Hobby Box",
+  "first-day-issue-hobby-jumbo-box": "First Day Issue Jumbo Box",
   "jumbo-box": "Jumbo Box",
   "hobby-jumbo-box": "Hobby Jumbo Box",
   "booster-box": "Booster Box",
@@ -32,13 +39,55 @@ const VARIANT_ORDER: string[] = [
   "mega-box",
   "hobby-box",
   "fotl-hobby-box",
+  "first-day-issue-hobby-box",
   "jumbo-box",
   "hobby-jumbo-box",
+  "first-day-issue-hobby-jumbo-box",
   "booster-box",
   "elite-trainer-box",
   "inner-case",
   "hobby-case",
 ];
+
+/**
+ * Visual grouping for the variant selector — three buckets so buyers
+ * see a clean "single box vs case vs retail" decision instead of one
+ * long row of chips. Order within each group still follows VARIANT_ORDER.
+ */
+export type VariantGroup = "box" | "retail" | "case" | "tcg";
+
+const VARIANT_GROUP_MAP: Record<string, VariantGroup> = {
+  // Hobby / premium single-box product
+  "hobby-box": "box",
+  "fotl-hobby-box": "box",
+  "first-day-issue-hobby-box": "box",
+  "jumbo-box": "box",
+  "hobby-jumbo-box": "box",
+  "first-day-issue-hobby-jumbo-box": "box",
+  // Retail single-box product (Walmart / Target shelf SKUs)
+  "blaster-box": "retail",
+  "hanger-box": "retail",
+  "value-box": "retail",
+  "mega-box": "retail",
+  // Sealed cases
+  "hobby-case": "case",
+  "inner-case": "case",
+  // Pokemon / TCG
+  "booster-box": "tcg",
+  "elite-trainer-box": "tcg",
+};
+
+export const VARIANT_GROUP_LABEL: Record<VariantGroup, string> = {
+  box: "Hobby box",
+  retail: "Retail",
+  case: "Sealed case",
+  tcg: "TCG",
+};
+
+export function variantGroupOf(type: string | null | undefined): VariantGroup {
+  if (!type) return "box";
+  return VARIANT_GROUP_MAP[type] ?? "box";
+}
 
 export function variantLabel(type: string | null | undefined): string {
   if (!type) return "Box";

@@ -18,6 +18,8 @@ const SEED = path.join(ROOT, "scripts", "seed-data.mjs");
 
 // Variants ordered longest-suffix-first so suffix matching is greedy.
 const VARIANTS = [
+  "first-day-issue-hobby-jumbo-box",
+  "first-day-issue-hobby-box",
   "fotl-hobby-box",
   "hobby-jumbo-box",
   "elite-trainer-box",
@@ -42,6 +44,8 @@ const PRODUCT_LABELS = {
   "hanger-box": "Hanger Box",
   "value-box": "Value Box",
   "fotl-hobby-box": "FOTL Hobby Box",
+  "first-day-issue-hobby-box": "First Day Issue Hobby Box",
+  "first-day-issue-hobby-jumbo-box": "First Day Issue Jumbo Box",
   "booster-box": "Booster Box",
   "elite-trainer-box": "Elite Trainer Box",
   "inner-case": "Inner Case",
