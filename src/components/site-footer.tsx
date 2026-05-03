@@ -34,6 +34,8 @@ export function SiteFooter() {
             { label: "Baseball", href: "/?sport=MLB" },
             { label: "Football", href: "/?sport=NFL" },
             { label: "Hockey", href: "/?sport=NHL" },
+            { label: "Soccer", href: "/?sport=Soccer" },
+            { label: "Pokemon TCG", href: "/?sport=Pokemon" },
           ]}
         />
         <FooterCol
