@@ -42,6 +42,7 @@ export function SiteFooter() {
             { label: "How it works", href: "/how-it-works" },
             { label: "FAQ", href: "/faq" },
             { label: "Buyer protection", href: "/help/buying/buyer-protection" },
+            { label: "Feedback / requests", href: "/feedback" },
             { label: "Help center", href: "/help" },
             { label: "Contact support", href: "/help/contact" },
           ]}
