@@ -6,7 +6,7 @@ import { submitFeedback } from "@/app/actions/feedback";
 
 type Tab = "feature" | "set";
 
-const SPORTS = ["NBA", "MLB", "NFL", "NHL", "Pokemon"] as const;
+const SPORTS = ["NBA", "MLB", "NFL", "NHL", "Soccer", "Pokemon"] as const;
 
 export function FeedbackForms({
   isSignedIn,

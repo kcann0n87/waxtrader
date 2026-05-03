@@ -16,7 +16,7 @@ type SkuFormValues = {
   brand: string;
   set_name: string;
   product: string;
-  sport: "NBA" | "MLB" | "NFL" | "NHL";
+  sport: "NBA" | "MLB" | "NFL" | "NHL" | "Pokemon" | "Soccer";
   release_date: string;
   description: string;
   image_url: string;
@@ -169,6 +169,8 @@ export function SkuForm({
             <option value="MLB">MLB</option>
             <option value="NFL">NFL</option>
             <option value="NHL">NHL</option>
+            <option value="Soccer">Soccer</option>
+            <option value="Pokemon">Pokemon TCG</option>
           </select>
         </Field>
         <Field label="Brand">

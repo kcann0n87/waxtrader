@@ -89,7 +89,17 @@ export function FeedbackRow({
       year,
       p.brand,
       p.set_name,
-      p.sport === "NBA" ? "basketball" : p.sport === "NFL" ? "football" : p.sport === "NHL" ? "hockey" : "baseball",
+      p.sport === "NBA"
+        ? "basketball"
+        : p.sport === "NFL"
+          ? "football"
+          : p.sport === "NHL"
+            ? "hockey"
+            : p.sport === "Soccer"
+              ? "soccer"
+              : p.sport === "Pokemon"
+                ? "pokemon-tcg"
+                : "baseball",
       "hobby-box",
     ]
       .join("-")

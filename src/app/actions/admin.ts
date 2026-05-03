@@ -277,7 +277,7 @@ export async function adminCreateSku(input: {
   brand: string;
   set_name: string;
   product: string;
-  sport: "NBA" | "MLB" | "NFL" | "NHL";
+  sport: "NBA" | "MLB" | "NFL" | "NHL" | "Pokemon" | "Soccer";
   release_date: string;
   description?: string;
   image_url?: string;
@@ -326,7 +326,7 @@ export async function adminUpdateSku(
     brand: string;
     set_name: string;
     product: string;
-    sport: "NBA" | "MLB" | "NFL" | "NHL";
+    sport: "NBA" | "MLB" | "NFL" | "NHL" | "Pokemon" | "Soccer";
     release_date: string;
     description: string;
     image_url: string | null | undefined;

@@ -1,4 +1,8 @@
-export type Sport = "NBA" | "MLB" | "NFL" | "NHL";
+// Sport enum mirrors the Postgres `sport` enum from migrations 0001
+// (NBA/MLB/NFL/NHL/Pokemon) + 0031 (Soccer). Keep both in sync — adding
+// a value here without the matching ALTER TYPE will let TypeScript pass
+// but Supabase inserts will fail with `invalid input value for enum`.
+export type Sport = "NBA" | "MLB" | "NFL" | "NHL" | "Pokemon" | "Soccer";
 
 export type Sku = {
   id: string;

@@ -58,7 +58,7 @@ export async function submitFeedback(
     const notes = String(formData.get("notes") || "").trim().slice(0, 2000);
     if (!brand) return { error: "Brand is required (e.g. Topps, Panini)." };
     if (!setName) return { error: "Set name is required (e.g. Chrome, Prizm)." };
-    if (!["NBA", "MLB", "NFL", "NHL", "Pokemon"].includes(sport))
+    if (!["NBA", "MLB", "NFL", "NHL", "Soccer", "Pokemon"].includes(sport))
       return { error: "Pick a sport." };
     if (!year || !/^\d{4}$/.test(year)) return { error: "Year is required." };
     payload = { brand, set_name: setName, sport, year, product, notes };

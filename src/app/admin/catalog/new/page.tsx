@@ -24,7 +24,7 @@ export default async function AdminNewSkuPage({
   }>;
 }) {
   const sp = await searchParams;
-  const validSports = ["NBA", "MLB", "NFL", "NHL"] as const;
+  const validSports = ["NBA", "MLB", "NFL", "NHL", "Pokemon", "Soccer"] as const;
   const sport = validSports.includes(sp.sport as (typeof validSports)[number])
     ? (sp.sport as (typeof validSports)[number])
     : undefined;

@@ -13,6 +13,7 @@ const SPORT_TABS: { id: string; label: string }[] = [
   { id: "MLB", label: "MLB" },
   { id: "NFL", label: "NFL" },
   { id: "NHL", label: "NHL" },
+  { id: "Soccer", label: "Soccer" },
 ];
 
 /**
