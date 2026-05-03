@@ -107,6 +107,10 @@ export function SportTabWithMenu({
 }
 
 function formatYearLabel(sport: string, year: number) {
+  // Header dropdown groups all products under a sport — no per-product set
+  // context here. NBA/NHL are uniformly split-year; Soccer is mixed (UEFA
+  // and European leagues split, MLS and World Cup don't), so the year label
+  // here stays single-year and per-product titles handle the season string.
   return ["NBA", "NHL"].includes(sport)
     ? `${year}-${(year + 1).toString().slice(2)}`
     : String(year);

@@ -15,17 +15,30 @@ export function formatUSDFull(n: number) {
 
 /**
  * Format a year for display as either "2025" or "2025-26" depending on the
- * sport. Only NBA and NHL seasons span the calendar year boundary
- * (Oct/Nov–Apr/Jun), so only those get the YYYY-YY treatment. MLB and NFL
- * are referenced by start year (the World Series and Super Bowl are part
- * of the same "season"); Pokemon and Soccer are single-year set releases.
+ * sport. NBA and NHL seasons span the calendar boundary (Oct/Nov–Apr/Jun),
+ * so they always get YYYY-YY. MLB and NFL are referenced by start year.
+ * Pokemon is single-year. Soccer is mixed: European leagues (UEFA, PL,
+ * Bundesliga, La Liga, Serie A, Ligue 1) split, but MLS and World Cup
+ * products are single-year — we look at the set name to disambiguate.
  */
-export function formatSeasonYear(year: number, sport?: string) {
-  const seasonSports = ["NBA", "NHL"];
-  if (sport && seasonSports.includes(sport) && year >= 2024) {
+export function formatSeasonYear(year: number, sport?: string, set?: string) {
+  if (year < 2024) return String(year);
+  if (sport === "NBA" || sport === "NHL") {
+    return `${year}-${(year + 1).toString().slice(2)}`;
+  }
+  if (sport === "Soccer" && set && isSplitSeasonSoccerSet(set)) {
     return `${year}-${(year + 1).toString().slice(2)}`;
   }
   return String(year);
+}
+
+// European league products span Aug-May, so they're labeled YYYY-YY.
+// MLS (Mar-Nov) and World Cup / Copa (single tournament) are single-year.
+function isSplitSeasonSoccerSet(set: string) {
+  const s = set.toLowerCase();
+  if (s.includes("mls")) return false;
+  if (s.includes("world cup") || s.includes("copa")) return false;
+  return true;
 }
 
 export function formatSkuTitle(sku: {
@@ -38,7 +51,7 @@ export function formatSkuTitle(sku: {
   const brandSet = sku.set.toLowerCase().startsWith(sku.brand.toLowerCase())
     ? sku.set
     : `${sku.brand} ${sku.set}`;
-  return `${formatSeasonYear(sku.year, sku.sport)} ${brandSet} ${sku.product}`;
+  return `${formatSeasonYear(sku.year, sku.sport, sku.set)} ${brandSet} ${sku.product}`;
 }
 
 // Real time, not a pinned demo date. Earlier iterations froze "today" to
