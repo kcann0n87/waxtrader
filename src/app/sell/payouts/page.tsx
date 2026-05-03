@@ -199,19 +199,28 @@ export default async function PayoutsPage({
             </p>
             <ul className="mt-3 space-y-1 text-xs text-white/60">
               <li>
-                <strong className="text-white/90">Starter (10%):</strong>{" "}
-                weekly payout every Friday for sales released that week
+                <strong className="text-white/90">Starter (12%):</strong>{" "}
+                weekly Friday payout, default for every new seller
               </li>
               <li>
-                <strong className="text-white/90">Pro (8%):</strong> twice
-                weekly (Tue + Fri), unlocks at 100+ sales/mo &amp; 99%+ rating
+                <strong className="text-white/90">Pro (10%):</strong> twice
+                weekly, ≥30 sales OR ≥$5k in 30 days &amp; 99%+ rating
               </li>
               <li>
-                <strong className="text-white/90">Elite (6%):</strong> every 3
-                days on tracking-scanned, 10% reserve, 500+ sales/mo &amp;
-                99.5%+ rating
+                <strong className="text-white/90">Elite (8%):</strong> every 3
+                days, ≥150 sales OR ≥$10k in 30 days &amp; 99.5%+ rating
+              </li>
+              <li>
+                <strong className="text-white/90">Apex (6%):</strong> next
+                business day, ≥1000 sales OR ≥$100k in 30 days, 0 disputes
               </li>
             </ul>
+            <Link
+              href="/sell/tiers"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-300 hover:text-amber-200"
+            >
+              Full tier breakdown · examples · how it works →
+            </Link>
           </div>
         </div>
       </Card>

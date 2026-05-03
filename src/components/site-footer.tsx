@@ -22,6 +22,7 @@ export function SiteFooter() {
           links={[
             { label: "Browse", href: "/" },
             { label: "Sell", href: "/sell" },
+            { label: "Seller tiers", href: "/sell/tiers" },
             { label: "Search", href: "/search" },
             { label: "My account", href: "/account" },
           ]}
