@@ -47,6 +47,45 @@ export function calcPayout(saleAmount: number, tier: SellerTier = CURRENT_USER_T
 }
 
 /**
+ * Numeric ordering of tiers so the recompute cron can compare "is the
+ * qualifying tier higher / equal / lower than the current tier."
+ * Higher number = more premium tier (= lower fee).
+ */
+export const TIER_RANK: Record<SellerTier, number> = {
+  Starter: 0,
+  Pro: 1,
+  Elite: 2,
+  Apex: 3,
+};
+
+/**
+ * Returns the last moment of NEXT calendar month from `now` in UTC. Used
+ * by the tier-recompute cron to set `tier_expires_at` whenever a seller
+ * qualifies for or re-qualifies for a tier.
+ *
+ *   now = 2026-05-15  →  2026-06-30 23:59:59.999 UTC
+ *   now = 2026-05-31  →  2026-06-30 23:59:59.999 UTC
+ *   now = 2026-12-15  →  2027-01-31 23:59:59.999 UTC
+ *
+ * `Date.UTC(year, month, 0)` returns the last day of the month before
+ * `month`, so passing `getUTCMonth() + 2` lands on the last day of next
+ * month.
+ */
+export function endOfNextMonth(now: Date = new Date()): Date {
+  return new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth() + 2,
+      0,
+      23,
+      59,
+      59,
+      999,
+    ),
+  );
+}
+
+/**
  * Compute the seller's tier from their rolling-30-day stats. The OR logic
  * on (sales | gmv) means a small-volume / high-ticket seller (e.g. 4 case
  * sales worth $20k) earns the same tier as a high-volume / low-ticket

@@ -10,7 +10,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { getProfile } from "@/lib/supabase/user";
-import { getSellerTierStats } from "@/lib/db";
+import { formatTierExpires, getSellerTierStats } from "@/lib/db";
 import {
   TIER_FEE,
   TIER_PAYOUT_CADENCE,
@@ -132,6 +132,7 @@ export default async function TiersPage() {
           salesLast30d={stats.salesLast30d}
           gmvLast30dCents={stats.gmvLast30dCents}
           displayName={profile.display_name}
+          expiresLabel={formatTierExpires(profile.tier_expires_at)}
         />
       )}
 
@@ -335,11 +336,13 @@ function TierTracker({
   salesLast30d,
   gmvLast30dCents,
   displayName,
+  expiresLabel,
 }: {
   currentTier: SellerTier;
   salesLast30d: number;
   gmvLast30dCents: number;
   displayName: string;
+  expiresLabel: string | null;
 }) {
   const next: SellerTier | null =
     currentTier === "Starter"
@@ -379,6 +382,13 @@ function TierTracker({
                 · {(TIER_FEE[currentTier] * 100).toFixed(0)}% seller fee
               </span>
             </div>
+            {expiresLabel && currentTier !== "Starter" && (
+              <div className="mt-1.5 text-xs text-white/60">
+                Tier locked in through{" "}
+                <strong className="text-white">{expiresLabel}</strong> — keep
+                qualifying to extend.
+              </div>
+            )}
           </div>
           <div className="text-right">
             <div className="text-[10px] font-semibold tracking-wider text-white/50 uppercase">

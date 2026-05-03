@@ -136,6 +136,20 @@ export default function TermsPage() {
             sales-volume threshold, plus the minimum positive-feedback bar. Tiers
             are recalculated nightly.
           </p>
+          <p>
+            <strong>Grace period.</strong> Once you qualify for a tier, your
+            benefits are locked in <strong>through the end of the next
+            calendar month</strong>. Re-qualifying any day during that window
+            extends the lock to the new "end of next month" anchor. You only
+            drop tier if you go a full grace window without re-qualifying.
+            Promotions to a higher tier apply <strong>immediately</strong>.
+          </p>
+          <p className="text-sm text-white/60">
+            Examples: qualify for Pro on May 15 → benefits good through
+            June 30. Re-qualify on June 5 → extended through July 31. Hit
+            Elite on June 20 while in Pro grace → instantly upgraded to
+            Elite, new lock through July 31.
+          </p>
           <ul className="list-disc space-y-1 pl-6">
             <li>
               <strong>Starter</strong> — 12% of item price. Default for every new

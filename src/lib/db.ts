@@ -82,6 +82,17 @@ export async function getSellerTierStats(userId: string): Promise<{
   };
 }
 
+/**
+ * Format the grace-period expiration timestamp for human-friendly display
+ * in tier badges ("expires Jun 30"). Returns null if no expiry is set.
+ */
+export function formatTierExpires(expiresAt: string | null | undefined): string | null {
+  if (!expiresAt) return null;
+  const d = new Date(expiresAt);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
 export async function getSkuBySlug(slug: string): Promise<Sku | null> {
   const supabase = await createClient();
   const { data, error } = await supabase

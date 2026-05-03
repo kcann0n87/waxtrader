@@ -17,7 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { getProfile } from "@/lib/supabase/user";
-import { getSellerTierStats } from "@/lib/db";
+import { formatTierExpires, getSellerTierStats } from "@/lib/db";
 import {
   TIER_FEE,
   TIER_THRESHOLDS,
@@ -133,6 +133,7 @@ export async function AuthMenu() {
             currentTier={currentTier}
             salesLast30d={stats.salesLast30d}
             gmvLast30dCents={stats.gmvLast30dCents}
+            expiresLabel={formatTierExpires(profile.tier_expires_at)}
           />
         )}
 
@@ -173,10 +174,12 @@ function TierBadge({
   currentTier,
   salesLast30d,
   gmvLast30dCents,
+  expiresLabel,
 }: {
   currentTier: SellerTier;
   salesLast30d: number;
   gmvLast30dCents: number;
+  expiresLabel: string | null;
 }) {
   const colors = TIER_COLOR[currentTier];
   const Icon = TIER_ICON[currentTier];
@@ -217,6 +220,11 @@ function TierBadge({
           {(TIER_FEE[currentTier] * 100).toFixed(0)}% seller fee
         </span>
       </div>
+      {expiresLabel && currentTier !== "Starter" && (
+        <div className="mt-1 text-[10px] text-white/50">
+          Tier good through <strong className="text-white/80">{expiresLabel}</strong>
+        </div>
+      )}
 
       {next && nextThreshold ? (
         <>
