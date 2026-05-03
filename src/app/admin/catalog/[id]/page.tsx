@@ -43,6 +43,7 @@ export default async function AdminEditSkuPage({
             image_url: sku.image_url ?? "",
             gradient_from: sku.gradient_from ?? "#475569",
             gradient_to: sku.gradient_to ?? "#0f172a",
+            is_published: sku.is_published ?? true,
           }}
         />
       </div>

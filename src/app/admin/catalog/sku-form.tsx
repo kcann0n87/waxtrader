@@ -22,6 +22,7 @@ type SkuFormValues = {
   image_url: string;
   gradient_from: string;
   gradient_to: string;
+  is_published: boolean;
 };
 
 export function SkuForm({
@@ -44,6 +45,7 @@ export function SkuForm({
     image_url: initial?.image_url ?? "",
     gradient_from: initial?.gradient_from ?? "#475569",
     gradient_to: initial?.gradient_to ?? "#0f172a",
+    is_published: initial?.is_published ?? true,
   });
   const [pending, start] = useTransition();
   const [uploading, startUpload] = useTransition();
@@ -74,6 +76,7 @@ export function SkuForm({
       description: vals.description,
       gradient_from: vals.gradient_from,
       gradient_to: vals.gradient_to,
+      is_published: vals.is_published,
     };
     start(async () => {
       const result = skuId
@@ -319,6 +322,28 @@ export function SkuForm({
           />
         </Field>
       </div>
+
+      {/* Publish toggle — hidden SKUs sit in the catalog for admin staging
+          but don't appear in any public-facing query (homepage, search,
+          variant selector, /sell catalog picker). Useful for preloading
+          historical years before launch, or holding a SKU back while
+          still finalizing description / image. */}
+      <label className="flex items-start gap-3 rounded-md border border-white/10 bg-white/[0.02] p-3">
+        <input
+          type="checkbox"
+          checked={vals.is_published}
+          onChange={(e) => set("is_published", e.target.checked)}
+          className="mt-0.5 h-4 w-4 cursor-pointer accent-amber-400"
+        />
+        <span className="text-xs">
+          <span className="font-semibold text-white">Published</span>
+          <span className="block text-white/60">
+            Unchecked = hidden from public browse, search, and product
+            pages. Admin still sees it here. Toggle on when ready to
+            launch.
+          </span>
+        </span>
+      </label>
 
       {err && <p className="text-xs text-rose-300">{err}</p>}
 

@@ -283,6 +283,7 @@ export async function adminCreateSku(input: {
   image_url?: string;
   gradient_from?: string;
   gradient_to?: string;
+  is_published?: boolean;
 }): Promise<Result> {
   const admin = await requireAdmin();
   if (!admin) return { error: "Forbidden" };
@@ -302,6 +303,7 @@ export async function adminCreateSku(input: {
       image_url: input.image_url ?? null,
       gradient_from: input.gradient_from ?? "#475569",
       gradient_to: input.gradient_to ?? "#0f172a",
+      is_published: input.is_published ?? true,
     })
     .select("id, slug")
     .maybeSingle();
@@ -330,6 +332,7 @@ export async function adminUpdateSku(
     image_url: string | null | undefined;
     gradient_from: string;
     gradient_to: string;
+    is_published: boolean;
   }>,
 ): Promise<Result> {
   const admin = await requireAdmin();

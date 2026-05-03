@@ -13,9 +13,11 @@ export default async function AdminCatalogPage({
   const { q, sport } = await searchParams;
   const sb = serviceRoleClient();
 
+  // Admin sees ALL SKUs — published and hidden — so we can stage
+  // future catalog entries and confirm they're correctly hidden.
   let query = sb
     .from("skus")
-    .select("id, slug, year, brand, set_name, product, sport, release_date, image_url")
+    .select("id, slug, year, brand, set_name, product, sport, release_date, image_url, is_published")
     .order("release_date", { ascending: false });
   if (sport) query = query.eq("sport", sport);
   if (q) query = query.ilike("slug", `%${q}%`);
@@ -24,6 +26,7 @@ export default async function AdminCatalogPage({
 
   const totalCount = (skus ?? []).length;
   const withImages = (skus ?? []).filter((s) => s.image_url).length;
+  const hiddenCount = (skus ?? []).filter((s) => !s.is_published).length;
 
   return (
     <div>
@@ -33,6 +36,14 @@ export default async function AdminCatalogPage({
           <p className="mt-1 text-xs text-white/60">
             {totalCount} SKUs · {withImages} with photos · {totalCount - withImages} on
             placeholder
+            {hiddenCount > 0 && (
+              <>
+                {" · "}
+                <span className="font-semibold text-fuchsia-300">
+                  {hiddenCount} hidden
+                </span>
+              </>
+            )}
           </p>
         </div>
         <Link
@@ -94,8 +105,15 @@ export default async function AdminCatalogPage({
                   />
                 </td>
                 <td className="px-4 py-3">
-                  <div className="text-sm font-semibold text-white">
-                    {s.year} {s.brand} {s.set_name}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-semibold text-white">
+                      {s.year} {s.brand} {s.set_name}
+                    </span>
+                    {!s.is_published && (
+                      <span className="rounded bg-fuchsia-500/15 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-fuchsia-300 uppercase">
+                        Hidden
+                      </span>
+                    )}
                   </div>
                   <div className="font-mono text-[10px] text-white/60">{s.slug}</div>
                 </td>

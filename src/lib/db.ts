@@ -41,6 +41,7 @@ export async function getAllSkus(): Promise<Sku[]> {
   const { data, error } = await supabase
     .from("skus")
     .select("*")
+    .eq("is_published", true)
     .order("release_date", { ascending: false });
   if (error) throw error;
   return (data ?? []).map(rowToSku);
@@ -99,6 +100,7 @@ export async function getSkuBySlug(slug: string): Promise<Sku | null> {
     .from("skus")
     .select("*")
     .eq("slug", slug)
+    .eq("is_published", true)
     .maybeSingle();
   if (error) throw error;
   return data ? rowToSku(data) : null;
@@ -119,7 +121,8 @@ export async function getVariantsForGroup(
   const { data: skuRows, error } = await supabase
     .from("skus")
     .select("*")
-    .eq("variant_group", group);
+    .eq("variant_group", group)
+    .eq("is_published", true);
   if (error) throw error;
   if (!skuRows || skuRows.length === 0) return [];
 
@@ -503,7 +506,11 @@ export async function getCatalogWithPricing(): Promise<
     const supabase = await createClient();
 
     const [skusRes, listingsRes, salesRes] = await Promise.all([
-      supabase.from("skus").select("*").order("release_date", { ascending: false }),
+      supabase
+        .from("skus")
+        .select("*")
+        .eq("is_published", true)
+        .order("release_date", { ascending: false }),
       supabase.from("listings").select("sku_id, price_cents").eq("status", "Active"),
       supabase
         .from("sales")
