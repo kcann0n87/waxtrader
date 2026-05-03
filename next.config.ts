@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "i0.wp.com" },
       { protocol: "https", hostname: "slabstat-production.s3.amazonaws.com" },
       { protocol: "https", hostname: "*.amazonaws.com" },
+      // Common image-host fallbacks for admins pasting third-party
+      // URLs into the SkuForm image_url field instead of uploading.
+      { protocol: "https", hostname: "i.ebayimg.com" },
+      { protocol: "https", hostname: "img.beckett.com" },
+      { protocol: "https", hostname: "xcdn.checklistinsider.com" },
       // Admin uploads from /admin/catalog land in the Supabase Storage
       // `product-images` bucket; the public URL is on the project's
       // supabase.co subdomain. Wildcard so we don't have to bake the
