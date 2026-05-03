@@ -805,8 +805,18 @@ export async function cancelOrder(formData: FormData): Promise<ActionResult> {
     if (!["Charged", "InEscrow"].includes(order.status))
       return { error: `Order is ${order.status} — open a dispute instead.` };
 
-    const canceledBy: "buyer" | "seller" =
-      order.seller_id === user.id ? "seller" : "buyer";
+    // Default to whoever's actually cancelling. Sellers can override to
+    // 'buyer' via the form's attribution dropdown — used when the buyer
+    // messaged asking the seller to cancel ("changed my mind, please
+    // cancel"). Buyer-attributed cancels DON'T count against the seller's
+    // tier-promotion cap. Buyer's own cancels are always 'buyer' — they
+    // can't claim a cancel was seller-initiated.
+    const userIsSeller = order.seller_id === user.id;
+    const requestedBy = String(formData.get("canceledBy") || "").trim();
+    let canceledBy: "buyer" | "seller" = userIsSeller ? "seller" : "buyer";
+    if (userIsSeller && (requestedBy === "buyer" || requestedBy === "seller")) {
+      canceledBy = requestedBy;
+    }
 
     // Service role for the cancel + listing reopen. Ownership was just
     // validated; the regular auth client could in theory do the order

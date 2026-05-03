@@ -16,6 +16,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { payOrderAndRedirect } from "@/app/actions/stripe-checkout";
 import { CancelOrderButton } from "./cancel-order";
+import { PartialRefundButton } from "./partial-refund";
 import { ConfirmDeliveryButton } from "./confirm-delivery";
 import { LeaveReview } from "./leave-review";
 import { MarkDeliveredButton } from "./mark-delivered";
@@ -60,6 +61,8 @@ type OrderRow = {
   released_at: string | null;
   canceled_at: string | null;
   cancel_reason: string | null;
+  canceled_by: "buyer" | "seller" | "admin" | null;
+  partial_refund_cents: number | null;
   payment_status: string | null;
   stripe_payment_intent_id: string | null;
   stripe_charge_id: string | null;
@@ -550,6 +553,39 @@ export default async function OrderDetailPage({
               </p>
               <div className="mt-3 border-t border-amber-700/30 pt-2">
                 <CancelOrderButton orderId={order.id} total={total} />
+              </div>
+            </div>
+          )}
+
+          {/* Seller-only: cancel + partial refund tools.
+              - Cancel: only available pre-ship (Charged/InEscrow). Has
+                attribution dropdown (buyer-requested vs seller-initiated)
+                so genuine "buyer asked me to cancel" cases don't ding the
+                tier-promotion cap.
+              - Partial refund: available any time the order is paid +
+                escrowed but not yet released. Comes out of seller payout. */}
+          {isSeller && !isCanceled && (order.payment_status === "paid" || !isShipped) && (
+            <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
+              <div className="mb-2 flex items-center gap-2 text-sm font-bold text-white">
+                <Package size={16} className="text-amber-300" />
+                Order tools
+              </div>
+              <p className="mb-4 text-xs text-white/60">
+                Resolve issues without escalating to a dispute. Both actions
+                go on the order record and notify the buyer.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                {order.payment_status === "paid" &&
+                  ["InEscrow", "Shipped", "Delivered"].includes(order.status) && (
+                    <PartialRefundButton
+                      orderId={order.id}
+                      itemPrice={order.price_cents / 100}
+                      alreadyRefundedCents={order.partial_refund_cents ?? 0}
+                    />
+                  )}
+                {!isShipped && (
+                  <CancelOrderButton orderId={order.id} total={total} isSeller />
+                )}
               </div>
             </div>
           )}
