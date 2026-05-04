@@ -6,6 +6,7 @@ import { getAllSkus } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://waxdepot.io";
+const BETA_MODE = process.env.NEXT_PUBLIC_BETA_MODE !== "false";
 
 const STATIC_PATHS: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "/", priority: 1.0, changeFrequency: "hourly" },
@@ -27,6 +28,20 @@ const STATIC_PATHS: { path: string; priority: number; changeFrequency: MetadataR
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+
+  // Beta mode: only /coming-soon is reachable for crawlers — every other
+  // path middleware-redirects there. Submitting marketplace URLs would just
+  // teach search engines to follow redirect chains.
+  if (BETA_MODE) {
+    return [
+      {
+        url: `${BASE}/coming-soon`,
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: 1.0,
+      },
+    ];
+  }
 
   let skuEntries: MetadataRoute.Sitemap = [];
   try {

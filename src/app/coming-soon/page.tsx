@@ -4,6 +4,28 @@ import { ShieldCheck, TrendingUp, Zap } from "lucide-react";
 import { LogoMark } from "@/components/logo-mark";
 import { WaitlistForm } from "./waitlist-form";
 
+const TITLE = "WaxDepot — Coming Spring 2026";
+const DESCRIPTION =
+  "The marketplace for serious sealed sports-card collectors. Real bid/ask, real escrow, no eBay tax. Join the waitlist for early access.";
+
+export const metadata = {
+  // absolute skips the layout's "%s · WaxDepot" template — TITLE already
+  // includes the brand.
+  title: { absolute: TITLE },
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "/coming-soon",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+};
+
 export default function ComingSoonPage() {
   return (
     <div className="relative isolate flex min-h-screen flex-col overflow-hidden bg-[#0a0a0b] px-4 pt-8 pb-12">
