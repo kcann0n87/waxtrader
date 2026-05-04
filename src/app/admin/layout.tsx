@@ -9,6 +9,7 @@ import {
   ScrollText,
   Lightbulb,
   Mail,
+  Inbox,
 } from "lucide-react";
 import { requireAdminOrNotFound } from "@/lib/admin";
 
@@ -53,6 +54,11 @@ export default async function AdminLayout({
               href="/admin/invite"
               icon={<Mail size={14} />}
               label="Invite"
+            />
+            <NavLink
+              href="/admin/waitlist"
+              icon={<Inbox size={14} />}
+              label="Waitlist"
             />
             <NavLink
               href="/admin/feedback"
