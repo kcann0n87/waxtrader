@@ -31,7 +31,9 @@ export default async function AdminLayout({
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[200px_1fr]">
         <aside>
-          <nav className="rounded-xl border border-white/10 bg-[#101012] p-2">
+          {/* Horizontal scroll on mobile (saves ~360px of vertical space
+              before content shows up); vertical column at lg+. */}
+          <nav className="-mx-4 flex gap-1 overflow-x-auto rounded-none border-b border-white/10 bg-[#101012] px-4 py-2 lg:mx-0 lg:flex-col lg:gap-0 lg:rounded-xl lg:border lg:px-2">
             <NavLink href="/admin" icon={<ShieldCheck size={14} />} label="Overview" />
             <NavLink href="/admin/orders" icon={<Receipt size={14} />} label="Orders" />
             <NavLink
@@ -71,7 +73,7 @@ export default async function AdminLayout({
               label="Audit log"
             />
           </nav>
-          <p className="mt-3 px-2 text-[10px] leading-relaxed text-white/50">
+          <p className="mt-3 hidden px-2 text-[10px] leading-relaxed text-white/50 lg:block">
             Every destructive action (refund, force-release, cancel) is logged in
             <code className="rounded bg-white/5 px-1 py-0.5 font-mono">admin_actions</code>.
           </p>
@@ -94,7 +96,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-white/70 transition hover:bg-white/5 hover:text-white"
+      className="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold whitespace-nowrap text-white/70 transition hover:bg-white/5 hover:text-white"
     >
       {icon}
       {label}

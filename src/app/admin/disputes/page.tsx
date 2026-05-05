@@ -77,7 +77,7 @@ function List({
 }) {
   return (
     <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#101012]">
-      <table className="w-full text-sm">
+      <table className="w-full min-w-[640px] text-sm">
         <thead className="bg-white/5 text-left text-[10px] font-semibold tracking-[0.15em] text-white/60 uppercase">
           <tr>
             <th className="px-4 py-3">Dispute</th>
