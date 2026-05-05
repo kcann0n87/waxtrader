@@ -111,12 +111,16 @@ export async function refreshSellerStripeStatus(): Promise<ConnectResult> {
     if (!profile?.stripe_account_id) return { error: "No Stripe account on file." };
 
     const account = await stripe.accounts.retrieve(profile.stripe_account_id);
+    const charges = !!account.charges_enabled;
     await supabase
       .from("profiles")
       .update({
-        stripe_charges_enabled: !!account.charges_enabled,
+        stripe_charges_enabled: charges,
         stripe_payouts_enabled: !!account.payouts_enabled,
         stripe_details_submitted: !!account.details_submitted,
+        // Mirror the webhook: charges-enabled marks the user as a seller.
+        // Sticky once true so a transient Stripe issue doesn't downgrade.
+        ...(charges ? { is_seller: true } : {}),
       })
       .eq("id", user.id);
 

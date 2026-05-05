@@ -91,12 +91,20 @@ async function handleEvent(event: Stripe.Event) {
   switch (event.type) {
     case "account.updated": {
       const account = event.data.object as Stripe.Account;
+      // Flip is_seller=true the first time charges become enabled —
+      // that's when a profile transitions from "browsing" to actually
+      // being a seller (can receive payouts, can have listings on
+      // them). We don't flip is_seller back to false if charges go
+      // off later — that's an account-issue state, not a "they
+      // stopped being a seller" state.
+      const charges = !!account.charges_enabled;
       await supabase
         .from("profiles")
         .update({
-          stripe_charges_enabled: !!account.charges_enabled,
+          stripe_charges_enabled: charges,
           stripe_payouts_enabled: !!account.payouts_enabled,
           stripe_details_submitted: !!account.details_submitted,
+          ...(charges ? { is_seller: true } : {}),
         })
         .eq("stripe_account_id", account.id);
       break;
