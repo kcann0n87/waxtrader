@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Loader2, Send } from "lucide-react";
+import { CheckCircle2, Loader2, Send, Zap } from "lucide-react";
 import { adminInviteUser } from "@/app/actions/admin";
 
 type Row = {
@@ -11,6 +11,7 @@ type Row = {
   source: string | null;
   created_at: string;
   invitedAt: string | null;
+  activatedAt: string | null;
 };
 
 export function WaitlistTable({ rows }: { rows: Row[] }) {
@@ -68,7 +69,15 @@ function WaitlistRow({ row }: { row: Row }) {
         {new Date(row.created_at).toLocaleDateString()}
       </td>
       <td className="px-4 py-2">
-        {invited ? (
+        {row.activatedAt ? (
+          <span
+            className="inline-flex items-center gap-1 rounded-md bg-sky-500/15 px-2 py-0.5 text-[11px] font-bold text-sky-300"
+            title={`Activated ${new Date(row.activatedAt).toLocaleString()}`}
+          >
+            <Zap size={11} />
+            Activated
+          </span>
+        ) : invited ? (
           <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-300">
             <CheckCircle2 size={11} />
             Invited

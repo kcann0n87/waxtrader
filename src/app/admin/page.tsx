@@ -45,6 +45,7 @@ async function loadOverview() {
     waitlistRes,
     waitlistEmailsRes,
     inviteLogsRes,
+    authUsersRes,
   ] = await Promise.all([
     // Counters in one round-trip via parallel sub-queries
     Promise.all([
@@ -130,6 +131,9 @@ async function loadOverview() {
       .select("created_at, details")
       .eq("action", "invite_user")
       .order("created_at", { ascending: false }),
+    // Auth users so we can detect who's actually clicked through their
+    // invite (email_confirmed_at is set on first sign-in).
+    sb.auth.admin.listUsers({ page: 1, perPage: 1000 }),
   ]);
 
   const [
@@ -247,12 +251,28 @@ async function loadOverview() {
       .map((r) => (r.details as { email?: string } | null)?.email?.toLowerCase())
       .filter((e): e is string => !!e),
   );
+  const activatedEmails = new Set(
+    (authUsersRes.data?.users ?? [])
+      .filter((u) => !!u.email_confirmed_at)
+      .map((u) => u.email?.toLowerCase())
+      .filter((e): e is string => !!e),
+  );
   const waitlistPending = (waitlistEmailsRes.data ?? []).filter(
     (w) => !invitedEmails.has(w.email.toLowerCase()),
+  ).length;
+  const waitlistActivated = (waitlistEmailsRes.data ?? []).filter(
+    (w) => activatedEmails.has(w.email.toLowerCase()),
   ).length;
   const invites7 = (inviteLogsRes.data ?? []).filter(
     (r) => r.created_at >= sevenDaysAgo,
   ).length;
+  // Activation rate of invited waitlist emails — null when nothing's been
+  // invited yet so we don't render "NaN%".
+  const invitedCount = (waitlistEmailsRes.data ?? []).filter((w) =>
+    invitedEmails.has(w.email.toLowerCase()),
+  ).length;
+  const activationRate =
+    invitedCount > 0 ? Math.round((waitlistActivated / invitedCount) * 100) : null;
 
   return {
     orderCount: orderCount ?? 0,
@@ -272,7 +292,9 @@ async function loadOverview() {
     lastActions: actionsRes.data ?? [],
     waitlistTotal,
     waitlistPending,
+    waitlistActivated,
     invites7,
+    activationRate,
   };
 }
 
@@ -307,9 +329,14 @@ export default async function AdminOverview() {
         />
         <Stat
           icon={<UserPlus size={14} />}
-          label="Signups · 30d"
-          value={data.signups30}
-          sub={`${data.signups7} last 7d`}
+          label="Activated"
+          value={data.waitlistActivated}
+          sub={
+            data.activationRate !== null
+              ? `${data.activationRate}% of invited`
+              : "no invites sent yet"
+          }
+          href="/admin/waitlist?filter=activated"
         />
         <Stat
           icon={<Package2 size={14} />}

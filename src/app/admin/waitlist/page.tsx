@@ -5,7 +5,7 @@ import { WaitlistTable } from "./waitlist-table";
 
 export const dynamic = "force-dynamic";
 
-const FILTERS = ["all", "pending", "invited"] as const;
+const FILTERS = ["all", "pending", "invited", "activated"] as const;
 type Filter = (typeof FILTERS)[number];
 
 export default async function AdminWaitlistPage({
@@ -46,18 +46,40 @@ export default async function AdminWaitlistPage({
     if (email && !invitedAt.has(email)) invitedAt.set(email, row.created_at);
   }
 
-  const rows = (waitlist ?? []).map((w) => ({
-    ...w,
-    invitedAt: invitedAt.get(w.email.toLowerCase()) ?? null,
-  }));
-  const filtered = rows.filter((r) =>
-    filter === "pending" ? !r.invitedAt : filter === "invited" ? !!r.invitedAt : true,
-  );
+  // Pull auth users to detect who's actually activated (email_confirmed_at
+  // gets set the first time they click the magic link). Service-role
+  // listUsers returns up to 1000 with perPage=1000 — fine for beta scale.
+  const { data: usersList } = await sb.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
+  const activatedAt = new Map<string, string>();
+  for (const u of usersList?.users ?? []) {
+    if (u.email && u.email_confirmed_at) {
+      activatedAt.set(u.email.toLowerCase(), u.email_confirmed_at);
+    }
+  }
+
+  const rows = (waitlist ?? []).map((w) => {
+    const key = w.email.toLowerCase();
+    return {
+      ...w,
+      invitedAt: invitedAt.get(key) ?? null,
+      activatedAt: activatedAt.get(key) ?? null,
+    };
+  });
+  const filtered = rows.filter((r) => {
+    if (filter === "pending") return !r.invitedAt;
+    if (filter === "invited") return !!r.invitedAt && !r.activatedAt;
+    if (filter === "activated") return !!r.activatedAt;
+    return true;
+  });
 
   const counts = {
     all: rows.length,
     pending: rows.filter((r) => !r.invitedAt).length,
-    invited: rows.filter((r) => r.invitedAt).length,
+    invited: rows.filter((r) => !!r.invitedAt && !r.activatedAt).length,
+    activated: rows.filter((r) => !!r.activatedAt).length,
   };
 
   return (
@@ -111,7 +133,14 @@ export default async function AdminWaitlistPage({
                   : "border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:text-white"
               }`}
             >
-              {f === "all" ? "All" : f === "pending" ? "Pending" : "Invited"} ·{" "}
+              {f === "all"
+                ? "All"
+                : f === "pending"
+                  ? "Pending"
+                  : f === "invited"
+                    ? "Invited"
+                    : "Activated"}
+              {" · "}
               {counts[f]}
             </Link>
           );
