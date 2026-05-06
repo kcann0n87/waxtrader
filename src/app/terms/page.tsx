@@ -77,7 +77,7 @@ export default function TermsPage() {
             You authorize WaxDepot to instruct Stripe to release escrowed funds to
             your connected account on your behalf, net of WaxDepot&apos;s fees.
             Payouts arrive on your seller-tier&apos;s cadence (Starter: weekly Friday;
-            Pro: twice weekly; Elite: every 3 days).
+            Pro: twice weekly Tue + Fri; Elite: every 3 days; Apex: daily).
           </p>
         </Section>
 
