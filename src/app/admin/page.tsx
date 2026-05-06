@@ -146,7 +146,7 @@ async function loadOverview() {
   const escrowSum =
     (escrowRes.data ?? []).reduce((s, o) => s + (o.total_cents ?? 0), 0) / 100;
 
-  // 30-day GMV + estimated platform fees. We assume Starter tier (10%) since
+  // 30-day GMV + estimated platform fees. We assume Starter tier (12%) since
   // we don't have per-seller tier joined here — close enough for an at-a-
   // glance figure; the real number is per-seller and lives in Stripe.
   const gmv30Cents =

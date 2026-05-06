@@ -108,7 +108,7 @@ export default function ComingSoonPage() {
           <Pillar
             icon={<Zap size={16} />}
             title="Flat seller fees"
-            body="10/8/6% by tier. No buyer fees. No hidden processing."
+            body="12% to start, dropping to 6% as you tier up. No buyer fees."
           />
         </div>
       </section>

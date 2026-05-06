@@ -70,7 +70,7 @@ export const helpCategories: HelpCategory[] = [
       {
         slug: "fees",
         title: "What are the fees?",
-        body: "Flat seller-only fee. No buyer fees, no separate payment processing — we absorb that. Three tiers based on rolling 30-day sales: Starter 10% (default), Pro 8% (100+ sales/mo, 99%+ positive), Elite 6% (500+ sales/mo, 99.5%+ positive). Pro unlocks twice-weekly payouts (Tue + Fri); Elite unlocks payouts every 3 days. No listing fees, no monthly fees.",
+        body: "Flat seller-only fee — no buyer fees, no separate payment processing (we absorb it). Four tiers, OR-logic on rolling sales|GMV plus a positive-feedback floor: Starter 12% (default), Pro 10% (30+ sales OR $5K GMV, 99%+ positive), Elite 8% (150+ sales OR $10K GMV, 99.5%+ positive), Apex 6% (1000+ sales OR $100K GMV, 99.5%+ positive). Pro unlocks Tue+Fri payouts, Elite every 3 days, Apex daily. No listing fees, no monthly fees.",
       },
     ],
   },

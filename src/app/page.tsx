@@ -378,7 +378,7 @@ export default async function Home({
             {
               icon: <Star size={20} />,
               title: "Tier-based fees",
-              body: "Earn 10% → 8% → 6% commission savings as you climb. Elite sellers get paid every three days.",
+              body: "Tiered seller fee from 12% down to 6% as you climb. Apex sellers get daily payouts.",
             },
           ].map((f) => (
             <div key={f.title}>

@@ -115,7 +115,7 @@ export default function HowItWorksPage() {
             items={[
               "Live bid/ask spread shows the real market",
               "Buy at ask or bid below — sellers respond to demand",
-              "10% flat seller fee, no buyer fees, free shipping option",
+              "Tiered seller fee 12% → 6%, no buyer fees, free shipping option",
               "Stripe escrow + 2-day dispute window protects buyers",
               "Sealed-only listings, dispute-on-delivery for tampering",
             ]}
@@ -133,7 +133,7 @@ export default function HowItWorksPage() {
         />
         <Pillar
           title="Seller fee schedule"
-          body="Starter 10% · Pro 8% · Elite 6%. No listing fees, no payment surcharges."
+          body="Starter 12% · Pro 10% · Elite 8% · Apex 6%. No listing fees, no payment surcharges."
           href="/help/selling/fees"
         />
         <Pillar
