@@ -156,6 +156,7 @@ Apply in order. Each is idempotent so re-runs are safe:
 0035           — adds 'bid-declined' / 'order-canceled' to notification_type enum
 0036           — backfills profiles.is_seller for accounts past Stripe Connect
 0037           — Topps Chrome Platinum BB + Signature Class FB (May 2026 drops)
+0038           — adds profiles.notification_prefs jsonb for per-category email opt-out
 ```
 
 Plus the cleanup SQL block delivered in chat (UEFA slug rename, image binds
@@ -191,10 +192,6 @@ Once `NEXT_PUBLIC_BETA_MODE=false`:
 
 ## What's NOT shipped (worth knowing)
 
-- **Notification preferences** — users can't opt out of specific
-  email types. All-or-nothing today (the `notifications.unread` and
-  `mark all read` flows handle the in-app side, but transactional emails
-  always send).
 - **Buyer dispute auto-escalation** — disputes go pending → admin
   resolves manually. No auto-timeout escalation.
 - **Mobile app** — web only. Mobile web is mobile-audited (admin tables
