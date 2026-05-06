@@ -35,19 +35,14 @@ export default function ComingSoonPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
       </div>
 
-      {/* Top bar — logo only */}
-      <header className="relative mx-auto flex w-full max-w-6xl items-center justify-between">
+      {/* Top bar — logo only. The "Sign in" entry point lives in the
+          hero pill instead of a duplicate header link. */}
+      <header className="relative mx-auto flex w-full max-w-6xl items-center">
         <Link href="/coming-soon" className="inline-flex items-center gap-2.5">
           <LogoMark size={36} />
           <span className="font-display text-xl font-black tracking-tight text-white">
             Wax<span className="text-amber-400">Depot</span>
           </span>
-        </Link>
-        <Link
-          href="/login"
-          className="hidden text-sm font-semibold text-white/50 transition hover:text-amber-300 sm:inline"
-        >
-          Sign in
         </Link>
       </header>
 
