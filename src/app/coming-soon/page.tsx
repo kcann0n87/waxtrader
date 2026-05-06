@@ -1,12 +1,10 @@
 import Link from "next/link";
-import { Suspense } from "react";
 import { ShieldCheck, TrendingUp, Zap } from "lucide-react";
 import { LogoMark } from "@/components/logo-mark";
-import { WaitlistForm } from "./waitlist-form";
 
 const TITLE = "WaxDepot — Coming Spring 2026";
 const DESCRIPTION =
-  "The marketplace for serious sealed sports-card collectors. Real bid/ask, real escrow, no eBay tax. Join the waitlist for early access.";
+  "The marketplace for serious sealed sports-card collectors. Real bid/ask, real escrow, no eBay tax. Invite-only beta.";
 
 export const metadata = {
   // absolute skips the layout's "%s · WaxDepot" template — TITLE already
@@ -79,12 +77,15 @@ export default function ComingSoonPage() {
           Real bid/ask. Real escrow. No eBay tax.
         </p>
 
-        {/* Primary CTA — waitlist */}
-        <div className="mt-10 w-full max-w-md">
-          <Suspense fallback={null}>
-            <WaitlistForm />
-          </Suspense>
-        </div>
+        {/* Invite-only notice — no public sign-up while we're in beta. */}
+        <p className="mt-10 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white/60">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+          Invite-only.{" "}
+          <Link href="/login" className="font-semibold text-amber-300 hover:text-amber-200">
+            Sign in
+          </Link>{" "}
+          if you have an account.
+        </p>
       </main>
 
       {/* Footer band — what we're building (sneak peek) */}
