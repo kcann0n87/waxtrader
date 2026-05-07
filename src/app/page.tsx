@@ -4,7 +4,7 @@ import { ProductCard } from "@/components/product-card";
 import { RecentSalesTicker } from "@/components/recent-sales-ticker";
 import { RecentlyViewed } from "@/components/recently-viewed";
 import { getCatalogWithPricing, getMarketplaceStats } from "@/lib/db";
-import { formatUSD, isPresale } from "@/lib/utils";
+import { formatSeasonYear, formatUSD, isPresale } from "@/lib/utils";
 import type { Sku } from "@/lib/data";
 
 /**
@@ -586,6 +586,42 @@ function BrowseGrid({
             Clear filter
           </Link>
         </div>
+      ) : sport && !year ? (
+        // Year-grouped sections when a sport filter is active without a
+        // specific year — gives Soccer / NBA / etc. a "by season" feel
+        // instead of one giant grid. Each section header uses the
+        // formatSeasonYear logic so NBA/NHL show "2024-25", Soccer's
+        // UEFA-derived years show "2024-25", MLS/WC stay single-year.
+        Object.entries(
+          sorted.reduce((acc, c) => {
+            const k = String(c.sku.year);
+            (acc[k] ||= []).push(c);
+            return acc;
+          }, {} as Record<string, typeof sorted>),
+        )
+          .sort((a, b) => Number(b[0]) - Number(a[0]))
+          .map(([y, group]) => (
+            <div key={y} className="mb-12">
+              <h3 className="font-display mb-4 text-xl font-black tracking-tight text-white">
+                {formatSeasonYear(Number(y), sport, group[0].sku.set)}
+                <span className="ml-2 text-sm font-medium text-white/40">
+                  · {group.length}
+                </span>
+              </h3>
+              <Grid>
+                {group.map((c) => (
+                  <ProductCard
+                    key={c.sku.variantGroup ?? c.sku.id}
+                    sku={c.sku}
+                    lowestAsk={c.lowestAskInGroup}
+                    lastSale={c.lastSaleInGroup}
+                    presale={isPresale(c.sku.releaseDate)}
+                    variantCount={c.variantCount}
+                  />
+                ))}
+              </Grid>
+            </div>
+          ))
       ) : (
         <Grid>
           {sorted.map((c) => (
