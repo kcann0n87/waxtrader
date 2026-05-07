@@ -29,7 +29,13 @@ import {
   getVariantsForGroup,
 } from "@/lib/db";
 import { sortByVariantOrder, variantLabel } from "@/lib/variants";
-import { formatUSD, formatUSDFull, isPresale } from "@/lib/utils";
+import {
+  formatSeasonYear,
+  formatSkuTitle,
+  formatUSD,
+  formatUSDFull,
+  isPresale,
+} from "@/lib/utils";
 import type { Metadata } from "next";
 
 /**
@@ -44,7 +50,11 @@ function groupTitle(year: number, brand: string, set: string, sport: string): st
   // "2025 Bowman Bowman MLB").
   const setLabel =
     set === brand || set.startsWith(`${brand} `) ? set : `${brand} ${set}`;
-  return `${year} ${setLabel} ${sport === "Pokemon" ? "TCG" : sport}`;
+  // formatSeasonYear handles split-season prefixes (NBA/NHL → "2025-26",
+  // Soccer UEFA/PL → "2025-26", MLS/World Cup → "2025"). Without this we
+  // got "2025 Topps Inception NBA" on the product page H1 when it should
+  // read "2025-26 Topps Inception NBA".
+  return `${formatSeasonYear(year, sport, set)} ${setLabel} ${sport === "Pokemon" ? "TCG" : sport}`;
 }
 
 export async function generateMetadata({
@@ -162,7 +172,7 @@ export default async function ProductPage({
   const showVariantSelector = variants.length > 1;
   const titleText = showVariantSelector
     ? groupTitle(sku.year, sku.brand, sku.set, sku.sport)
-    : `${sku.year} ${sku.brand} ${sku.set} ${sku.product}`;
+    : formatSkuTitle(sku);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 lg:px-6">

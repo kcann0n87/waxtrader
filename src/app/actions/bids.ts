@@ -51,16 +51,25 @@ export async function createBid(formData: FormData): Promise<CreateBidResult> {
         expires_at: expiresAt,
         status: "Active",
       })
-      .select("id, expires_at, sku:skus!bids_sku_id_fkey(slug, year, brand, product)")
+      .select("id, expires_at, sku:skus!bids_sku_id_fkey(slug, year, brand, set_name, product)")
       .single();
 
     if (error) return { error: error.message };
 
     const skuRel = Array.isArray(data?.sku) ? data.sku[0] : data?.sku;
-    const skuMeta = skuRel as { slug?: string; year?: number; brand?: string; product?: string } | null;
+    const skuMeta = skuRel as {
+      slug?: string;
+      year?: number;
+      brand?: string;
+      set_name?: string;
+      product?: string;
+    } | null;
     const slug = skuMeta?.slug;
+    // Match formatSkuTitle's "{year} {brand} {set} {product}" shape so the
+    // notification + email body reads "2025-26 Topps Inception Hobby Box"
+    // not "2025 Topps Hobby Box" (set_name was missing from the select).
     const productTitle = skuMeta
-      ? `${skuMeta.year} ${skuMeta.brand} ${skuMeta.product}`
+      ? `${skuMeta.year} ${skuMeta.brand} ${skuMeta.set_name} ${skuMeta.product}`
       : "your bid";
     const origin = siteUrl();
     const productHref = slug ? `${origin}/product/${slug}` : `${origin}/account`;
