@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 type FeedbackItem = {
   id: string;
-  type: "feature" | "set";
+  type: "feature" | "set" | "bug";
   payload: Record<string, string>;
   status: "pending" | "reviewed" | "accepted" | "declined" | "shipped";
   submitted_by: string | null;
@@ -55,6 +55,7 @@ export default async function AdminFeedbackPage({
     accepted: feedback.filter((f) => f.status === "accepted").length,
     feature: feedback.filter((f) => f.type === "feature").length,
     set: feedback.filter((f) => f.type === "set").length,
+    bug: feedback.filter((f) => f.type === "bug").length,
   };
 
   return (
@@ -65,7 +66,8 @@ export default async function AdminFeedbackPage({
           <p className="mt-1 text-xs text-white/60">
             {feedback.length} {feedback.length === 1 ? "submission" : "submissions"} ·{" "}
             <span className="text-amber-300">{counts.pending} pending</span> ·{" "}
-            {counts.feature} features · {counts.set} set requests
+            {counts.feature} features · {counts.set} set requests ·{" "}
+            <span className="text-rose-300">{counts.bug} bugs</span>
           </p>
         </div>
       </div>
@@ -111,6 +113,12 @@ export default async function AdminFeedbackPage({
           label="Set requests"
           href="/admin/feedback?type=set"
           active={type === "set"}
+        />
+        <FilterChip
+          label="Bugs"
+          href="/admin/feedback?type=bug"
+          active={type === "bug"}
+          accent="amber"
         />
       </div>
 

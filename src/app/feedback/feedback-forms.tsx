@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check, Loader2, Lightbulb, Package, Send } from "lucide-react";
+import { Bug, Check, Loader2, Lightbulb, Package, Send } from "lucide-react";
 import { submitFeedback } from "@/app/actions/feedback";
 
-type Tab = "feature" | "set";
+type Tab = "feature" | "set" | "bug";
 
 const SPORTS = ["NBA", "MLB", "NFL", "NHL", "Soccer", "Pokemon"] as const;
 
@@ -45,7 +45,9 @@ export function FeedbackForms({
         <p className="mt-2 text-sm text-emerald-100/80">
           {submittedType === "feature"
             ? "We'll triage your idea this week. If it lines up with what we're building, we'll loop back."
-            : "We'll verify the product is real, find a stock photo, and add it to the catalog. You'll get an email when it goes live."}
+            : submittedType === "bug"
+              ? "Bugs are triaged daily. If reproducible, we'll fix and follow up via email. Critical issues get prioritized first."
+              : "We'll verify the product is real, find a stock photo, and add it to the catalog. You'll get an email when it goes live."}
         </p>
         <button
           onClick={() => {
@@ -76,6 +78,12 @@ export function FeedbackForms({
           icon={<Package size={14} />}
           label="Request a set"
         />
+        <TabButton
+          active={tab === "bug"}
+          onClick={() => setTab("bug")}
+          icon={<Bug size={14} />}
+          label="Report a bug"
+        />
       </div>
 
       <form action={submit} className="space-y-4 p-6">
@@ -98,6 +106,57 @@ export function FeedbackForms({
                 required
                 rows={5}
                 placeholder="What's the workflow? Why is it useful? Anything specific you're hoping for."
+                className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+              />
+            </Field>
+          </>
+        ) : tab === "bug" ? (
+          <>
+            <Field label="One-line summary" htmlFor="bug-title">
+              <input
+                id="bug-title"
+                name="title"
+                required
+                maxLength={120}
+                placeholder='e.g. "Bid form shows wrong total at checkout"'
+                className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+              />
+            </Field>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_140px]">
+              <Field label="Where did it happen? (URL)" htmlFor="bug-url">
+                <input
+                  id="bug-url"
+                  name="url"
+                  type="url"
+                  placeholder="https://waxdepot.io/product/…"
+                  className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+                />
+              </Field>
+              <Field label="Severity" htmlFor="bug-severity">
+                <select
+                  id="bug-severity"
+                  name="severity"
+                  required
+                  defaultValue=""
+                  className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+                >
+                  <option value="" disabled>
+                    Pick…
+                  </option>
+                  <option value="low">Low — cosmetic</option>
+                  <option value="medium">Medium — annoying</option>
+                  <option value="high">High — blocks task</option>
+                  <option value="critical">Critical — money / data</option>
+                </select>
+              </Field>
+            </div>
+            <Field label="What happened? (steps to reproduce)" htmlFor="bug-description">
+              <textarea
+                id="bug-description"
+                name="description"
+                required
+                rows={5}
+                placeholder="1. Go to ... 2. Click ... 3. Expected: ... Actual: ..."
                 className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
               />
             </Field>
@@ -212,7 +271,11 @@ export function FeedbackForms({
             ) : (
               <Send size={14} />
             )}
-            {tab === "feature" ? "Send feature request" : "Send set request"}
+            {tab === "feature"
+              ? "Send feature request"
+              : tab === "bug"
+                ? "Send bug report"
+                : "Send set request"}
           </button>
         </div>
       </form>

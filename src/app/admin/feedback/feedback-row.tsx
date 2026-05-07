@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Bug,
   Check,
   Clock,
   Lightbulb,
@@ -37,6 +38,13 @@ const STATUS_COLOR: Record<Status, string> = {
   shipped: "bg-emerald-500/15 text-emerald-300",
 };
 
+const SEVERITY_COLOR: Record<string, string> = {
+  low: "bg-white/10 text-white/70",
+  medium: "bg-amber-500/15 text-amber-300",
+  high: "bg-orange-500/15 text-orange-300",
+  critical: "bg-rose-500/15 text-rose-300",
+};
+
 /**
  * One row in the admin feedback queue. Expanded inline so triage can
  * happen in-place without a route change. Status buttons fire a server
@@ -51,7 +59,7 @@ export function FeedbackRow({
 }: {
   item: {
     id: string;
-    type: "feature" | "set";
+    type: "feature" | "set" | "bug";
     payload: Record<string, string>;
     status: Status;
     submitted_by: string | null;
@@ -144,11 +152,15 @@ export function FeedbackRow({
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
             item.type === "feature"
               ? "bg-amber-500/15 text-amber-300"
-              : "bg-sky-500/15 text-sky-300"
+              : item.type === "bug"
+                ? "bg-rose-500/15 text-rose-300"
+                : "bg-sky-500/15 text-sky-300"
           }`}
         >
           {item.type === "feature" ? (
             <Lightbulb size={14} />
+          ) : item.type === "bug" ? (
+            <Bug size={14} />
           ) : (
             <Package size={14} />
           )}
@@ -156,10 +168,17 @@ export function FeedbackRow({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="truncate text-sm font-bold text-white">
-              {item.type === "feature"
+              {item.type === "feature" || item.type === "bug"
                 ? item.payload.title
                 : `${item.payload.year} ${item.payload.brand} ${item.payload.set_name} ${item.payload.sport}`}
             </span>
+            {item.type === "bug" && item.payload.severity && (
+              <span
+                className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${SEVERITY_COLOR[item.payload.severity] ?? "bg-white/10 text-white/70"}`}
+              >
+                {item.payload.severity}
+              </span>
+            )}
             <span
               className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${STATUS_COLOR[item.status]}`}
             >
@@ -196,6 +215,32 @@ export function FeedbackRow({
               <p className="text-sm whitespace-pre-line text-white/90">
                 {item.payload.description}
               </p>
+            ) : item.type === "bug" ? (
+              <div className="space-y-3">
+                {item.payload.url && (
+                  <div>
+                    <span className="text-[10px] font-semibold tracking-wider text-white/50 uppercase">
+                      URL
+                    </span>
+                    <a
+                      href={item.payload.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-0.5 block truncate text-sm text-sky-300 hover:underline"
+                    >
+                      {item.payload.url}
+                    </a>
+                  </div>
+                )}
+                <div>
+                  <span className="text-[10px] font-semibold tracking-wider text-white/50 uppercase">
+                    Steps to reproduce
+                  </span>
+                  <p className="mt-0.5 text-sm whitespace-pre-line text-white/90">
+                    {item.payload.description}
+                  </p>
+                </div>
+              </div>
             ) : (
               <dl className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
                 <Field k="Year" v={item.payload.year} />
