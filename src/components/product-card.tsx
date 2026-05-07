@@ -1,9 +1,17 @@
 import Link from "next/link";
-import { Layers } from "lucide-react";
+import { CalendarClock, Layers } from "lucide-react";
 import type { Sku } from "@/lib/data";
-import { formatSkuTitle, formatUSD } from "@/lib/utils";
+import { daysUntilRelease, formatSkuTitle, formatUSD } from "@/lib/utils";
 import { ProductImage } from "./product-image";
 import { WatchButton } from "./watch-button";
+
+function shortReleaseDate(iso: string) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
 
 /**
  * Single card on a product grid (homepage / browse / search).
@@ -58,8 +66,16 @@ export function ProductCard({
     >
       <ProductImage sku={sku} size="card" className="relative aspect-[4/5]">
         {presale && (
-          <span className="absolute top-2 left-2 z-10 rounded-full border border-amber-400/40 bg-black/50 px-2 py-0.5 text-[10px] font-bold tracking-wider text-amber-300 uppercase backdrop-blur">
-            Presale
+          <span
+            className="absolute top-2 left-2 z-10 inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-2.5 py-1 text-[11px] font-black tracking-wider text-slate-900 uppercase shadow-lg shadow-amber-500/30 ring-1 ring-amber-300/60"
+            title={`Releases ${shortReleaseDate(sku.releaseDate)}`}
+          >
+            <CalendarClock size={12} strokeWidth={2.5} />
+            <span>
+              Presale · {daysUntilRelease(sku.releaseDate) <= 0
+                ? "out now"
+                : `${shortReleaseDate(sku.releaseDate)}`}
+            </span>
           </span>
         )}
         {isMultiVariant && (
