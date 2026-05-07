@@ -36,6 +36,33 @@ function rowToSku(row: {
   };
 }
 
+/**
+ * Fill in missing imageUrl on each variant by inheriting from a sibling
+ * SKU in the same variant_group that has one. We prefer the hobby-box's
+ * image because that's what admins upload first; falls back to any
+ * sibling with an image. No-ops on SKUs that already have an image or
+ * have no variant_group.
+ *
+ * Lets us avoid duplicating /public/products/<slug>.jpg across hobby-box
+ * + hobby-case + mega-box just to get the case page to render. Upload
+ * the box once and the case/mega pages auto-pick it up.
+ */
+function fillVariantImageFallback<T extends Sku>(skus: T[]): T[] {
+  const groupImage = new Map<string, string>();
+  for (const s of skus) {
+    if (!s.variantGroup || !s.imageUrl) continue;
+    const existing = groupImage.get(s.variantGroup);
+    if (!existing || s.variantType === "hobby-box") {
+      groupImage.set(s.variantGroup, s.imageUrl);
+    }
+  }
+  return skus.map((s) =>
+    s.imageUrl || !s.variantGroup
+      ? s
+      : { ...s, imageUrl: groupImage.get(s.variantGroup) },
+  );
+}
+
 export async function getAllSkus(): Promise<Sku[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -44,7 +71,7 @@ export async function getAllSkus(): Promise<Sku[]> {
     .eq("is_published", true)
     .order("release_date", { ascending: false });
   if (error) throw error;
-  return (data ?? []).map(rowToSku);
+  return fillVariantImageFallback((data ?? []).map(rowToSku));
 }
 
 /**
@@ -103,7 +130,22 @@ export async function getSkuBySlug(slug: string): Promise<Sku | null> {
     .eq("is_published", true)
     .maybeSingle();
   if (error) throw error;
-  return data ? rowToSku(data) : null;
+  if (!data) return null;
+  const sku = rowToSku(data);
+  // If this single SKU has no image but a sibling variant does, inherit.
+  // One extra query per missing-image case-or-mega page hit; cheap.
+  if (!sku.imageUrl && sku.variantGroup) {
+    const { data: sibling } = await supabase
+      .from("skus")
+      .select("image_url, variant_type")
+      .eq("variant_group", sku.variantGroup)
+      .not("image_url", "is", null)
+      .order("variant_type", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (sibling?.image_url) sku.imageUrl = sibling.image_url;
+  }
+  return sku;
 }
 
 /**
@@ -140,9 +182,13 @@ export async function getVariantsForGroup(
     if (cur === undefined || row.price_cents < cur) lowest[row.sku_id] = row.price_cents;
   }
 
-  return skuRows.map((row) => ({
-    ...rowToSku(row),
-    lowestAskCents: lowest[row.id] ?? null,
+  // Inherit imageUrl from sibling variants when this one's null — case /
+  // mega rows often share the hobby-box's product photo since they're
+  // visually identical packaging variants.
+  const filled = fillVariantImageFallback(skuRows.map((row) => rowToSku(row)));
+  return filled.map((sku) => ({
+    ...sku,
+    lowestAskCents: lowest[sku.id] ?? null,
   }));
 }
 
@@ -547,15 +593,15 @@ export async function getCatalogWithPricing(): Promise<
       }
     }
 
-    return (skusRes.data ?? []).map((row) => {
-      const sku = rowToSku(row);
-      return {
-        ...sku,
-        lowestAsk: lowestBySku.has(sku.id) ? lowestBySku.get(sku.id)! / 100 : null,
-        lastSale: lastBySku.has(sku.id) ? lastBySku.get(sku.id)! / 100 : null,
-        salesCount90d: salesCount90dBySku.get(sku.id) ?? 0,
-      };
-    });
+    const filledSkus = fillVariantImageFallback(
+      (skusRes.data ?? []).map((row) => rowToSku(row)),
+    );
+    return filledSkus.map((sku) => ({
+      ...sku,
+      lowestAsk: lowestBySku.has(sku.id) ? lowestBySku.get(sku.id)! / 100 : null,
+      lastSale: lastBySku.has(sku.id) ? lastBySku.get(sku.id)! / 100 : null,
+      salesCount90d: salesCount90dBySku.get(sku.id) ?? 0,
+    }));
   } catch (e) {
     console.error("getCatalogWithPricing failed:", e);
     return [];
