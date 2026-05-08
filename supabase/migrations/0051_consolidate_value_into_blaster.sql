@@ -40,8 +40,7 @@ update skus
 update skus
   set slug = regexp_replace(slug, '-value-box$', '-blaster-box'),
       product = 'Blaster Box',
-      variant_type = 'blaster-box',
-      updated_at = now()
+      variant_type = 'blaster-box'
   where variant_type = 'value-box'
     and is_published = true
     and not exists (
