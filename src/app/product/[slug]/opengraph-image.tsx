@@ -28,9 +28,15 @@ export default async function OG({ params }: { params: { slug: string } }) {
   // slug (canonical post-0013). Try direct lookup first; fall back to
   // the first variant in the group so the OG card still renders for
   // canonical URLs that the page handler resolves via group lookup.
-  let sku = await getSkuBySlug(slug);
+  // Pass includeUnpublished:false explicitly — OG image is public-
+  // facing (Twitter/Facebook scrapers), shouldn't honor the admin
+  // preview cookie, AND must opt out of the dynamic preview-mode
+  // import that pulls cookies/admin chains over the 1MB Edge limit.
+  let sku = await getSkuBySlug(slug, { includeUnpublished: false });
   if (!sku) {
-    const variants = sortByVariantOrder(await getVariantsForGroup(slug));
+    const variants = sortByVariantOrder(
+      await getVariantsForGroup(slug, { includeUnpublished: false }),
+    );
     sku = variants[0] ?? null;
   }
 

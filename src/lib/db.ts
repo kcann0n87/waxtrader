@@ -126,13 +126,18 @@ export async function getSkuBySlug(
   options: { includeUnpublished?: boolean } = {},
 ): Promise<Sku | null> {
   const supabase = await createClient();
-  // Site-wide admin preview mode: when the wd_preview cookie is set
-  // and the visitor is admin, every catalog query bypasses
-  // is_published. Per-call options.includeUnpublished override (used
-  // by /admin/catalog and the legacy ?preview=1 query param) still
-  // works the same way.
-  const { isPreviewModeOn } = await import("./preview-mode");
-  const showAll = options.includeUnpublished || (await isPreviewModeOn());
+  // Three modes:
+  //   - includeUnpublished === true  → bypass filter (admin contexts)
+  //   - includeUnpublished === false → strict published-only, NO
+  //     preview-mode check (Edge-runtime callers like opengraph-image
+  //     can't afford to bundle the cookies/admin chain)
+  //   - undefined (default)          → defer to wd_preview cookie +
+  //     admin gate via isPreviewModeOn()
+  let showAll = options.includeUnpublished === true;
+  if (options.includeUnpublished === undefined) {
+    const { isPreviewModeOn } = await import("./preview-mode");
+    showAll = await isPreviewModeOn();
+  }
   let q = supabase.from("skus").select("*").eq("slug", slug);
   if (!showAll) q = q.eq("is_published", true);
   const { data, error } = await q.maybeSingle();
@@ -168,8 +173,14 @@ export async function getVariantsForGroup(
   options: { includeUnpublished?: boolean } = {},
 ): Promise<Array<Sku & { lowestAskCents: number | null }>> {
   const supabase = await createClient();
-  const { isPreviewModeOn } = await import("./preview-mode");
-  const showAll = options.includeUnpublished || (await isPreviewModeOn());
+  // Same three-mode pattern as getSkuBySlug — Edge runtimes (e.g.
+  // opengraph-image) pass `includeUnpublished: false` to opt out of
+  // the dynamic import chain that bundles cookies/admin checks.
+  let showAll = options.includeUnpublished === true;
+  if (options.includeUnpublished === undefined) {
+    const { isPreviewModeOn } = await import("./preview-mode");
+    showAll = await isPreviewModeOn();
+  }
   let q = supabase.from("skus").select("*").eq("variant_group", group);
   if (!showAll) q = q.eq("is_published", true);
   const { data: skuRows, error } = await q;
