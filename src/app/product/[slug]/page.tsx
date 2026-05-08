@@ -215,7 +215,15 @@ export default async function ProductPage({
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
         <div>
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#101012] p-6">
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#101012] p-6">
+            {/* Admin X — absolute top-right of the product card. Only
+                visible when signed in as admin. Click → centered
+                confirmation modal. */}
+            <AdminDeleteSkuButton
+              skuId={sku.id}
+              skuLabel={sku.slug}
+              isAdmin={isAdmin}
+            />
             <div className="grid grid-cols-1 gap-6 md:grid-cols-[280px_1fr]">
               <AdminImageDropOverlay
                 skuId={sku.id}
@@ -244,19 +252,6 @@ export default async function ProductPage({
                   <strong className="text-white/80">{variantLabel(sku.variantType)}</strong>
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-white/60">{sku.description}</p>
-
-                {/* Admin-only delete button. Renders nothing for
-                    non-admins. Confirms before deleting + bounces to
-                    /admin/catalog on success. */}
-                {isAdmin && (
-                  <div className="mt-4">
-                    <AdminDeleteSkuButton
-                      skuId={sku.id}
-                      skuLabel={sku.slug}
-                      isAdmin={isAdmin}
-                    />
-                  </div>
-                )}
 
                 <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
                   <Spec label="Sport" value={sku.sport} />
