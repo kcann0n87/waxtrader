@@ -12,6 +12,7 @@ import { PriceChart } from "@/components/price-chart";
 import { ProductImageWithPreview } from "@/components/product-image-with-preview";
 import { AdminImageDropOverlay } from "@/components/admin-image-drop-overlay";
 import { AdminDeleteSkuButton } from "@/components/admin-delete-sku-button";
+import { AdminAddSkuButton } from "@/components/admin-add-sku-button";
 import { SalesVolumeChart } from "@/components/sales-volume-chart";
 import { RecentlyViewed } from "@/components/recently-viewed";
 import { TrackView } from "@/components/track-view";
@@ -216,9 +217,19 @@ export default async function ProductPage({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
         <div>
           <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#101012] p-6">
-            {/* Admin X — absolute top-right of the product card. Only
-                visible when signed in as admin. Click → centered
-                confirmation modal. */}
+            {/* Admin floating actions — pair of corner pills, only
+                visible when signed in as admin. The + sits left of the
+                ✕ so the most-destructive action is the rightmost
+                target (matches platform conventions). */}
+            <AdminAddSkuButton
+              isAdmin={isAdmin}
+              prefill={{
+                year: sku.year,
+                brand: sku.brand,
+                setName: sku.set,
+                sport: sku.sport,
+              }}
+            />
             <AdminDeleteSkuButton
               skuId={sku.id}
               skuLabel={sku.slug}
