@@ -8,9 +8,13 @@ export const dynamic = "force-dynamic";
 export default async function AdminCatalogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; sport?: string }>;
+  searchParams: Promise<{ q?: string; sport?: string; hidden?: string }>;
 }) {
-  const { q, sport } = await searchParams;
+  const { q, sport, hidden } = await searchParams;
+  // ?hidden=1 narrows to staged (is_published=false) SKUs — useful when
+  // building out a new sport/category before flipping it live. Default
+  // shows everything (admin sees published + staged).
+  const onlyHidden = hidden === "1";
   const sb = serviceRoleClient();
 
   // Admin sees ALL SKUs — published and hidden — so we can stage
@@ -21,6 +25,7 @@ export default async function AdminCatalogPage({
     .order("release_date", { ascending: false });
   if (sport) query = query.eq("sport", sport);
   if (q) query = query.ilike("slug", `%${q}%`);
+  if (onlyHidden) query = query.eq("is_published", false);
 
   const { data: skus } = await query;
 
@@ -73,7 +78,19 @@ export default async function AdminCatalogPage({
           <option value="MLB">MLB</option>
           <option value="NFL">NFL</option>
           <option value="NHL">NHL</option>
+          <option value="Soccer">Soccer</option>
+          <option value="Pokemon">Pokemon</option>
         </select>
+        <label className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/80">
+          <input
+            type="checkbox"
+            name="hidden"
+            value="1"
+            defaultChecked={onlyHidden}
+            className="h-4 w-4 accent-fuchsia-400"
+          />
+          Hidden only
+        </label>
         <button
           type="submit"
           className="rounded-md bg-amber-400 px-3 py-1.5 text-sm font-bold text-slate-900 hover:bg-amber-300"
