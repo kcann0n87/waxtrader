@@ -65,19 +65,34 @@ export function ProductCard({
       className="group flex flex-col overflow-hidden rounded-lg border border-white/5 bg-[#101012] transition hover:border-amber-400/30 hover:bg-[#15151a]"
     >
       <ProductImage sku={sku} size="card" className="relative aspect-[4/5]">
-        {presale && (
-          <span
-            className="absolute top-2 left-2 z-10 inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-2.5 py-1 text-[11px] font-black tracking-wider text-slate-900 uppercase shadow-lg shadow-amber-500/30 ring-1 ring-amber-300/60"
-            title={`Releases ${shortReleaseDate(sku.releaseDate)}`}
-          >
-            <CalendarClock size={12} strokeWidth={2.5} />
-            <span>
-              Presale · {daysUntilRelease(sku.releaseDate) <= 0
-                ? "out now"
-                : `${shortReleaseDate(sku.releaseDate)}`}
+        {presale && (() => {
+          const days = daysUntilRelease(sku.releaseDate);
+          const countdown =
+            days <= 0
+              ? "OUT NOW"
+              : days === 1
+                ? "1 day"
+                : days <= 14
+                  ? `${days} days`
+                  : shortReleaseDate(sku.releaseDate);
+          // Imminent drops (≤7d) get a brighter, slightly larger pill so
+          // the buyer can scan a grid and instantly see what's about to
+          // hit the market.
+          const imminent = days <= 7;
+          return (
+            <span
+              className={
+                imminent
+                  ? "absolute top-2 left-2 z-10 inline-flex animate-pulse items-center gap-1.5 rounded-md bg-gradient-to-r from-rose-400 to-amber-400 px-3 py-1.5 text-xs font-black tracking-wider text-slate-900 uppercase shadow-lg shadow-amber-500/40 ring-1 ring-amber-300/70"
+                  : "absolute top-2 left-2 z-10 inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-2.5 py-1 text-[11px] font-black tracking-wider text-slate-900 uppercase shadow-lg shadow-amber-500/30 ring-1 ring-amber-300/60"
+              }
+              title={`Releases ${shortReleaseDate(sku.releaseDate)}`}
+            >
+              <CalendarClock size={imminent ? 14 : 12} strokeWidth={2.5} />
+              <span>Presale · {countdown}</span>
             </span>
-          </span>
-        )}
+          );
+        })()}
         {isMultiVariant && (
           <span className="absolute bottom-2 left-2 z-10 inline-flex items-center gap-1 rounded-full border border-fuchsia-400/40 bg-black/60 px-2 py-0.5 text-[10px] font-bold tracking-wider text-fuchsia-300 uppercase backdrop-blur">
             <Layers size={10} />

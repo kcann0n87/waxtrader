@@ -103,7 +103,27 @@ export default async function Home({
   }
   const presaleSkus = filtered.filter((s) => isPresale(s.releaseDate));
   const releasedSkus = filtered.filter((s) => !isPresale(s.releaseDate));
-  const releases = presaleSkus.length > 0 ? presaleSkus.slice(0, 4) : filtered.slice(0, 4);
+  // Collapse multi-variant releases (hobby box + mega + case) into one
+  // card per variant_group so a single drop doesn't eat 3-4 slots in the
+  // pre-orders rail. Sorted by closest-to-release first so the soonest
+  // drop is the first thing the buyer sees.
+  const presaleReleases = collapseToVariantGroups(presaleSkus, new Date()).sort(
+    (a, b) => a.sku.releaseDate.localeCompare(b.sku.releaseDate),
+  );
+  // When there are no presales at all, fall back to the first 4 of any
+  // filtered SKU so the "featured" rail still has content. Wrap them in
+  // the same CollapsedRelease shape so the renderer is uniform.
+  const releases: CollapsedRelease[] = presaleReleases.length > 0
+    ? presaleReleases.slice(0, 8)
+    : filtered.slice(0, 4).map((s) => ({
+        sku: s,
+        variantCount: 1,
+        lowestAskInGroup: s.lowestAsk,
+        lastSaleInGroup: s.lastSale,
+        salesCount90dInGroup: s.salesCount90d ?? 0,
+        heatScore: 0,
+      }));
+  const hasMorePresales = presaleReleases.length > 8;
   const trending = releasedSkus.slice(0, 4);
   const justDropped = releasedSkus.slice(4, 8);
 
@@ -316,21 +336,42 @@ export default async function Home({
                 title={presaleSkus.length > 0 ? "Pre-orders open" : "Tonight's book"}
                 subtitle={
                   presaleSkus.length > 0
-                    ? "List early to lock the lowest ask"
+                    ? `${presaleReleases.length} upcoming ${presaleReleases.length === 1 ? "release" : "releases"} · list early to lock the lowest ask`
                     : "Hot boxes this week"
+                }
+                action={
+                  presaleSkus.length > 0 ? (
+                    <Link
+                      href="/releases"
+                      className="inline-flex items-center gap-1 text-xs font-bold tracking-wider text-amber-300 uppercase hover:text-amber-200"
+                    >
+                      Full release calendar <ArrowUpRight size={12} />
+                    </Link>
+                  ) : undefined
                 }
               >
                 <Grid>
-                  {releases.map((s) => (
+                  {releases.map((c) => (
                     <ProductCard
-                      key={s.id}
-                      sku={s}
-                      lowestAsk={s.lowestAsk}
-                      lastSale={s.lastSale}
-                      presale={isPresale(s.releaseDate)}
+                      key={c.sku.variantGroup ?? c.sku.id}
+                      sku={c.sku}
+                      lowestAsk={c.lowestAskInGroup}
+                      lastSale={c.lastSaleInGroup}
+                      presale={isPresale(c.sku.releaseDate)}
+                      variantCount={c.variantCount}
                     />
                   ))}
                 </Grid>
+                {hasMorePresales && (
+                  <div className="mt-4 text-center">
+                    <Link
+                      href="/releases"
+                      className="inline-flex items-center gap-1 rounded-md border border-amber-700/40 bg-amber-500/10 px-4 py-2 text-xs font-bold tracking-wider text-amber-200 uppercase transition hover:bg-amber-500/20"
+                    >
+                      View all {presaleReleases.length} upcoming releases <ArrowUpRight size={12} />
+                    </Link>
+                  </div>
+                )}
               </Section>
             )}
 
@@ -645,12 +686,14 @@ function Section({
   eyebrow,
   title,
   subtitle,
+  action,
   children,
 }: {
   id?: string;
   eyebrow: string;
   title: string;
   subtitle: string;
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -665,12 +708,14 @@ function Section({
           </h2>
           <p className="mt-1 text-sm text-white/50">{subtitle}</p>
         </div>
-        <Link
-          href="/search"
-          className="inline-flex items-center gap-1 text-xs font-semibold text-white/60 transition hover:text-amber-300"
-        >
-          View all <ArrowUpRight size={12} />
-        </Link>
+        {action ?? (
+          <Link
+            href="/search"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-white/60 transition hover:text-amber-300"
+          >
+            View all <ArrowUpRight size={12} />
+          </Link>
+        )}
       </div>
       {children}
     </section>
