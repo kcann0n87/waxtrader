@@ -3,9 +3,17 @@ import { getLowestAsk, getSkuBySlug, getVariantsForGroup } from "@/lib/db";
 import { sortByVariantOrder } from "@/lib/variants";
 import { formatSkuTitle, formatUSDFull } from "@/lib/utils";
 
-// Edge runtime so the OG image generation doesn't cold-start a Node lambda
+// Node runtime — Edge has a 1MB bundle limit and our shared db.ts
+// helper imports a dynamic preview-mode module that pushes the
+// bundle over. OG cards are static-cached after first render so
+// the slower Node cold start is fine.
+//
+// LEGACY (kept for reference): we used Edge here to skip the cold
+// start, but that required a custom inline supabase query in this
+// file. Switching to Node lets us reuse getSkuBySlug + the variant
+// fallback for image inheritance.
 // for every social-share crawler hit.
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const alt = "WaxDepot product";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
