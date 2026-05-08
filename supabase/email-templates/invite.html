@@ -22,7 +22,7 @@
         Welcome to WaxDepot — the marketplace for serious sealed sports-card collectors. Real bid/ask, real escrow, no eBay tax.
       </p>
       <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:rgba(255,255,255,0.75);">
-        Tap the button below to set up your account. The link signs you in directly — no password to remember.
+        Tap the button below to set up your account, or use the 6-digit code further down. The link signs you in directly — no password to remember.
       </p>
       <table role="presentation" cellspacing="0" cellpadding="0" border="0">
         <tr>
@@ -30,6 +30,19 @@
             <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 28px;font-size:14px;font-weight:800;color:#0f172a;text-decoration:none;letter-spacing:0.01em;">
               Activate your account →
             </a>
+          </td>
+        </tr>
+      </table>
+
+      <!-- 6-digit code fallback. If your email client (Gmail/Workspace) prefetches links to scan them for safety, the click above can fail with "expired". The code below survives prefetch — copy it and use it on the sign-in page. -->
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-top:24px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
+        <tr>
+          <td style="padding:18px 20px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.18em;color:rgba(245,158,11,0.9);text-transform:uppercase;margin-bottom:8px;">Or use this code</div>
+            <div style="font-family:'Menlo',Monaco,'Courier New',monospace;font-size:28px;font-weight:900;letter-spacing:0.4em;color:#ffffff;margin-bottom:8px;">{{ .Token }}</div>
+            <div style="font-size:12px;line-height:1.5;color:rgba(255,255,255,0.55);">
+              On <a href="{{ .SiteURL }}/login" style="color:#fcd34d;">waxdepot.io/login</a>, tap <strong>Email Code</strong>, enter your email + this 6-digit code. Use this if the activate link above gives an "expired" error — Gmail's link scanner sometimes uses up the link before you can click it.
+            </div>
           </td>
         </tr>
       </table>

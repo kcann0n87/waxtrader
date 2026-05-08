@@ -125,6 +125,46 @@ export async function updatePassword(formData: FormData): Promise<AuthResult> {
   redirect("/account?password=updated");
 }
 
+/**
+ * Sign in via 6-digit OTP code (no link click needed). Solves the
+ * Gmail/Google Workspace prefetch problem — link scanners consume
+ * one-time auth tokens before the human can click. The 6-digit code
+ * embedded in the email body alongside the link can't be prefetched,
+ * so it survives.
+ *
+ * Calls supabase.auth.verifyOtp with type='email' which works for
+ * both invite and magic-link OTP codes from the unified Token field.
+ */
+export async function signInWithCode(formData: FormData): Promise<AuthResult> {
+  const email = String(formData.get("email") || "").trim().toLowerCase();
+  const token = String(formData.get("code") || "").trim().replace(/\s+/g, "");
+  const next = String(formData.get("next") || "/account") || "/account";
+
+  if (!email) return { error: "Enter your email address." };
+  if (!/^\d{6}$/.test(token)) {
+    return { error: "Code must be 6 digits." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "email",
+  });
+  if (error) {
+    return {
+      error:
+        error.message.toLowerCase().includes("expired") ||
+        error.message.toLowerCase().includes("invalid")
+          ? "That code is invalid or expired. Send a fresh one and try again."
+          : error.message,
+    };
+  }
+
+  revalidatePath("/", "layout");
+  redirect(next);
+}
+
 export async function updateProfile(formData: FormData): Promise<AuthResult> {
   const displayName = String(formData.get("displayName") || "").trim();
   const username = String(formData.get("username") || "").trim().toLowerCase();
