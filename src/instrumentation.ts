@@ -6,6 +6,13 @@
 export async function register() {
   if (!process.env.NEXT_PUBLIC_SENTRY_DSN) return;
 
+  // Same lock-contention filter as the client init — Supabase's auth
+  // navigator lock surfaces a warning when concurrent requests touch
+  // session state, but the underlying operation succeeds.
+  const ignoreErrors = [
+    /Lock "lock:sb-.*-auth-token" was released because another request stole it/,
+  ];
+
   if (process.env.NEXT_RUNTIME === "nodejs") {
     const Sentry = await import("@sentry/nextjs");
     Sentry.init({
@@ -15,6 +22,7 @@ export async function register() {
       // setUser / setContext calls in server actions can override.
       sendDefaultPii: false,
       environment: process.env.VERCEL_ENV ?? "development",
+      ignoreErrors,
     });
   }
 
@@ -25,6 +33,7 @@ export async function register() {
       tracesSampleRate: 0.1,
       sendDefaultPii: false,
       environment: process.env.VERCEL_ENV ?? "development",
+      ignoreErrors,
     });
   }
 }

@@ -14,6 +14,15 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
     replaysOnErrorSampleRate: 0.1,
     sendDefaultPii: false,
     environment: process.env.NEXT_PUBLIC_VERCEL_ENV ?? "development",
+    // Drop known-noisy events that don't represent real bugs.
+    ignoreErrors: [
+      // Supabase auth client serializes session reads/writes through a
+      // navigator lock. When middleware + a server component touch auth
+      // on the same request, the second steals the lock from the first
+      // and the first surfaces this warning. Both operations succeed —
+      // it's documented Supabase behavior, not an auth failure.
+      /Lock "lock:sb-.*-auth-token" was released because another request stole it/,
+    ],
   });
 }
 
