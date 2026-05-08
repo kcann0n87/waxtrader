@@ -19,6 +19,10 @@
     {
       "path": "/api/cron/expire-bids",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-stale-checkouts",
+      "schedule": "0 8 * * *"
     }
   ]
 }
