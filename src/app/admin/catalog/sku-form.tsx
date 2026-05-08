@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ImageOff, Loader2, Upload } from "lucide-react";
 import {
@@ -9,6 +9,7 @@ import {
   adminUpdateSku,
   adminUploadSkuImage,
 } from "@/app/actions/admin";
+import { generateSkuSlug } from "@/lib/slug";
 
 type SkuFormValues = {
   slug?: string;
@@ -53,8 +54,37 @@ export function SkuForm({
   const [uploadMsg, setUploadMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Track whether the slug was hand-edited. Once true, stop
+  // auto-generating so we don't clobber the admin's typing. Resets
+  // to false on Reset Slug click.
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+
   const set = <K extends keyof SkuFormValues>(k: K, v: SkuFormValues[K]) =>
     setVals((p) => ({ ...p, [k]: v }));
+
+  // Auto-generate slug from the other fields whenever they change —
+  // unless we're editing an existing SKU (slugs are immutable post-
+  // create) or the admin manually overrode it.
+  useEffect(() => {
+    if (skuId) return;
+    if (slugManuallyEdited) return;
+    const auto = generateSkuSlug({
+      year: vals.year,
+      brand: vals.brand,
+      setName: vals.set_name,
+      product: vals.product,
+      sport: vals.sport,
+    });
+    setVals((p) => (p.slug === auto ? p : { ...p, slug: auto }));
+  }, [
+    skuId,
+    slugManuallyEdited,
+    vals.year,
+    vals.brand,
+    vals.set_name,
+    vals.product,
+    vals.sport,
+  ]);
 
   const submit = () => {
     setErr(null);
@@ -138,14 +168,38 @@ export function SkuForm({
 
   return (
     <div className="space-y-4">
-      <Field label="Slug" hint="lowercase-with-hyphens, immutable after create">
-        <input
-          disabled={!!skuId}
-          value={vals.slug ?? ""}
-          onChange={(e) => set("slug", e.target.value.toLowerCase().replace(/\s+/g, "-"))}
-          className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white disabled:opacity-50"
-          placeholder="2025-topps-chrome-football-hobby-box"
-        />
+      <Field
+        label="Slug"
+        hint={
+          skuId
+            ? "Immutable after create."
+            : slugManuallyEdited
+              ? "Manually edited — auto-generation paused. Click Reset to re-derive."
+              : "Auto-generated from year + brand + set + product + sport. Type to override."
+        }
+      >
+        <div className="flex items-center gap-2">
+          <input
+            disabled={!!skuId}
+            value={vals.slug ?? ""}
+            onChange={(e) => {
+              if (!skuId) setSlugManuallyEdited(true);
+              set("slug", e.target.value.toLowerCase().replace(/\s+/g, "-"));
+            }}
+            className="flex-1 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white disabled:opacity-50"
+            placeholder="2025-topps-chrome-football-hobby-box"
+          />
+          {!skuId && slugManuallyEdited && (
+            <button
+              type="button"
+              onClick={() => setSlugManuallyEdited(false)}
+              className="rounded-md border border-amber-700/40 bg-amber-500/10 px-2.5 py-1.5 text-[11px] font-bold text-amber-200 transition hover:bg-amber-500/20"
+              title="Re-derive slug from the other fields"
+            >
+              Reset
+            </button>
+          )}
+        </div>
       </Field>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
