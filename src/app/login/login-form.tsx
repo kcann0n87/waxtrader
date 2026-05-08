@@ -113,7 +113,7 @@ export function LoginForm({ next }: { next: string }) {
       ) : (
         <label className="block">
           <span className="mb-1.5 block text-[11px] font-semibold tracking-[0.18em] text-white/50 uppercase">
-            6-digit code from email
+            Code from email
           </span>
           <div className="relative">
             <Hash
@@ -126,16 +126,15 @@ export function LoginForm({ next }: { next: string }) {
               required
               autoComplete="one-time-code"
               inputMode="numeric"
-              pattern="[0-9]{6}"
-              maxLength={6}
-              placeholder="123456"
-              className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 font-mono text-base tracking-[0.4em] text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+              pattern="[0-9]{4,10}"
+              maxLength={10}
+              placeholder="12345678"
+              className="w-full rounded-md border border-white/10 bg-white/5 py-2.5 pr-3 pl-9 font-mono text-base tracking-[0.3em] text-white placeholder:text-white/30 focus:border-amber-400/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
             />
           </div>
           <p className="mt-1.5 text-[11px] text-white/50">
-            Check the invite email — it includes a 6-digit code right
-            below the activate button. Codes survive Gmail&apos;s link
-            scanner.
+            Check the invite email — the digits below the activate
+            button. Codes survive Gmail&apos;s link scanner.
           </p>
         </label>
       )}

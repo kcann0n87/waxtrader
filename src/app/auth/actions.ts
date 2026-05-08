@@ -141,8 +141,11 @@ export async function signInWithCode(formData: FormData): Promise<AuthResult> {
   const next = String(formData.get("next") || "/account") || "/account";
 
   if (!email) return { error: "Enter your email address." };
-  if (!/^\d{6}$/.test(token)) {
-    return { error: "Code must be 6 digits." };
+  // Supabase OTP length is per-project (6, 7, or 8 digits). Be permissive
+  // here — verifyOtp will reject anything that doesn't match what was
+  // actually sent.
+  if (!/^\d{4,10}$/.test(token)) {
+    return { error: "Code should be the digits from your email (no spaces or letters)." };
   }
 
   const supabase = await createClient();
