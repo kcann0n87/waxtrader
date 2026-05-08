@@ -173,7 +173,8 @@ export async function getVariantsForGroup(
     .from("listings")
     .select("sku_id, price_cents")
     .in("sku_id", ids)
-    .eq("status", "Active");
+    .eq("status", "Active")
+    .gt("quantity", 0);
 
   // Reduce to lowest active ask per SKU.
   const lowest: Record<string, number> = {};
@@ -199,6 +200,7 @@ export async function getListingsForSku(skuId: string): Promise<Listing[]> {
     .select("id, sku_id, price_cents, shipping_cents, quantity, seller:profiles!listings_seller_id_fkey(username, is_verified)")
     .eq("sku_id", skuId)
     .eq("status", "Active")
+    .gt("quantity", 0)
     .order("price_cents", { ascending: true });
   if (error) throw error;
   return (data ?? []).map((r) => {
@@ -226,6 +228,7 @@ export async function getLowestAsk(skuId: string): Promise<number | null> {
     .select("price_cents")
     .eq("sku_id", skuId)
     .eq("status", "Active")
+    .gt("quantity", 0)
     .order("price_cents", { ascending: true })
     .limit(1)
     .maybeSingle();
@@ -260,7 +263,8 @@ export async function getLowestAsksForSkus(
     .from("listings")
     .select("sku_id, price_cents")
     .in("sku_id", skuIds)
-    .eq("status", "Active");
+    .eq("status", "Active")
+    .gt("quantity", 0);
   if (error) throw error;
   const out = new Map<string, number>();
   for (const r of data ?? []) {
@@ -562,7 +566,11 @@ export async function getCatalogWithPricing(): Promise<
         .select("*")
         .eq("is_published", true)
         .order("release_date", { ascending: false }),
-      supabase.from("listings").select("sku_id, price_cents").eq("status", "Active"),
+      supabase
+        .from("listings")
+        .select("sku_id, price_cents")
+        .eq("status", "Active")
+        .gt("quantity", 0),
       supabase
         .from("sales")
         .select("sku_id, price_cents, sold_at")
