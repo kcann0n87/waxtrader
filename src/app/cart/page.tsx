@@ -1,64 +1,66 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowLeft, Building2, Check, CreditCard, Lock, Minus, Plus, ShieldCheck, ShoppingBag, Trash2 } from "lucide-react";
+import { useState, useTransition } from "react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Lock,
+  Minus,
+  Plus,
+  ShieldCheck,
+  ShoppingBag,
+  Trash2,
+} from "lucide-react";
 import { groupBySeller, useCart } from "@/lib/cart";
 import { formatUSD, formatUSDFull } from "@/lib/utils";
 import { SkuThumb } from "@/components/sku-thumb";
+import { createCartCheckout } from "@/app/actions/stripe-checkout";
 
+/**
+ * Multi-seller cart → one Stripe Checkout session.
+ *
+ * The previous version of this page collected raw card numbers in plain
+ * inputs and just flipped a `confirmed` boolean on click — no payment ever
+ * happened, and the form was a PCI risk if anyone wired it up. Replaced
+ * with a real handoff to Stripe Checkout: createCartCheckout creates one
+ * order per cart line, plus one Checkout Session whose metadata stores
+ * the comma-separated order IDs so the webhook can fan out updates.
+ *
+ * Buyer enters address + card on Stripe's hosted page (PCI compliant).
+ * On success they land on /account/orders?cart_payment=success.
+ */
 export default function CartPage() {
-  const { items, hydrated, subtotal, shipping, tax, total, itemCount, updateQty, remove, clear } = useCart();
+  const { items, hydrated, subtotal, shipping, tax, total, itemCount, updateQty, remove } =
+    useCart();
 
-  const [cardNumber, setCardNumber] = useState("");
-  const [exp, setExp] = useState("");
-  const [cvc, setCvc] = useState("");
-  const [zip, setZip] = useState("");
-  const [shipName, setShipName] = useState("Kyle Cannon");
-  const [shipAddr, setShipAddr] = useState("123 Main St");
-  const [shipCity, setShipCity] = useState("Austin");
-  const [shipState, setShipState] = useState("TX");
-  const [shipZip, setShipZip] = useState("78701");
-  const [confirmed, setConfirmed] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
-  const cardValid =
-    cardNumber.replace(/\s/g, "").length >= 13 && exp.length === 5 && cvc.length >= 3 && zip.length >= 5;
-  const shipValid = shipName && shipAddr && shipCity && shipState.length === 2 && shipZip.length >= 5;
-  const canSubmit = cardValid && shipValid && items.length > 0;
-
-  if (confirmed) {
-    return (
-      <div className="mx-auto max-w-2xl px-4 py-16">
-        <div className="rounded-xl border border-white/10 bg-[#101012] p-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15">
-            <Check className="text-emerald-400" size={32} />
-          </div>
-          <h1 className="mt-4 text-2xl font-black tracking-tight text-white">Orders placed</h1>
-          <p className="mt-2 text-sm text-white/60">
-            You ordered {itemCount} {itemCount === 1 ? "box" : "boxes"} for {formatUSDFull(total)}.
-            Each seller has 2 business days to ship. Payment is held in escrow until you confirm
-            delivery.
-          </p>
-          <div className="mt-6 flex justify-center gap-2">
-            <Link
-              href="/account"
-              onClick={clear}
-              className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
-            >
-              View orders
-            </Link>
-            <Link
-              href="/"
-              onClick={clear}
-              className="rounded-md border border-white/15 bg-[#101012] px-4 py-2 text-sm font-semibold text-white/80 hover:bg-white/[0.02]"
-            >
-              Keep shopping
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleCheckout = () => {
+    setError(null);
+    if (items.length === 0) return;
+    startTransition(async () => {
+      const res = await createCartCheckout(
+        items.map((i) => ({ listingId: i.listingId, qty: i.qty })),
+      );
+      if (res.needsAuth) {
+        window.location.href = `/signup?next=${encodeURIComponent("/cart")}`;
+        return;
+      }
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+      if (res.checkoutUrl) {
+        // Hand off to Stripe's hosted checkout. Webhook fires
+        // checkout.session.completed when buyer pays → orders move to
+        // InEscrow + cart clears (webhook handles updates; we clear local
+        // localStorage cart on success-redirect from /account/orders).
+        window.location.href = res.checkoutUrl;
+      }
+    });
+  };
 
   if (hydrated && items.length === 0) {
     return (
@@ -68,7 +70,9 @@ export default function CartPage() {
             <ShoppingBag size={24} />
           </div>
           <h1 className="mt-4 text-xl font-bold text-white">Your cart is empty</h1>
-          <p className="mt-1 text-sm text-white/50">Add boxes from any product page to get started.</p>
+          <p className="mt-1 text-sm text-white/50">
+            Add boxes from any product page to get started.
+          </p>
           <Link
             href="/"
             className="mt-4 inline-block rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
@@ -82,11 +86,14 @@ export default function CartPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
-      <Link href="/" className="mb-4 inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-white">
+      <Link
+        href="/"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-white"
+      >
         <ArrowLeft size={14} /> Continue shopping
       </Link>
 
-      <h1 className="text-2xl font-black tracking-tight text-white">Checkout</h1>
+      <h1 className="text-2xl font-black tracking-tight text-white">Cart</h1>
       <p className="text-sm text-white/50">
         {itemCount} {itemCount === 1 ? "item" : "items"} from{" "}
         {hydrated ? groupBySeller(items).length : 0} sellers
@@ -96,14 +103,20 @@ export default function CartPage() {
         <div className="space-y-6">
           {hydrated &&
             groupBySeller(items).map(([seller, sellerItems]) => (
-              <div key={seller} className="overflow-hidden rounded-xl border border-white/10">
+              <div
+                key={seller}
+                className="overflow-hidden rounded-xl border border-white/10"
+              >
                 <div className="flex items-center justify-between border-b border-white/5 bg-white/[0.02] px-4 py-2.5">
                   <div className="text-sm">
                     Sold by <span className="font-bold text-white">{seller}</span>
                   </div>
                   <div className="text-xs text-white/50">
-                    {sellerItems.length} {sellerItems.length === 1 ? "item" : "items"} ·{" "}
-                    {sellerItems.every((i) => i.shipping === 0) ? "Free shipping" : "Standard shipping"}
+                    {sellerItems.length}{" "}
+                    {sellerItems.length === 1 ? "item" : "items"} ·{" "}
+                    {sellerItems.every((i) => i.shipping === 0)
+                      ? "Free shipping"
+                      : "Standard shipping"}
                   </div>
                 </div>
                 <ul className="divide-y divide-white/5">
@@ -115,7 +128,8 @@ export default function CartPage() {
                       brand: item.skuBrand ?? "WAX",
                       imageUrl: item.skuImageUrl ?? null,
                       gradient:
-                        item.skuGradient ?? (["#475569", "#0f172a"] as [string, string]),
+                        item.skuGradient ??
+                        (["#475569", "#0f172a"] as [string, string]),
                     };
                     return (
                       <li key={item.id} className="flex gap-4 p-4">
@@ -123,7 +137,11 @@ export default function CartPage() {
                           href={`/product/${slug}`}
                           className="block h-20 w-16 shrink-0 overflow-hidden rounded"
                         >
-                          <SkuThumb sku={thumbSku} className="h-full w-full" alt={title} />
+                          <SkuThumb
+                            sku={thumbSku}
+                            className="h-full w-full"
+                            alt={title}
+                          />
                         </Link>
                         <div className="min-w-0 flex-1">
                           <Link
@@ -132,7 +150,9 @@ export default function CartPage() {
                           >
                             {title}
                           </Link>
-                          <div className="text-xs text-white/50">{sport} · Factory Sealed</div>
+                          <div className="text-xs text-white/50">
+                            {sport} · Factory Sealed
+                          </div>
                           <div className="mt-3 flex items-center gap-3">
                             <div className="inline-flex items-center rounded-md border border-white/15">
                               <button
@@ -142,7 +162,9 @@ export default function CartPage() {
                               >
                                 <Minus size={12} />
                               </button>
-                              <span className="px-3 text-sm font-semibold text-white">{item.qty}</span>
+                              <span className="px-3 text-sm font-semibold text-white">
+                                {item.qty}
+                              </span>
                               <button
                                 onClick={() => updateQty(item.id, item.qty + 1)}
                                 className="px-2 py-1 text-white/50 hover:text-white"
@@ -165,10 +187,14 @@ export default function CartPage() {
                             {formatUSDFull(item.price * item.qty)}
                           </div>
                           {item.qty > 1 && (
-                            <div className="text-xs text-white/60">{formatUSDFull(item.price)} ea</div>
+                            <div className="text-xs text-white/60">
+                              {formatUSDFull(item.price)} ea
+                            </div>
                           )}
                           <div className="mt-1 text-xs text-emerald-400">
-                            {item.shipping === 0 ? "Free shipping" : `+${formatUSD(item.shipping)} shipping`}
+                            {item.shipping === 0
+                              ? "Free shipping"
+                              : `+${formatUSD(item.shipping)} shipping`}
                           </div>
                         </div>
                       </li>
@@ -177,113 +203,59 @@ export default function CartPage() {
                 </ul>
               </div>
             ))}
-
-          <Section icon={<Building2 size={16} />} title="Ship to">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Field label="Full name">
-                <input value={shipName} onChange={(e) => setShipName(e.target.value)} className={input} />
-              </Field>
-              <Field label="ZIP">
-                <input value={shipZip} onChange={(e) => setShipZip(e.target.value.replace(/\D/g, "").slice(0, 5))} className={input} />
-              </Field>
-            </div>
-            <Field label="Address">
-              <input value={shipAddr} onChange={(e) => setShipAddr(e.target.value)} className={input} />
-            </Field>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="City">
-                <input value={shipCity} onChange={(e) => setShipCity(e.target.value)} className={input} />
-              </Field>
-              <Field label="State">
-                <input
-                  value={shipState}
-                  onChange={(e) => setShipState(e.target.value.slice(0, 2).toUpperCase())}
-                  maxLength={2}
-                  className={input}
-                />
-              </Field>
-            </div>
-          </Section>
-
-          <Section icon={<CreditCard size={16} />} title="Payment" right={<Lock size={11} className="text-white/60" />}>
-            <div className="rounded-lg border border-white/15 bg-[#101012] p-3">
-              <div className="flex items-center gap-2">
-                <CreditCard size={16} className="text-white/60" />
-                <input
-                  inputMode="numeric"
-                  value={cardNumber}
-                  onChange={(e) =>
-                    setCardNumber(
-                      e.target.value
-                        .replace(/\D/g, "")
-                        .slice(0, 19)
-                        .replace(/(\d{4})(?=\d)/g, "$1 "),
-                    )
-                  }
-                  placeholder="1234 1234 1234 1234"
-                  className="flex-1 text-sm focus:outline-none"
-                />
-              </div>
-              <div className="mt-2 grid grid-cols-3 gap-2 border-t border-white/5 pt-2">
-                <input
-                  inputMode="numeric"
-                  value={exp}
-                  onChange={(e) => {
-                    let v = e.target.value.replace(/\D/g, "").slice(0, 4);
-                    if (v.length >= 3) v = `${v.slice(0, 2)}/${v.slice(2)}`;
-                    setExp(v);
-                  }}
-                  placeholder="MM/YY"
-                  className="text-sm focus:outline-none"
-                />
-                <input
-                  inputMode="numeric"
-                  value={cvc}
-                  maxLength={4}
-                  onChange={(e) => setCvc(e.target.value.replace(/\D/g, ""))}
-                  placeholder="CVC"
-                  className="text-sm focus:outline-none"
-                />
-                <input
-                  inputMode="numeric"
-                  value={zip}
-                  maxLength={5}
-                  onChange={(e) => setZip(e.target.value.replace(/\D/g, ""))}
-                  placeholder="ZIP"
-                  className="text-sm focus:outline-none"
-                />
-              </div>
-            </div>
-          </Section>
         </div>
 
         <aside className="lg:sticky lg:top-20 lg:self-start">
           <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
             <h2 className="mb-4 text-base font-bold text-white">Order summary</h2>
             <dl className="space-y-1.5 text-sm">
-              <Row label={`Subtotal (${itemCount} ${itemCount === 1 ? "item" : "items"})`} value={formatUSDFull(subtotal)} />
-              <Row label="Shipping" value={shipping === 0 ? "Free" : formatUSDFull(shipping)} />
+              <Row
+                label={`Subtotal (${itemCount} ${itemCount === 1 ? "item" : "items"})`}
+                value={formatUSDFull(subtotal)}
+              />
+              <Row
+                label="Shipping"
+                value={shipping === 0 ? "Free" : formatUSDFull(shipping)}
+              />
               <Row label="Sales tax (est)" value={formatUSDFull(tax)} />
               <div className="my-2 border-t border-white/5" />
               <Row label="Total" value={formatUSDFull(total)} bold />
             </dl>
 
             <button
-              disabled={!canSubmit}
-              onClick={() => setConfirmed(true)}
-              className="mt-5 flex w-full items-center justify-between rounded-md bg-emerald-600 px-4 py-3 font-bold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={pending || items.length === 0}
+              onClick={handleCheckout}
+              className="mt-5 flex w-full items-center justify-between rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-3 font-bold text-slate-900 shadow-md shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <span>Place orders</span>
+              <span className="inline-flex items-center gap-2">
+                <Lock size={14} />
+                {pending ? "Redirecting…" : "Continue to secure checkout"}
+              </span>
               <span>{formatUSD(total)}</span>
             </button>
+
+            {error && (
+              <div className="mt-3 flex items-start gap-2 rounded-md border border-rose-700/40 bg-rose-500/10 p-3 text-xs text-rose-200">
+                <AlertCircle size={12} className="mt-0.5 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <p className="mt-3 text-center text-[11px] text-white/50">
+              Address + payment collected on Stripe&apos;s secure page. We
+              never see your card.
+            </p>
 
             <Link
               href="/help/buying/buyer-protection"
               className="mt-3 block rounded-md border border-emerald-700/40 bg-emerald-500/10 p-2.5 text-[11px] text-emerald-200 transition hover:border-emerald-500/60 hover:bg-emerald-500/15"
             >
               <ShieldCheck size={11} className="mr-1 inline align-text-bottom" />
-              Buyer Protection on every order. Payment held in escrow until each box arrives sealed.
-              <span className="ml-1 underline decoration-emerald-400/40 underline-offset-2">Learn more</span>
+              Buyer Protection on every order. Payment held in escrow until each
+              box arrives sealed.
+              <span className="ml-1 underline decoration-emerald-400/40 underline-offset-2">
+                Learn more
+              </span>
             </Link>
           </div>
         </aside>
@@ -292,46 +264,23 @@ export default function CartPage() {
   );
 }
 
-const input =
-  "w-full rounded-md border border-white/15 px-3 py-2 text-sm focus:border-amber-500/40 focus:outline-none focus:ring-2 focus:ring-amber-400/20";
-
-function Section({
-  icon,
-  title,
-  right,
-  children,
+function Row({
+  label,
+  value,
+  bold,
 }: {
-  icon: React.ReactNode;
-  title: string;
-  right?: React.ReactNode;
-  children: React.ReactNode;
+  label: string;
+  value: string;
+  bold?: boolean;
 }) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-[#101012] p-5">
-      <div className="mb-3 flex items-center gap-2 text-sm font-bold text-white">
-        <span className="text-white/60">{icon}</span>
-        {title}
-        {right && <span className="ml-auto inline-flex items-center gap-1 text-xs text-white/60">{right} Encrypted</span>}
-      </div>
-      <div className="space-y-3">{children}</div>
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-xs font-semibold text-white/80">{label}</span>
-      {children}
-    </label>
-  );
-}
-
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
     <div className="flex justify-between">
       <dt className={bold ? "font-bold text-white" : "text-white/60"}>{label}</dt>
-      <dd className={bold ? "text-base font-bold text-white" : "font-semibold text-white"}>{value}</dd>
+      <dd
+        className={bold ? "text-base font-bold text-white" : "font-semibold text-white"}
+      >
+        {value}
+      </dd>
     </div>
   );
 }

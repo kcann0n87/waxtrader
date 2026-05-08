@@ -114,8 +114,22 @@ async function handleEvent(event: Stripe.Event) {
 
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      const orderId = session.metadata?.waxdepot_order_id;
-      if (!orderId) break;
+      // Buy Now / single-order checkout uses `waxdepot_order_id`.
+      // Cart checkout uses `waxdepot_order_ids` (CSV) so one Stripe session
+      // can fan out to N orders. Treat both the same — the only difference
+      // is per-order shipping recompute, which we skip for cart since the
+      // line-item shipping_cents on each order was already set correctly
+      // and the cart's combined shipping rate is just the sum.
+      const singleOrderId = session.metadata?.waxdepot_order_id;
+      const multiOrderIdsRaw = session.metadata?.waxdepot_order_ids;
+      const orderIds = singleOrderId
+        ? [singleOrderId]
+        : multiOrderIdsRaw
+          ? multiOrderIdsRaw.split(",").map((s) => s.trim()).filter(Boolean)
+          : [];
+      if (orderIds.length === 0) break;
+      const isCart = orderIds.length > 1;
+      const orderId = orderIds[0]; // primary id used for legacy single-order paths below
 
       const piId =
         typeof session.payment_intent === "string"
@@ -207,18 +221,21 @@ async function handleEvent(event: Stripe.Event) {
         update.ship_to_state = a.state ?? "—";
         update.ship_to_zip = a.postal_code ?? "—";
       }
-      // Persist the actual shipping the buyer paid + the option name. The
-      // pre-checkout `orders.shipping_cents` was a placeholder (the lowest
-      // option) so this is when the order's shipping cost becomes real.
-      if (chosenShippingCents !== null) {
+      // Single-order path: persist the actual shipping the buyer paid + the
+      // option name. The pre-checkout `orders.shipping_cents` was a
+      // placeholder (lowest option); this is when it becomes real.
+      // Cart path: skip — each order already has its own listing-level
+      // shipping_cents and the combined rate is just the sum.
+      if (!isCart && chosenShippingCents !== null) {
         update.shipping_cents = chosenShippingCents;
       }
-      if (chosenShippingName) {
+      if (!isCart && chosenShippingName) {
         update.shipping_option_name = chosenShippingName;
       }
       // Re-derive total_cents from the final shipping pick so receipts and
-      // payouts stay consistent.
-      if (chosenShippingCents !== null) {
+      // payouts stay consistent. Only single-order — cart orders keep their
+      // pre-computed totals.
+      if (!isCart && chosenShippingCents !== null) {
         const { data: existing } = await supabase
           .from("orders")
           .select("price_cents, tax_cents")
@@ -230,21 +247,25 @@ async function handleEvent(event: Stripe.Event) {
         }
       }
 
-      await supabase.from("orders").update(update).eq("id", orderId);
+      // Apply the same address + payment-status update to every order in
+      // the set. For cart checkouts, this lights up all N orders at once.
+      await supabase.from("orders").update(update).in("id", orderIds);
 
-      // Notify both sides: seller "ship now", buyer "payment received".
-      const { data: order } = await supabase
+      // Notify each order's seller + buyer. For cart checkouts the buyer
+      // is the same person across orders, but every seller needs their own
+      // "ship now" ping. We don't dedupe buyer emails — getting a separate
+      // email per order is fine and keeps the per-order link useful.
+      const { data: paidOrders } = await supabase
         .from("orders")
         .select(
-          "seller_id, buyer_id, total_cents, sku:skus!orders_sku_id_fkey(year, brand, product)",
+          "id, seller_id, buyer_id, total_cents, sku:skus!orders_sku_id_fkey(year, brand, product)",
         )
-        .eq("id", orderId)
-        .maybeSingle();
-      if (order) {
+        .in("id", orderIds);
+      for (const order of paidOrders ?? []) {
         const sku = Array.isArray(order.sku) ? order.sku[0] : order.sku;
         const productTitle = sku
           ? `${sku.year} ${sku.brand} ${sku.product}`
-          : `order ${orderId}`;
+          : `order ${order.id}`;
 
         await supabase.from("notifications").insert([
           {
@@ -252,7 +273,7 @@ async function handleEvent(event: Stripe.Event) {
             type: "bid-accepted",
             title: "Payment received — ship the order",
             body: `Buyer paid for ${productTitle}. Funds in escrow until they confirm delivery.`,
-            href: `/account/orders/${orderId}`,
+            href: `/account/orders/${order.id}`,
           },
         ]);
 
@@ -272,7 +293,7 @@ async function handleEvent(event: Stripe.Event) {
               role: "seller",
               productTitle,
               amountDollars: order.total_cents / 100,
-              orderHref: `${siteUrl()}/account/orders/${orderId}`,
+              orderHref: `${siteUrl()}/account/orders/${order.id}`,
             });
           }
           if (
@@ -284,7 +305,7 @@ async function handleEvent(event: Stripe.Event) {
               role: "buyer",
               productTitle,
               amountDollars: order.total_cents / 100,
-              orderHref: `${siteUrl()}/account/orders/${orderId}`,
+              orderHref: `${siteUrl()}/account/orders/${order.id}`,
             });
           }
         } catch (e) {

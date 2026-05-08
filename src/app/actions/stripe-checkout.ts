@@ -340,6 +340,210 @@ export async function createCheckoutForOrder(formData: FormData): Promise<Checko
 }
 
 /**
+ * Multi-item cart checkout: takes an array of {listingId, qty}, creates
+ * one DB order per cart line, and produces a single Stripe Checkout
+ * session with all line items combined. Buyer pays once, fills shipping
+ * once. The session's metadata stores a comma-separated list of order
+ * IDs (`waxdepot_order_ids`) so the webhook can fan the
+ * checkout.session.completed event out to each order.
+ *
+ * Why one session, multiple orders (instead of N sessions)? Funds all
+ * land in the platform balance under the escrow model — there's no need
+ * to split the payment at charge time. We split per-seller transfers
+ * later when each order ships and gets confirmed delivered. UX-wise
+ * this also means the buyer enters their address + card once, regardless
+ * of how many sellers are in the cart.
+ *
+ * Edge case: if any line item's seller hasn't finished Stripe Connect,
+ * the whole cart fails (we can't half-checkout). The error names the
+ * blocking seller so the buyer can remove that item and retry.
+ */
+export type CartCheckoutInput = {
+  listingId: string;
+  qty: number;
+};
+
+export async function createCartCheckout(
+  items: CartCheckoutInput[],
+): Promise<CheckoutResult> {
+  if (!stripe) return { error: "Payments aren't configured yet." };
+  if (!Array.isArray(items) || items.length === 0) {
+    return { error: "Your cart is empty." };
+  }
+
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { needsAuth: true };
+
+    // Fetch all listings + sellers + skus in a single round-trip each.
+    const listingIds = items.map((i) => String(i.listingId).trim()).filter(Boolean);
+    if (listingIds.length === 0) return { error: "Cart has no valid items." };
+
+    const { data: listings } = await supabase
+      .from("listings")
+      .select(
+        "id, sku_id, seller_id, price_cents, shipping_cents, quantity, status",
+      )
+      .in("id", listingIds)
+      .eq("status", "Active");
+    if (!listings || listings.length === 0) {
+      return { error: "These listings are no longer available." };
+    }
+
+    const sellerIds = [...new Set(listings.map((l) => l.seller_id))];
+    const skuIds = [...new Set(listings.map((l) => l.sku_id))];
+    const [{ data: sellers }, { data: skus }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select(
+          "id, display_name, username, stripe_account_id, stripe_charges_enabled",
+        )
+        .in("id", sellerIds),
+      supabase
+        .from("skus")
+        .select("id, slug, year, brand, product, set_name, image_url")
+        .in("id", skuIds),
+    ]);
+    const sellerById = new Map((sellers ?? []).map((s) => [s.id, s]));
+    const skuById = new Map((skus ?? []).map((s) => [s.id, s]));
+
+    // Verify every seller has Connect ready before we create any orders —
+    // we don't want partial cart state if one seller is blocked.
+    for (const l of listings) {
+      const seller = sellerById.get(l.seller_id);
+      if (!seller?.stripe_account_id || !seller.stripe_charges_enabled) {
+        return {
+          needsSellerStripe: true,
+          error: `Seller @${seller?.username ?? "unknown"} hasn't finished payouts setup. Remove their items and retry.`,
+        };
+      }
+    }
+
+    const origin = await getOrigin();
+    const lineItems: Array<{
+      price_data: {
+        currency: string;
+        product_data: { name: string; description?: string; images?: string[] };
+        unit_amount: number;
+      };
+      quantity: number;
+    }> = [];
+    const orderIds: string[] = [];
+
+    // For each cart line, create one order row + one Stripe line item.
+    // Shipping per-listing is summed into a single shipping_options entry
+    // below so checkout shows one combined shipping number.
+    let combinedShippingCents = 0;
+    for (const cartItem of items) {
+      const listing = listings.find((l) => l.id === cartItem.listingId);
+      if (!listing) continue;
+      const sku = skuById.get(listing.sku_id);
+      const seller = sellerById.get(listing.seller_id);
+      if (!sku || !seller) continue;
+
+      const qty = Math.max(1, Math.min(99, Math.floor(cartItem.qty)));
+      // Insert an order with retry-on-collision (random WM-XXXXXX id).
+      let orderId = newOrderId();
+      const insertOrder = {
+        id: orderId,
+        buyer_id: user.id,
+        seller_id: listing.seller_id,
+        listing_id: listing.id,
+        sku_id: listing.sku_id,
+        qty,
+        price_cents: listing.price_cents,
+        shipping_cents: listing.shipping_cents,
+        tax_cents: 0,
+        total_cents: listing.price_cents * qty + listing.shipping_cents,
+        status: "Charged" as const,
+        payment_status: "pending",
+        ship_to_name: "ADDRESS_PENDING",
+        ship_to_addr1: "ADDRESS_PENDING",
+        ship_to_city: "PENDING",
+        ship_to_state: "XX",
+        ship_to_zip: "00000",
+      };
+      let { error: orderErr } = await supabase.from("orders").insert(insertOrder);
+      if (orderErr && orderErr.code === "23505") {
+        orderId = newOrderId();
+        const retry = await supabase
+          .from("orders")
+          .insert({ ...insertOrder, id: orderId });
+        orderErr = retry.error;
+      }
+      if (orderErr) {
+        console.error("createCartCheckout order insert failed:", orderErr);
+        return { error: "Could not start checkout. Please try again." };
+      }
+      orderIds.push(orderId);
+      combinedShippingCents += listing.shipping_cents;
+
+      lineItems.push({
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: `${sku.year} ${sku.brand} ${sku.product}`,
+            description: `${sku.set_name} · Sold by ${seller.display_name}`,
+            ...(sku.image_url ? { images: [`${origin}${sku.image_url}`] } : {}),
+          },
+          unit_amount: listing.price_cents,
+        },
+        quantity: qty,
+      });
+    }
+
+    if (orderIds.length === 0) return { error: "No items could be processed." };
+
+    // Combined shipping shown as one fixed-amount option. (Per-listing
+    // shipping nuance is preserved on each order row.)
+    const shippingOptions: CheckoutShippingOption[] = combinedShippingCents > 0
+      ? [
+          {
+            shipping_rate_data: {
+              display_name: "Combined shipping",
+              type: "fixed_amount",
+              fixed_amount: { amount: combinedShippingCents, currency: "usd" },
+              metadata: { waxdepot_shipping_name: "Combined shipping" },
+            },
+          },
+        ]
+      : [];
+
+    const orderIdsCsv = orderIds.join(",");
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: lineItems,
+      shipping_address_collection: { allowed_countries: ["US"] },
+      ...(shippingOptions.length > 0 && { shipping_options: shippingOptions }),
+      payment_intent_data: {
+        metadata: { waxdepot_order_ids: orderIdsCsv },
+      },
+      metadata: { waxdepot_order_ids: orderIdsCsv },
+      success_url: `${origin}/account/orders?cart_payment=success`,
+      cancel_url: `${origin}/cart?payment=cancel`,
+    });
+
+    if (!session.url) return { error: "Stripe didn't return a checkout URL." };
+
+    // Persist the PI id on every order in the cart (when it exists).
+    if (typeof session.payment_intent === "string") {
+      await supabase
+        .from("orders")
+        .update({ stripe_payment_intent_id: session.payment_intent })
+        .in("id", orderIds);
+    }
+
+    return { ok: true, checkoutUrl: session.url, orderId: orderIds[0] };
+  } catch (e) {
+    console.error("createCartCheckout failed:", e);
+    return { error: "Something went wrong. Please try again." };
+  }
+}
+
+/**
  * Convenience wrapper: take checkout result and redirect, otherwise revalidate
  * the source page so the inline error renders.
  */

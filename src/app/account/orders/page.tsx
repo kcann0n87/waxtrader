@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { ArrowLeft, Clock, DollarSign, Package, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatUSD, formatUSDFull } from "@/lib/utils";
+import { CartCleanupOnSuccess } from "@/components/cart-cleanup-on-success";
 
 export const dynamic = "force-dynamic";
 
@@ -142,6 +144,10 @@ export default async function OrderHistoryPage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 lg:px-6">
+      {/* Banner + cart-clear after a successful Stripe Checkout return */}
+      <Suspense fallback={null}>
+        <CartCleanupOnSuccess />
+      </Suspense>
       <Link
         href="/account"
         className="mb-3 inline-flex items-center gap-1.5 text-xs text-white/50 hover:text-white"
