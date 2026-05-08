@@ -17,7 +17,11 @@ import {
   User,
 } from "lucide-react";
 import { updateProfile } from "../../auth/actions";
-import { deleteAccount, updateNotificationPrefs } from "../../actions/account";
+import {
+  deleteAccount,
+  updateNotificationPrefs,
+  updatePassword,
+} from "../../actions/account";
 
 type NotifPrefs = {
   order_emails: boolean;
@@ -78,6 +82,14 @@ export function SettingsClient({
 
   const [profileMsg, setProfileMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [pending, startTransition] = useTransition();
+
+  // Password-set / change flow state. Two fields: current (optional —
+  // empty means "I signed in via magic link, never had one") and new.
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [pwdMsg, setPwdMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [pwdPending, startPwd] = useTransition();
 
   // Delete-account flow state
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -155,6 +167,108 @@ export function SettingsClient({
                 }`}
               >
                 {profileMsg.text}
+              </span>
+            )}
+          </div>
+        </form>
+      </Section>
+
+      <Section
+        icon={<Lock size={16} />}
+        title="Sign-in & security"
+        subtitle="Set or change your password"
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setPwdMsg(null);
+            if (newPwd.length < 8) {
+              setPwdMsg({
+                kind: "err",
+                text: "New password must be at least 8 characters.",
+              });
+              return;
+            }
+            if (newPwd !== confirmPwd) {
+              setPwdMsg({ kind: "err", text: "New passwords don't match." });
+              return;
+            }
+            startPwd(async () => {
+              const res = await updatePassword({
+                newPassword: newPwd,
+                currentPassword: currentPwd || undefined,
+              });
+              if (res.error) {
+                setPwdMsg({ kind: "err", text: res.error });
+                return;
+              }
+              setPwdMsg({
+                kind: "ok",
+                text: "Password saved. You can now sign in with email + password.",
+              });
+              setCurrentPwd("");
+              setNewPwd("");
+              setConfirmPwd("");
+            });
+          }}
+          className="space-y-3"
+        >
+          <p className="text-xs text-white/60">
+            If you signed in with a magic link and haven&apos;t set a password
+            yet, leave the current-password field blank.
+          </p>
+          <Field label="Current password (leave blank if unset)">
+            <input
+              type="password"
+              value={currentPwd}
+              onChange={(e) => setCurrentPwd(e.target.value)}
+              placeholder="••••••••"
+              autoComplete="current-password"
+              className={input}
+            />
+          </Field>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field label="New password">
+              <input
+                type="password"
+                value={newPwd}
+                onChange={(e) => setNewPwd(e.target.value)}
+                placeholder="At least 8 characters"
+                autoComplete="new-password"
+                minLength={8}
+                required
+                className={input}
+              />
+            </Field>
+            <Field label="Confirm new password">
+              <input
+                type="password"
+                value={confirmPwd}
+                onChange={(e) => setConfirmPwd(e.target.value)}
+                placeholder="Type it again"
+                autoComplete="new-password"
+                minLength={8}
+                required
+                className={input}
+              />
+            </Field>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="submit"
+              disabled={pwdPending || !newPwd || !confirmPwd}
+              className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2 text-sm font-bold text-slate-900 shadow-md shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {pwdPending ? <Loader2 size={14} className="animate-spin" /> : null}
+              Save password
+            </button>
+            {pwdMsg && (
+              <span
+                className={`text-xs font-semibold ${
+                  pwdMsg.kind === "ok" ? "text-emerald-300" : "text-rose-300"
+                }`}
+              >
+                {pwdMsg.text}
               </span>
             )}
           </div>

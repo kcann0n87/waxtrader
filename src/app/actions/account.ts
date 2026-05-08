@@ -16,6 +16,67 @@ const VALID_PREF_KEYS: readonly EmailCategory[] = [
 ];
 
 export type DeleteAccountResult = { ok?: boolean; error?: string };
+export type UpdatePasswordResult = { ok?: boolean; error?: string };
+
+/**
+ * Set or change the signed-in user's password.
+ *
+ * Why this exists: invitees activate their account via a magic link
+ * email — Supabase confirms their email and signs them in, but they
+ * never picked a password. Without an explicit set-password flow, they
+ * can never use the email/password form on /login again, only password
+ * reset emails or new magic links.
+ *
+ * Behavior:
+ *   - currentPassword empty → set without re-auth (first-time set after
+ *     magic-link sign-in). Trusts the active session.
+ *   - currentPassword provided → re-auth with it; reject if wrong. This
+ *     is the change-existing-password path; making attackers prove they
+ *     know the old password limits damage from a stolen session.
+ *
+ * Length floor is 8 chars to match the /signup form.
+ */
+export async function updatePassword(input: {
+  newPassword: string;
+  currentPassword?: string;
+}): Promise<UpdatePasswordResult> {
+  const newPassword = (input.newPassword ?? "").trim();
+  const currentPassword = (input.currentPassword ?? "").trim();
+  if (newPassword.length < 8) {
+    return { error: "Password must be at least 8 characters." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be signed in." };
+  if (!user.email) return { error: "No email on file — contact support." };
+
+  if (currentPassword) {
+    // Re-auth — if it fails the old password was wrong (or there isn't
+    // one and they're confused). Either way we don't want to proceed.
+    const { error: reauthErr } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
+    if (reauthErr) {
+      return {
+        error:
+          "Current password is incorrect. If you signed in with a magic link and never set one, leave the current-password field blank.",
+      };
+    }
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) {
+    console.error("updatePassword failed:", error);
+    return { error: error.message };
+  }
+
+  revalidatePath("/account/settings");
+  return { ok: true };
+}
 
 /**
  * Permanently deletes the current user's account.
