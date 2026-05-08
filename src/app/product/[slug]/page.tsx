@@ -10,6 +10,7 @@ import { RealtimeOrderBook } from "@/components/realtime-order-book";
 import { SellerLink } from "@/components/seller-link";
 import { PriceChart } from "@/components/price-chart";
 import { ProductImageWithPreview } from "@/components/product-image-with-preview";
+import { AdminImageDropOverlay } from "@/components/admin-image-drop-overlay";
 import { SalesVolumeChart } from "@/components/sales-volume-chart";
 import { RecentlyViewed } from "@/components/recently-viewed";
 import { TrackView } from "@/components/track-view";
@@ -152,15 +153,14 @@ export default async function ProductPage({
   const { slug } = await params;
   const sp = await searchParams;
 
-  // Admin preview mode: ?preview=1 bypasses the is_published filter so
-  // admins can view staged SKUs as if they were live. Anyone else hitting
-  // the URL with ?preview=1 falls back to the normal filter — admin check
-  // is the gate, not the query param.
-  let includeUnpublished = false;
-  if (sp.preview === "1") {
-    const { requireAdmin } = await import("@/lib/admin");
-    includeUnpublished = !!(await requireAdmin());
-  }
+  // Resolve admin status once — used for two things: (1) bypassing the
+  // is_published filter when ?preview=1 is on, (2) showing the
+  // drag-and-drop image upload overlay over the product photo.
+  const { requireAdmin } = await import("@/lib/admin");
+  const adminUser = await requireAdmin();
+  const isAdmin = !!adminUser;
+
+  const includeUnpublished = isAdmin && sp.preview === "1";
 
   const { sku, variants } = await resolveProduct(slug, sp.variant, {
     includeUnpublished,
@@ -216,7 +216,16 @@ export default async function ProductPage({
         <div>
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#101012] p-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-[280px_1fr]">
-              <ProductImageWithPreview sku={sku} className="aspect-[4/5] rounded-xl border border-white/5" />
+              <AdminImageDropOverlay
+                skuId={sku.id}
+                slug={sku.slug}
+                isAdmin={isAdmin}
+              >
+                <ProductImageWithPreview
+                  sku={sku}
+                  className="aspect-[4/5] rounded-xl border border-white/5"
+                />
+              </AdminImageDropOverlay>
 
               <div>
                 <div className="flex items-start justify-between gap-3">
