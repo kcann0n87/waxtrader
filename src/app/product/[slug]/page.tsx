@@ -109,12 +109,15 @@ export async function generateMetadata({
 async function resolveProduct(
   slug: string,
   variantParam?: string,
+  options: { includeUnpublished?: boolean } = {},
 ): Promise<{
   sku: Awaited<ReturnType<typeof getSkuBySlug>>;
   variants: Awaited<ReturnType<typeof getVariantsForGroup>>;
 }> {
   // Case 1: treat slug as a variant_group.
-  const variants = sortByVariantOrder(await getVariantsForGroup(slug));
+  const variants = sortByVariantOrder(
+    await getVariantsForGroup(slug, options),
+  );
   if (variants.length > 0) {
     const requested = variantParam
       ? variants.find((v) => v.variantType === variantParam)
@@ -125,9 +128,13 @@ async function resolveProduct(
 
   // Case 2: legacy per-SKU slug. Redirect to the canonical group URL so
   // any inbound link or bookmark still works without changing the API.
-  const direct = await getSkuBySlug(slug);
+  const direct = await getSkuBySlug(slug, options);
   if (direct?.variantGroup && direct.variantType) {
-    redirect(`/product/${direct.variantGroup}?variant=${direct.variantType}`);
+    // Preserve preview mode through the redirect so admins don't lose
+    // the unpublished-visible toggle when bouncing to the canonical URL.
+    const variantParam = `variant=${direct.variantType}`;
+    const previewParam = options.includeUnpublished ? "&preview=1" : "";
+    redirect(`/product/${direct.variantGroup}?${variantParam}${previewParam}`);
   }
 
   // Stranded SKU with no group/type backfill — render directly so the
@@ -140,11 +147,24 @@ export default async function ProductPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ variant?: string }>;
+  searchParams: Promise<{ variant?: string; preview?: string }>;
 }) {
   const { slug } = await params;
   const sp = await searchParams;
-  const { sku, variants } = await resolveProduct(slug, sp.variant);
+
+  // Admin preview mode: ?preview=1 bypasses the is_published filter so
+  // admins can view staged SKUs as if they were live. Anyone else hitting
+  // the URL with ?preview=1 falls back to the normal filter — admin check
+  // is the gate, not the query param.
+  let includeUnpublished = false;
+  if (sp.preview === "1") {
+    const { requireAdmin } = await import("@/lib/admin");
+    includeUnpublished = !!(await requireAdmin());
+  }
+
+  const { sku, variants } = await resolveProduct(slug, sp.variant, {
+    includeUnpublished,
+  });
   if (!sku) notFound();
 
   // Parallel fetch everything the page needs for this SKU.

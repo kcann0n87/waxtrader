@@ -121,14 +121,14 @@ export function formatTierExpires(expiresAt: string | null | undefined): string 
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-export async function getSkuBySlug(slug: string): Promise<Sku | null> {
+export async function getSkuBySlug(
+  slug: string,
+  options: { includeUnpublished?: boolean } = {},
+): Promise<Sku | null> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("skus")
-    .select("*")
-    .eq("slug", slug)
-    .eq("is_published", true)
-    .maybeSingle();
+  let q = supabase.from("skus").select("*").eq("slug", slug);
+  if (!options.includeUnpublished) q = q.eq("is_published", true);
+  const { data, error } = await q.maybeSingle();
   if (error) throw error;
   if (!data) return null;
   const sku = rowToSku(data);
@@ -158,13 +158,12 @@ export async function getSkuBySlug(slug: string): Promise<Sku | null> {
  */
 export async function getVariantsForGroup(
   group: string,
+  options: { includeUnpublished?: boolean } = {},
 ): Promise<Array<Sku & { lowestAskCents: number | null }>> {
   const supabase = await createClient();
-  const { data: skuRows, error } = await supabase
-    .from("skus")
-    .select("*")
-    .eq("variant_group", group)
-    .eq("is_published", true);
+  let q = supabase.from("skus").select("*").eq("variant_group", group);
+  if (!options.includeUnpublished) q = q.eq("is_published", true);
+  const { data: skuRows, error } = await q;
   if (error) throw error;
   if (!skuRows || skuRows.length === 0) return [];
 
