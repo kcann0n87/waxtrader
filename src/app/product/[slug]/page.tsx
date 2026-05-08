@@ -13,6 +13,7 @@ import { ProductImageWithPreview } from "@/components/product-image-with-preview
 import { AdminImageDropOverlay } from "@/components/admin-image-drop-overlay";
 import { AdminDeleteSkuButton } from "@/components/admin-delete-sku-button";
 import { AdminAddSkuButton } from "@/components/admin-add-sku-button";
+import { AdminFeaturedRankButton } from "@/components/admin-featured-rank-button";
 import { SalesVolumeChart } from "@/components/sales-volume-chart";
 import { RecentlyViewed } from "@/components/recently-viewed";
 import { TrackView } from "@/components/track-view";
@@ -217,10 +218,12 @@ export default async function ProductPage({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
         <div>
           <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#101012] p-6">
-            {/* Admin floating actions — pair of corner pills, only
-                visible when signed in as admin. The + sits left of the
-                ✕ so the most-destructive action is the rightmost
-                target (matches platform conventions). */}
+            {/* Admin floating actions — corner pills, only visible
+                when signed in as admin. Layout left → right:
+                  + add (emerald)
+                  📌 featured rank (amber)
+                  ✕ delete (rose)
+                Most-destructive on the rightmost edge. */}
             <AdminAddSkuButton
               isAdmin={isAdmin}
               prefill={{
@@ -229,6 +232,11 @@ export default async function ProductPage({
                 setName: sku.set,
                 sport: sku.sport,
               }}
+            />
+            <AdminFeaturedRankButton
+              skuId={sku.id}
+              currentRank={sku.featuredRank ?? null}
+              isAdmin={isAdmin}
             />
             <AdminDeleteSkuButton
               skuId={sku.id}

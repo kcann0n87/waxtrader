@@ -17,7 +17,8 @@ function rowToSku(row: {
   gradient_to: string | null;
   variant_group?: string | null;
   variant_type?: string | null;
-}): Sku & { uuid: string } {
+  featured_rank?: number | null;
+}): Sku & { uuid: string; featuredRank: number | null } {
   return {
     id: row.id, // uuid
     uuid: row.id,
@@ -33,6 +34,7 @@ function rowToSku(row: {
     gradient: [row.gradient_from ?? "#475569", row.gradient_to ?? "#0f172a"],
     variantGroup: row.variant_group ?? undefined,
     variantType: row.variant_type ?? undefined,
+    featuredRank: row.featured_rank ?? null,
   };
 }
 
@@ -581,9 +583,13 @@ export async function getCatalogWithPricing(): Promise<
     const { isPreviewModeOn } = await import("./preview-mode");
     const preview = await isPreviewModeOn();
 
+    // Featured rank first (admin-set manual priority), then release
+    // date desc. Postgrest puts NULLs last on ASC by default, so the
+    // ranked rows float to the top and the rest stay newest-first.
     let skuQuery = supabase
       .from("skus")
       .select("*")
+      .order("featured_rank", { ascending: true, nullsFirst: false })
       .order("release_date", { ascending: false });
     if (!preview) skuQuery = skuQuery.eq("is_published", true);
 

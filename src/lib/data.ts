@@ -20,6 +20,9 @@ export type Sku = {
   // legacy mock-data callsites compile without modification.
   variantGroup?: string;
   variantType?: string;
+  // Manual sort priority for homepage rails. Lower = higher up. Null
+  // = use default ordering. Added in migration 0074.
+  featuredRank?: number | null;
 };
 
 export type Listing = {

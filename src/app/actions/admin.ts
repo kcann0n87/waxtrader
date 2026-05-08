@@ -436,6 +436,39 @@ export async function adminUploadSkuImage(
 /**
  * Delete a SKU. Refuses if any listings reference it.
  */
+/**
+ * Manually pin a SKU's homepage sort position. Lower numbers rise
+ * higher in the rail. Pass null to clear (back to default ordering).
+ *
+ * Surfaces from the floating "Featured rank" pill on product pages —
+ * admins can rank top picks without leaving whatever page they're on.
+ */
+export async function adminSetFeaturedRank(
+  id: string,
+  rank: number | null,
+): Promise<Result> {
+  const admin = await requireAdmin();
+  if (!admin) return { error: "Forbidden" };
+
+  // Smallint range — Postgres rejects anything outside ±32767.
+  if (rank !== null && (rank < 0 || rank > 32767 || !Number.isInteger(rank))) {
+    return { error: "Rank must be an integer 0–32767, or null to clear." };
+  }
+
+  const sb = serviceRoleClient();
+  const { error } = await sb
+    .from("skus")
+    .update({ featured_rank: rank })
+    .eq("id", id);
+  if (error) return { error: error.message };
+
+  await logAdminAction(admin.id, "set_featured_rank", "sku", id, { rank });
+  // Homepage + browse pages cache aggressively at the data layer.
+  // Revalidate root layout to flush.
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
 export async function adminDeleteSku(id: string): Promise<Result> {
   const admin = await requireAdmin();
   if (!admin) return { error: "Forbidden" };
