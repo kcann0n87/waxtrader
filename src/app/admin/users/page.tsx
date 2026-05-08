@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { serviceRoleClient } from "@/lib/supabase/admin";
+import { ResendInviteButton } from "./resend-invite-button";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,25 @@ export default async function AdminUsersPage({
 
   const { data: users, error } = await query;
   if (error) console.error(error);
+
+  // Email + activation state come from auth.users — joined client-side
+  // by id since the Supabase JS SDK doesn't let us do a true cross-schema
+  // join. listUsers caps at 1000/page which is fine for our scale; bump
+  // to pagination if we ever hit that.
+  const { data: authList } = await sb.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
+  const authById = new Map(
+    (authList?.users ?? []).map((u) => [
+      u.id,
+      {
+        email: u.email ?? null,
+        emailConfirmedAt: u.email_confirmed_at ?? null,
+        lastSignInAt: u.last_sign_in_at ?? null,
+      },
+    ]),
+  );
 
   return (
     <div>
@@ -75,70 +95,105 @@ export default async function AdminUsersPage({
       </form>
 
       <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#101012]">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="w-full min-w-[760px] text-sm">
           <thead className="bg-white/5 text-left text-[10px] font-semibold tracking-[0.15em] text-white/60 uppercase">
             <tr>
               <th className="px-4 py-3">User</th>
+              <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Tier</th>
               <th className="px-4 py-3">Roles</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Signed up</th>
+              <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
-            {(users ?? []).map((u) => (
-              <tr key={u.id} className="hover:bg-white/[0.02]">
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/admin/users/${u.id}`}
-                    className="block"
-                  >
-                    <div className="text-sm font-semibold text-white hover:text-amber-300">
-                      {u.display_name}
+            {(users ?? []).map((u) => {
+              const auth = authById.get(u.id);
+              const everSignedIn =
+                !!auth?.emailConfirmedAt || !!auth?.lastSignInAt;
+              return (
+                <tr key={u.id} className="hover:bg-white/[0.02]">
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/admin/users/${u.id}`}
+                      className="block"
+                    >
+                      <div className="text-sm font-semibold text-white hover:text-amber-300">
+                        {u.display_name}
+                      </div>
+                      <div className="text-[11px] text-white/50">@{u.username}</div>
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3">
+                    {auth?.email ? (
+                      <div>
+                        <div className="font-mono text-xs text-white/80">
+                          {auth.email}
+                        </div>
+                        {!everSignedIn && (
+                          <div className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-semibold tracking-wider text-amber-300/80 uppercase">
+                            <span className="h-1 w-1 rounded-full bg-amber-400" />
+                            Invite pending
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-white/40">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {u.is_seller ? (
+                      <TierBadge tier={u.seller_tier ?? "Starter"} />
+                    ) : (
+                      <span className="text-[11px] text-white/40">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {u.is_admin && (
+                        <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-300">
+                          ADMIN
+                        </span>
+                      )}
+                      {u.is_seller && (
+                        <span className="rounded bg-sky-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-sky-300">
+                          seller
+                        </span>
+                      )}
+                      {u.is_verified && (
+                        <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
+                          verified
+                        </span>
+                      )}
                     </div>
-                    <div className="text-[11px] text-white/50">@{u.username}</div>
-                  </Link>
-                </td>
-                <td className="px-4 py-3">
-                  {u.is_seller ? (
-                    <TierBadge tier={u.seller_tier ?? "Starter"} />
-                  ) : (
-                    <span className="text-[11px] text-white/40">—</span>
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex flex-wrap gap-1">
-                    {u.is_admin && (
-                      <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-300">
-                        ADMIN
+                  </td>
+                  <td className="px-4 py-3">
+                    {u.banned_at ? (
+                      <span className="rounded bg-rose-500/15 px-2 py-0.5 text-[10px] font-bold text-rose-300">
+                        BANNED
                       </span>
+                    ) : (
+                      <span className="text-[11px] text-emerald-300/80">active</span>
                     )}
-                    {u.is_seller && (
-                      <span className="rounded bg-sky-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-sky-300">
-                        seller
-                      </span>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-white/60">
+                    {new Date(u.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {auth?.email ? (
+                      <ResendInviteButton
+                        userId={u.id}
+                        email={auth.email}
+                        everSignedIn={everSignedIn}
+                      />
+                    ) : (
+                      <span className="text-[10px] text-white/30">no email</span>
                     )}
-                    {u.is_verified && (
-                      <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
-                        verified
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  {u.banned_at ? (
-                    <span className="rounded bg-rose-500/15 px-2 py-0.5 text-[10px] font-bold text-rose-300">
-                      BANNED
-                    </span>
-                  ) : (
-                    <span className="text-[11px] text-emerald-300/80">active</span>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-xs text-white/60">
-                  {new Date(u.created_at).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         {(users ?? []).length === 0 && (

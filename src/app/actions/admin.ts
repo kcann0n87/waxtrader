@@ -542,6 +542,85 @@ export async function adminInviteUser(input: {
 }
 
 /**
+ * Resend a sign-in link to any user, regardless of state. Used from
+ * /admin/users so admins can recover stuck invitees with one click
+ * without juggling Supabase tabs.
+ *
+ * Branches on the auth user's state:
+ *   - No user yet → adminInviteUser (creates account + invite email)
+ *   - Unactivated invite (no email_confirmed_at, no last_sign_in_at) →
+ *     adminInviteUser, which auto-revokes + reissues a fresh invite
+ *   - Activated user → send a magic-link sign-in email so they can
+ *     get back in without resetting a password
+ *
+ * Always lands the user on /auth/callback?next=/account regardless of
+ * path so PKCE works.
+ */
+export async function adminSendSignInLink(input: {
+  userId?: string;
+  email?: string;
+}): Promise<Result> {
+  const admin = await requireAdmin();
+  if (!admin) return { error: "Forbidden" };
+
+  const sb = serviceRoleClient();
+
+  // Resolve to an email — either provided directly, or look up by user id.
+  let email = (input.email ?? "").trim().toLowerCase();
+  if (!email && input.userId) {
+    const { data } = await sb.auth.admin.getUserById(input.userId);
+    email = data?.user?.email?.toLowerCase() ?? "";
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { error: "Couldn't resolve a valid email for that user." };
+  }
+
+  // Find the existing auth row (if any). For activated users we send a
+  // magic link; for missing/unactivated we delegate to adminInviteUser
+  // which already does the right thing.
+  const { data: list } = await sb.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
+  const existing = list?.users.find(
+    (u) => u.email?.toLowerCase() === email,
+  );
+  const everSignedIn =
+    !!existing?.email_confirmed_at || !!existing?.last_sign_in_at;
+
+  if (!existing || !everSignedIn) {
+    // No user OR pending invite → invite path (handles auto-revoke).
+    return adminInviteUser({ email });
+  }
+
+  // Activated user → magic link. generateLink returns a URL we then
+  // pass to Supabase's email-send infrastructure via signInWithOtp's
+  // shouldCreateUser=false path, which sends the configured magic-link
+  // template. Either approach works; signInWithOtp keeps the email
+  // template wiring identical to the rest of the app.
+  const redirectTo =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+    "http://localhost:3000";
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: false,
+      emailRedirectTo: `${redirectTo}/auth/callback?next=/account`,
+    },
+  });
+  if (error) {
+    console.error("adminSendSignInLink magic link failed:", error);
+    return { error: error.message };
+  }
+
+  await logAdminAction(admin.id, "send_signin_link", "user", existing.id, {
+    email,
+  });
+  revalidatePath("/admin/users");
+  return { ok: true, data: { user_id: existing.id, email } };
+}
+
+/**
  * Bulk-invite the next N pending waitlist entries (oldest first — first
  * sign-up gets in first). Caps at 25 per run because Supabase rate-limits
  * inviteUserByEmail. Returns counts so the admin can see what happened
