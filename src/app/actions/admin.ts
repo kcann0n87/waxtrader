@@ -479,11 +479,39 @@ export async function adminInviteUser(input: {
 
   const sb = serviceRoleClient();
 
-  // Reject if there's already an auth user for this email — better to
-  // surface the duplicate than silently send another invite.
+  // Look up any existing auth user for this email. There are two cases:
+  //   1. Real activated user (email_confirmed_at set, has logged in) →
+  //      reject as a duplicate. They should sign in, not be re-invited.
+  //   2. Stale unactivated invite (email_confirmed_at null, no last_sign_in
+  //      _at) → silently revoke + reinvite. This is the "I sent the
+  //      invite but the link was broken / they never clicked" case;
+  //      forcing the admin to delete in the Supabase dashboard before
+  //      resending is needless friction.
   const { data: existing } = await sb.auth.admin.listUsers({ page: 1, perPage: 200 });
-  if (existing?.users.some((u) => u.email?.toLowerCase() === email)) {
-    return { error: "An account with that email already exists." };
+  const existingUser = existing?.users.find(
+    (u) => u.email?.toLowerCase() === email,
+  );
+  if (existingUser) {
+    const everSignedIn =
+      !!existingUser.email_confirmed_at || !!existingUser.last_sign_in_at;
+    if (everSignedIn) {
+      return { error: "An account with that email already exists." };
+    }
+    // Unactivated — revoke and reinvite. Defensive: if the user managed
+    // to leave behind FK rows (shouldn't happen for an unactivated invite
+    // but the cascade handles it anyway), the auth deletion cascades
+    // through profiles → all dependent tables.
+    const { error: delErr } = await sb.auth.admin.deleteUser(existingUser.id);
+    if (delErr) {
+      console.error("adminInviteUser: revoke unactivated invite failed:", delErr);
+      return {
+        error:
+          "An invite was already sent to that email but couldn't be auto-revoked. Delete the user manually in Supabase Authentication → Users, then retry.",
+      };
+    }
+    await logAdminAction(admin.id, "revoke_unactivated_invite", "user", existingUser.id, {
+      email,
+    });
   }
 
   const redirectTo =
