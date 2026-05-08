@@ -489,6 +489,53 @@ export async function adminSetFeaturedRank(
   return { ok: true };
 }
 
+/**
+ * Bulk-reorder SKUs by writing featured_rank = 1..N in the order the
+ * admin dropped them. Drives the homepage drag-and-drop reorder UX —
+ * admin grabs a card, drops it, the visible list comes back as
+ * skuIds in new order, and we persist that order verbatim.
+ *
+ * Only the SKUs in the input list get touched. Anything not in the
+ * list keeps whatever featured_rank it had (so reordering one section
+ * doesn't clobber pins set elsewhere). To "unpin" something, drop a
+ * shorter list — items omitted from the new order keep their old rank
+ * (the homepage's "below the pinned" zone falls through to release-
+ * date sort).
+ *
+ * Empty list = no-op (defensive — protects against a bad client send).
+ */
+export async function adminReorderSkus(skuIds: string[]): Promise<Result> {
+  const admin = await requireAdmin();
+  if (!admin) return { error: "Forbidden" };
+  if (!Array.isArray(skuIds) || skuIds.length === 0) return { ok: true };
+  // Cap at the smallint upper bound. We're nowhere near it in practice
+  // but better to reject a 50K-item drop than write garbage.
+  if (skuIds.length > 32767) return { error: "Too many SKUs to reorder at once." };
+
+  const sb = serviceRoleClient();
+  // Postgres has no "update many with different values per row" in a
+  // single query without CTEs. For ~100 rows the per-row update is
+  // fine; if this ever grows past a few hundred we'd switch to a
+  // batched RPC. Run them sequentially to keep transaction semantics
+  // simple — partial failure leaves the catalog in a half-renumbered
+  // state, which is recoverable by re-dropping.
+  for (let i = 0; i < skuIds.length; i++) {
+    const { error } = await sb
+      .from("skus")
+      .update({ featured_rank: i + 1 })
+      .eq("id", skuIds[i]);
+    if (error) return { error: `Row ${i + 1}: ${error.message}` };
+  }
+
+  await logAdminAction(admin.id, "reorder_skus", "sku", "bulk", {
+    count: skuIds.length,
+    first: skuIds[0],
+    last: skuIds[skuIds.length - 1],
+  });
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
 export async function adminDeleteSku(id: string): Promise<Result> {
   const admin = await requireAdmin();
   if (!admin) return { error: "Forbidden" };
