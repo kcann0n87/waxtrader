@@ -231,6 +231,12 @@ export default async function ProductPage({
                 brand: sku.brand,
                 setName: sku.set,
                 sport: sku.sport,
+                releaseDate: sku.releaseDate,
+                description: sku.description,
+                gradientFrom: sku.gradient[0],
+                gradientTo: sku.gradient[1],
+                imageUrl: sku.imageUrl,
+                sourceProduct: sku.product,
               }}
             />
             <AdminFeaturedRankButton
