@@ -110,8 +110,16 @@ export default async function AdminUsersPage({
           <tbody className="divide-y divide-white/5">
             {(users ?? []).map((u) => {
               const auth = authById.get(u.id);
-              const everSignedIn =
-                !!auth?.emailConfirmedAt || !!auth?.lastSignInAt;
+              // Three distinct activation states. The middle one matters
+              // a lot during beta because the broken /auth/callback bug
+              // left a population of users with confirmed emails who
+              // never finished signing in:
+              //   - never confirmed → "Invite pending" (no email click)
+              //   - confirmed, never signed in → "Confirmed, never signed in"
+              //   - actually signed in → no badge (they're a real user)
+              const hasSignedIn = !!auth?.lastSignInAt;
+              const emailConfirmed = !!auth?.emailConfirmedAt;
+              const everSignedIn = hasSignedIn || emailConfirmed; // for the resend button label
               return (
                 <tr key={u.id} className="hover:bg-white/[0.02]">
                   <td className="px-4 py-3">
@@ -131,10 +139,19 @@ export default async function AdminUsersPage({
                         <div className="font-mono text-xs text-white/80">
                           {auth.email}
                         </div>
-                        {!everSignedIn && (
+                        {!emailConfirmed && (
                           <div className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-semibold tracking-wider text-amber-300/80 uppercase">
                             <span className="h-1 w-1 rounded-full bg-amber-400" />
                             Invite pending
+                          </div>
+                        )}
+                        {emailConfirmed && !hasSignedIn && (
+                          <div
+                            className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-semibold tracking-wider text-sky-300/80 uppercase"
+                            title="They clicked the invite email (Supabase marked their email confirmed) but never completed sign-in. Likely hit the broken /auth/callback redirect. Send a magic link to get them in."
+                          >
+                            <span className="h-1 w-1 rounded-full bg-sky-400" />
+                            Confirmed · never signed in
                           </div>
                         )}
                       </div>
