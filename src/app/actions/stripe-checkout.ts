@@ -115,6 +115,9 @@ export async function createBuyNowCheckout(formData: FormData): Promise<Checkout
       ? await listingQuery.eq("id", listingIdHint).limit(1).maybeSingle()
       : await listingQuery.limit(1).maybeSingle();
     if (!listing) return { error: "This product is no longer available." };
+    if ((listing.quantity ?? 0) < 1) {
+      return { error: "This listing is sold out — try a different one." };
+    }
 
     // Seller must have Stripe Connect set up — otherwise we can't direct payment.
     const { data: seller } = await supabase
@@ -410,14 +413,24 @@ export async function createCartCheckout(
     const sellerById = new Map((sellers ?? []).map((s) => [s.id, s]));
     const skuById = new Map((skus ?? []).map((s) => [s.id, s]));
 
-    // Verify every seller has Connect ready before we create any orders —
-    // we don't want partial cart state if one seller is blocked.
+    // Verify every seller has Connect ready AND every listing has enough
+    // stock for the requested qty before we create any orders. We don't
+    // want partial cart state if one seller is blocked or a listing went
+    // out of stock between add-to-cart and checkout.
     for (const l of listings) {
       const seller = sellerById.get(l.seller_id);
       if (!seller?.stripe_account_id || !seller.stripe_charges_enabled) {
         return {
           needsSellerStripe: true,
           error: `Seller @${seller?.username ?? "unknown"} hasn't finished payouts setup. Remove their items and retry.`,
+        };
+      }
+      const requestedQty = items
+        .filter((i) => i.listingId === l.id)
+        .reduce((sum, i) => sum + Math.max(1, Math.floor(i.qty)), 0);
+      if ((l.quantity ?? 0) < requestedQty) {
+        return {
+          error: `One of your cart items is now out of stock. Remove it and retry.`,
         };
       }
     }

@@ -258,9 +258,34 @@ async function handleEvent(event: Stripe.Event) {
       const { data: paidOrders } = await supabase
         .from("orders")
         .select(
-          "id, seller_id, buyer_id, total_cents, sku:skus!orders_sku_id_fkey(year, brand, product)",
+          "id, seller_id, buyer_id, listing_id, qty, total_cents, sku:skus!orders_sku_id_fkey(year, brand, product)",
         )
         .in("id", orderIds);
+
+      // Atomically decrement listing inventory now that payment landed. The
+      // RPC also flips status to 'Sold' when quantity hits 0. We do this
+      // before notifications so the seller's "ship now" ping doesn't include
+      // a still-Active listing they could oversell. If the decrement returns
+      // null (race lost), we still process the order — the buyer paid and
+      // the seller has stock obligation per their listing terms — but log
+      // it for ops to investigate.
+      for (const order of paidOrders ?? []) {
+        if (!order.listing_id) continue;
+        try {
+          const { data: rpcRows } = await supabase.rpc(
+            "consume_listing_quantity",
+            { p_listing_id: order.listing_id, p_qty: order.qty ?? 1 },
+          );
+          const result = Array.isArray(rpcRows) ? rpcRows[0] : rpcRows;
+          if (!result || result.remaining_qty === null) {
+            console.warn(
+              `[stripe webhook] inventory race on listing ${order.listing_id} for order ${order.id} — decrement skipped`,
+            );
+          }
+        } catch (e) {
+          console.error("consume_listing_quantity rpc failed:", e);
+        }
+      }
       for (const order of paidOrders ?? []) {
         const sku = Array.isArray(order.sku) ? order.sku[0] : order.sku;
         const productTitle = sku
