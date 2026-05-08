@@ -489,8 +489,15 @@ export async function adminInviteUser(input: {
   const redirectTo =
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "http://localhost:3000";
 
+  // Route through /auth/callback so PKCE code exchange happens (Supabase
+  // SSR uses PKCE by default — appending ?code=... to the redirect_to).
+  // Without this, the link lands on /account with the code unexchanged,
+  // middleware sees anon, and beta-gated invitees get bounced to
+  // /coming-soon. /auth is in ALWAYS_PUBLIC_PREFIXES so the callback
+  // itself is reachable; it exchanges the code, sets the session
+  // cookies, then forwards to ?next=.
   const { data, error } = await sb.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${redirectTo}/account`,
+    redirectTo: `${redirectTo}/auth/callback?next=/account`,
     data: input.displayName
       ? { display_name: input.displayName.trim() }
       : undefined,
@@ -572,8 +579,10 @@ export async function adminInviteBatchPending(
   for (const rawEmail of pending) {
     const email = rawEmail.trim().toLowerCase();
     try {
+      // Same /auth/callback routing as the single-invite path — see
+      // adminInviteUser for why direct /account skips PKCE code exchange.
       const { data, error } = await sb.auth.admin.inviteUserByEmail(email, {
-        redirectTo: `${redirectTo}/account`,
+        redirectTo: `${redirectTo}/auth/callback?next=/account`,
       });
       if (error) {
         failed++;
