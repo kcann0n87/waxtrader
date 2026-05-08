@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import {
   AlertTriangle,
   ArrowDownToLine,
+  ArrowRight,
   BarChart3,
   Bell,
   Box,
@@ -49,37 +50,50 @@ export default async function AccountPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/account");
 
-  const [ordersRes, bidsRes, listingsRes, profileRes] = await Promise.all([
-    supabase
-      .from("orders")
-      .select(
-        "id, total_cents, status, placed_at, sku:skus!orders_sku_id_fkey(slug, year, brand, product, set_name)",
-      )
-      .eq("buyer_id", user.id)
-      .order("placed_at", { ascending: false })
-      .limit(10),
-    supabase
-      .from("bids")
-      .select(
-        "id, sku_id, price_cents, status, expires_at, sku:skus!bids_sku_id_fkey(slug, year, brand, product, set_name)",
-      )
-      .eq("buyer_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(10),
-    supabase
-      .from("listings")
-      .select(
-        "id, price_cents, quantity, status, created_at, sku:skus!listings_sku_id_fkey(slug, year, brand, product, set_name)",
-      )
-      .eq("seller_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(10),
-    supabase
-      .from("profiles")
-      .select("username, display_name, is_seller, created_at")
-      .eq("id", user.id)
-      .maybeSingle(),
-  ]);
+  const [ordersRes, bidsRes, listingsRes, profileRes, toShipRes] =
+    await Promise.all([
+      supabase
+        .from("orders")
+        .select(
+          "id, total_cents, status, placed_at, sku:skus!orders_sku_id_fkey(slug, year, brand, product, set_name)",
+        )
+        .eq("buyer_id", user.id)
+        .order("placed_at", { ascending: false })
+        .limit(10),
+      supabase
+        .from("bids")
+        .select(
+          "id, sku_id, price_cents, status, expires_at, sku:skus!bids_sku_id_fkey(slug, year, brand, product, set_name)",
+        )
+        .eq("buyer_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10),
+      supabase
+        .from("listings")
+        .select(
+          "id, price_cents, quantity, status, created_at, sku:skus!listings_sku_id_fkey(slug, year, brand, product, set_name)",
+        )
+        .eq("seller_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10),
+      supabase
+        .from("profiles")
+        .select("username, display_name, is_seller, created_at")
+        .eq("id", user.id)
+        .maybeSingle(),
+      // Seller-side: orders the user has SOLD that are paid + not yet
+      // shipped. These are the "ship me NOW" orders — surfaced as a
+      // banner above the buyer-side dashboard so the seller can't miss
+      // them. Stale-shipping = lost seller-tier promotion eligibility,
+      // so making this loud matters.
+      supabase
+        .from("orders")
+        .select("id, placed_at, sku:skus!orders_sku_id_fkey(year, brand, product)")
+        .eq("seller_id", user.id)
+        .eq("status", "InEscrow")
+        .order("placed_at", { ascending: true })
+        .limit(20),
+    ]);
 
   type OrderRow = {
     id: string;
@@ -149,6 +163,31 @@ export default async function AccountPage() {
   const activeListings = myListings.filter((l) => l.status === "Active").length;
   const hasAnyActivity = orders.length + myBids.length + myListings.length > 0;
 
+  // Seller-side: orders paid + not shipped, oldest first. Showing the
+  // oldest in the banner CTA gets the seller to the most-overdue order
+  // in one click instead of a generic list.
+  type ToShipRow = {
+    id: string;
+    placed_at: string;
+    sku:
+      | { year: number; brand: string; product: string }
+      | { year: number; brand: string; product: string }[]
+      | null;
+  };
+  const toShip = (toShipRes.data ?? []) as ToShipRow[];
+  const oldestToShip = toShip[0];
+  const oldestToShipSku = oldestToShip
+    ? Array.isArray(oldestToShip.sku)
+      ? oldestToShip.sku[0]
+      : oldestToShip.sku
+    : null;
+  const oldestToShipDays = oldestToShip
+    ? Math.floor(
+        (Date.now() - new Date(oldestToShip.placed_at).getTime()) /
+          (24 * 3600 * 1000),
+      )
+    : 0;
+
   // First-impression state for invitees who just clicked their magic link.
   // Display name defaults to the email-derived username when the invite
   // didn't include one — that's a good signal to nudge them to set it.
@@ -180,6 +219,45 @@ export default async function AccountPage() {
           <NavLink href="/account/settings" icon={<Settings size={14} />} label="Settings" />
         </div>
       </div>
+
+      {/* Seller "ship now" banner — only renders when there are paid
+          unshipped orders to surface. Click takes the seller straight
+          to the oldest order so they can hit the ship form. */}
+      {toShip.length > 0 && oldestToShip && (
+        <Link
+          href={`/account/orders/${oldestToShip.id}`}
+          className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-700/50 bg-gradient-to-r from-amber-500/15 to-amber-500/5 px-5 py-4 transition hover:border-amber-400/60 hover:from-amber-500/20 hover:to-amber-500/10"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-300">
+              <Package size={18} />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-amber-100">
+                {toShip.length === 1
+                  ? "1 order needs shipping"
+                  : `${toShip.length} orders need shipping`}
+              </div>
+              <div className="text-xs text-amber-200/70">
+                Oldest:{" "}
+                {oldestToShipSku
+                  ? `${oldestToShipSku.year} ${oldestToShipSku.brand} ${oldestToShipSku.product}`
+                  : `order ${oldestToShip.id}`}
+                {oldestToShipDays >= 1 &&
+                  ` · paid ${oldestToShipDays} ${oldestToShipDays === 1 ? "day" : "days"} ago`}
+                {oldestToShipDays >= 2 && (
+                  <span className="ml-1 font-semibold text-rose-300">
+                    · ship today to keep your seller score
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-md bg-amber-400/90 px-3 py-1.5 text-xs font-bold tracking-wider text-slate-900 uppercase">
+            Open order <ArrowRight size={11} />
+          </span>
+        </Link>
+      )}
 
       <div className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat icon={<Package size={14} />} label="Orders" value={String(orders.length)} sub="all time" />
