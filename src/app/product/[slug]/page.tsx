@@ -11,6 +11,7 @@ import { SellerLink } from "@/components/seller-link";
 import { PriceChart } from "@/components/price-chart";
 import { ProductImageWithPreview } from "@/components/product-image-with-preview";
 import { AdminImageDropOverlay } from "@/components/admin-image-drop-overlay";
+import { AdminDeleteSkuButton } from "@/components/admin-delete-sku-button";
 import { SalesVolumeChart } from "@/components/sales-volume-chart";
 import { RecentlyViewed } from "@/components/recently-viewed";
 import { TrackView } from "@/components/track-view";
@@ -243,6 +244,19 @@ export default async function ProductPage({
                   <strong className="text-white/80">{variantLabel(sku.variantType)}</strong>
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-white/60">{sku.description}</p>
+
+                {/* Admin-only delete button. Renders nothing for
+                    non-admins. Confirms before deleting + bounces to
+                    /admin/catalog on success. */}
+                {isAdmin && (
+                  <div className="mt-4">
+                    <AdminDeleteSkuButton
+                      skuId={sku.id}
+                      skuLabel={sku.slug}
+                      isAdmin={isAdmin}
+                    />
+                  </div>
+                )}
 
                 <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
                   <Spec label="Sport" value={sku.sport} />
