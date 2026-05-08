@@ -24,6 +24,11 @@ type SkuFormValues = {
   gradient_from: string;
   gradient_to: string;
   is_published: boolean;
+  // Hidden — only set by the sibling-variant flow ("+ Add SKU" on a
+  // product page) so the new SKU lands in the same variant_group as
+  // its source. Otherwise we leave this null and let the DB trigger
+  // derive it from the slug.
+  variant_group?: string;
 };
 
 export function SkuForm({
@@ -47,6 +52,7 @@ export function SkuForm({
     gradient_from: initial?.gradient_from ?? "#475569",
     gradient_to: initial?.gradient_to ?? "#0f172a",
     is_published: initial?.is_published ?? true,
+    variant_group: initial?.variant_group,
   });
   const [pending, start] = useTransition();
   const [uploading, startUpload] = useTransition();
@@ -111,7 +117,12 @@ export function SkuForm({
     start(async () => {
       const result = skuId
         ? await adminUpdateSku(skuId, { ...payload, image_url: vals.image_url || null })
-        : await adminCreateSku({ slug: vals.slug ?? "", ...payload, image_url: vals.image_url || undefined });
+        : await adminCreateSku({
+            slug: vals.slug ?? "",
+            ...payload,
+            image_url: vals.image_url || undefined,
+            variant_group: vals.variant_group,
+          });
       if (result.error) setErr(result.error);
       else router.push("/admin/catalog");
     });

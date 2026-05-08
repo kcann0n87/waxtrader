@@ -37,6 +37,7 @@ export function AdminAddSkuButton({
     gradientTo?: string;
     imageUrl?: string;
     sourceProduct?: string;
+    variantGroup?: string;
   };
 }) {
   if (!isAdmin) return null;
@@ -51,6 +52,10 @@ export function AdminAddSkuButton({
   if (prefill?.gradientFrom) params.set("gradient_from", prefill.gradientFrom);
   if (prefill?.gradientTo) params.set("gradient_to", prefill.gradientTo);
   if (prefill?.imageUrl) params.set("image_url", prefill.imageUrl);
+  // Critical for the sibling-variant flow: carrying the source's
+  // variant_group means the new SKU lands on the same product page
+  // instead of becoming a standalone product.
+  if (prefill?.variantGroup) params.set("variant_group", prefill.variantGroup);
 
   // Pick a sensible default for the new variant so creating a sibling
   // doesn't collide on slug. Hobby Box → Hobby Case is the canonical

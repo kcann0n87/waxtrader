@@ -284,9 +284,27 @@ export async function adminCreateSku(input: {
   gradient_from?: string;
   gradient_to?: string;
   is_published?: boolean;
+  // Sibling-variant flow (the floating "+" on a product page) passes
+  // variant_group through so the new SKU joins the source's product
+  // page instead of standing alone. variant_type is derived from the
+  // product label here so the DB trigger doesn't have to know about
+  // every suffix variant we support (mega-case, fotl-hobby-case, etc.).
+  variant_group?: string;
+  variant_type?: string;
 }): Promise<Result> {
   const admin = await requireAdmin();
   if (!admin) return { error: "Forbidden" };
+
+  // Derive variant_type from the product label if the caller didn't
+  // pass one explicitly. "Hobby Box" → "hobby-box", "Mega Case" →
+  // "mega-case", etc. — matches the keys in src/lib/variants.ts.
+  const variantType =
+    input.variant_type ??
+    input.product
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
 
   const sb = serviceRoleClient();
   const { data, error } = await sb
@@ -304,6 +322,8 @@ export async function adminCreateSku(input: {
       gradient_from: input.gradient_from ?? "#475569",
       gradient_to: input.gradient_to ?? "#0f172a",
       is_published: input.is_published ?? true,
+      variant_group: input.variant_group ?? null,
+      variant_type: variantType || null,
     })
     .select("id, slug")
     .maybeSingle();

@@ -237,6 +237,7 @@ export default async function ProductPage({
                 gradientTo: sku.gradient[1],
                 imageUrl: sku.imageUrl,
                 sourceProduct: sku.product,
+                variantGroup: sku.variantGroup,
               }}
             />
             <AdminFeaturedRankButton

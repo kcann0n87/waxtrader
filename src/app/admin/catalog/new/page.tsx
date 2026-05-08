@@ -28,6 +28,7 @@ export default async function AdminNewSkuPage({
     image_url?: string;
     gradient_from?: string;
     gradient_to?: string;
+    variant_group?: string;
   }>;
 }) {
   const sp = await searchParams;
@@ -56,6 +57,7 @@ export default async function AdminNewSkuPage({
         image_url: sp.image_url,
         gradient_from: sp.gradient_from,
         gradient_to: sp.gradient_to,
+        variant_group: sp.variant_group,
       }
     : undefined;
 
