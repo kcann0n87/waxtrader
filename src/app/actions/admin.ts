@@ -525,7 +525,7 @@ export async function adminInviteUser(input: {
   // itself is reachable; it exchanges the code, sets the session
   // cookies, then forwards to ?next=.
   const { data, error } = await sb.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${redirectTo}/auth/callback?next=/account`,
+    redirectTo: `${redirectTo}/auth/callback`,
     data: input.displayName
       ? { display_name: input.displayName.trim() }
       : undefined,
@@ -553,7 +553,7 @@ export async function adminInviteUser(input: {
  *   - Activated user → send a magic-link sign-in email so they can
  *     get back in without resetting a password
  *
- * Always lands the user on /auth/callback?next=/account regardless of
+ * Always lands the user on /auth/callback regardless of
  * path so PKCE works.
  */
 export async function adminSendSignInLink(input: {
@@ -605,7 +605,7 @@ export async function adminSendSignInLink(input: {
     email,
     options: {
       shouldCreateUser: false,
-      emailRedirectTo: `${redirectTo}/auth/callback?next=/account`,
+      emailRedirectTo: `${redirectTo}/auth/callback`,
     },
   });
   if (error) {
@@ -689,7 +689,7 @@ export async function adminInviteBatchPending(
       // Same /auth/callback routing as the single-invite path — see
       // adminInviteUser for why direct /account skips PKCE code exchange.
       const { data, error } = await sb.auth.admin.inviteUserByEmail(email, {
-        redirectTo: `${redirectTo}/auth/callback?next=/account`,
+        redirectTo: `${redirectTo}/auth/callback`,
       });
       if (error) {
         failed++;
