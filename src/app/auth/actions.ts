@@ -126,6 +126,64 @@ export async function updatePassword(formData: FormData): Promise<AuthResult> {
 }
 
 /**
+ * Verify a token_hash from an email link. Used by /auth/confirm when
+ * the email link puts the token in a URL hash fragment (#token_hash=...
+ * &type=...) instead of a query string. Browsers don't send hash
+ * fragments to servers, so Gmail's link prefetcher hits the bare URL
+ * /auth/confirm with no token attached → can't consume anything. The
+ * real user's browser runs JS, reads the hash, and posts here to
+ * actually verify.
+ *
+ * type is the Supabase OtpType ('invite' | 'magiclink' | 'recovery'
+ * | 'email_change' | 'signup' | 'email').
+ */
+export async function verifyTokenHash(input: {
+  tokenHash: string;
+  type: string;
+}): Promise<AuthResult> {
+  const tokenHash = (input.tokenHash ?? "").trim();
+  const type = (input.type ?? "").trim();
+  if (!tokenHash) return { error: "Missing token." };
+  // Whitelist the types we expect — anything else likely indicates a
+  // malformed link.
+  const validTypes = new Set([
+    "invite",
+    "magiclink",
+    "recovery",
+    "email_change",
+    "signup",
+    "email",
+  ]);
+  if (!validTypes.has(type)) return { error: "Invalid link type." };
+
+  const supabase = await createClient();
+  // verifyOtp's token_hash branch only accepts EmailOtpType — narrow
+  // explicitly so TypeScript is happy.
+  type EmailOtpType =
+    | "invite"
+    | "magiclink"
+    | "recovery"
+    | "email_change"
+    | "signup"
+    | "email";
+  const { error } = await supabase.auth.verifyOtp({
+    token_hash: tokenHash,
+    type: type as EmailOtpType,
+  });
+  if (error) {
+    console.error("[verifyTokenHash] failed:", error);
+    const msg = error.message?.toLowerCase() ?? "";
+    return {
+      error:
+        msg.includes("expired") || msg.includes("invalid")
+          ? "This sign-in link expired or was already used. Use the code from the email instead, or request a fresh link."
+          : error.message,
+    };
+  }
+  return { ok: true };
+}
+
+/**
  * Sign in via 6-digit OTP code (no link click needed). Solves the
  * Gmail/Google Workspace prefetch problem — link scanners consume
  * one-time auth tokens before the human can click. The 6-digit code
