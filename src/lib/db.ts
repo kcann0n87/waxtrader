@@ -65,11 +65,11 @@ function fillVariantImageFallback<T extends Sku>(skus: T[]): T[] {
 
 export async function getAllSkus(): Promise<Sku[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("skus")
-    .select("*")
-    .eq("is_published", true)
-    .order("release_date", { ascending: false });
+  const { isPreviewModeOn } = await import("./preview-mode");
+  const preview = await isPreviewModeOn();
+  let q = supabase.from("skus").select("*").order("release_date", { ascending: false });
+  if (!preview) q = q.eq("is_published", true);
+  const { data, error } = await q;
   if (error) throw error;
   return fillVariantImageFallback((data ?? []).map(rowToSku));
 }
@@ -126,8 +126,15 @@ export async function getSkuBySlug(
   options: { includeUnpublished?: boolean } = {},
 ): Promise<Sku | null> {
   const supabase = await createClient();
+  // Site-wide admin preview mode: when the wd_preview cookie is set
+  // and the visitor is admin, every catalog query bypasses
+  // is_published. Per-call options.includeUnpublished override (used
+  // by /admin/catalog and the legacy ?preview=1 query param) still
+  // works the same way.
+  const { isPreviewModeOn } = await import("./preview-mode");
+  const showAll = options.includeUnpublished || (await isPreviewModeOn());
   let q = supabase.from("skus").select("*").eq("slug", slug);
-  if (!options.includeUnpublished) q = q.eq("is_published", true);
+  if (!showAll) q = q.eq("is_published", true);
   const { data, error } = await q.maybeSingle();
   if (error) throw error;
   if (!data) return null;
@@ -161,8 +168,10 @@ export async function getVariantsForGroup(
   options: { includeUnpublished?: boolean } = {},
 ): Promise<Array<Sku & { lowestAskCents: number | null }>> {
   const supabase = await createClient();
+  const { isPreviewModeOn } = await import("./preview-mode");
+  const showAll = options.includeUnpublished || (await isPreviewModeOn());
   let q = supabase.from("skus").select("*").eq("variant_group", group);
-  if (!options.includeUnpublished) q = q.eq("is_published", true);
+  if (!showAll) q = q.eq("is_published", true);
   const { data: skuRows, error } = await q;
   if (error) throw error;
   if (!skuRows || skuRows.length === 0) return [];
@@ -558,13 +567,17 @@ export async function getCatalogWithPricing(): Promise<
   try {
     const supabase = await createClient();
     const since90d = new Date(Date.now() - 90 * 86400000).toISOString();
+    const { isPreviewModeOn } = await import("./preview-mode");
+    const preview = await isPreviewModeOn();
+
+    let skuQuery = supabase
+      .from("skus")
+      .select("*")
+      .order("release_date", { ascending: false });
+    if (!preview) skuQuery = skuQuery.eq("is_published", true);
 
     const [skusRes, listingsRes, salesRes] = await Promise.all([
-      supabase
-        .from("skus")
-        .select("*")
-        .eq("is_published", true)
-        .order("release_date", { ascending: false }),
+      skuQuery,
       supabase
         .from("listings")
         .select("sku_id, price_cents")
