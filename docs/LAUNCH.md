@@ -19,10 +19,16 @@ to flip / be verified for go-live.
       waitlist before fully opening.
 - [ ] **Verify all 5 Supabase email templates pasted**: see "Email" below.
 - [ ] **Verify Stripe Connect webhooks land**: see "Stripe" below.
-- [ ] **Apply pending migrations**: `0027` through `0037` — each is
-      idempotent so re-runs are safe.
+- [ ] **Apply pending migrations**: `0027` through `0043` — each is
+      idempotent so re-runs are safe. `0043` adds the
+      `consume_listing_quantity` RPC the Stripe webhook calls on every
+      paid checkout — without it, listing inventory won't decrement.
 - [ ] **Sanity-check by sending yourself an invite**: from `/admin/invite`
       and walk the email → magic link → /account flow end-to-end.
+- [ ] **Test multi-item cart checkout**: add boxes from 2+ sellers, hit
+      `/cart`, click Continue to secure checkout. After paying with the
+      Stripe test card, confirm both sellers got "Payment received"
+      pings and `?cart_payment=success` cleared the cart.
 
 ## Environment
 
@@ -143,7 +149,8 @@ Configured in `vercel.json` (5 entries):
 | `/api/cron/saved-searches` | daily 14:00 UTC | digest matches per saved search; in-app + optional email |
 | `/api/cron/watchlist-alerts` | daily 15:00 UTC | price-drop notifications on watched products |
 | `/api/cron/recompute-tiers` | daily 06:00 UTC | seller tier promotions (12% → 6% as 30-day sales/GMV/positive% trigger thresholds) |
-| `/api/cron/expire-bids` | hourly | flip bids past `expires_at` to Expired |
+| `/api/cron/expire-bids` | daily 07:00 UTC | flip bids past `expires_at` to Expired |
+| `/api/cron/cleanup-stale-checkouts` | daily 08:00 UTC | cancel orders that hit Stripe Checkout but never paid (older than 36h) and restore listing inventory |
 
 All gated by `Authorization: Bearer ${CRON_SECRET}`.
 
@@ -157,6 +164,12 @@ Apply in order. Each is idempotent so re-runs are safe:
 0036           — backfills profiles.is_seller for accounts past Stripe Connect
 0037           — Topps Chrome Platinum BB + Signature Class FB (May 2026 drops)
 0038           — adds profiles.notification_prefs jsonb for per-category email opt-out
+0039           — catalog corrections (Panini NBA license expiry, year fixes)
+0040           — soccer back-catalog top-10 (Prizm PL, Topps Chrome Bundesliga)
+0041           — 2025-26 Topps Chrome UEFA Champions League hobby case + mega box
+0042           — adds 'bug' to feedback type CHECK constraint
+0043           — consume_listing_quantity RPC (atomic stock decrement on paid
+                 checkout — REQUIRED for inventory to drop after sales)
 ```
 
 Plus the cleanup SQL block delivered in chat (UEFA slug rename, image binds
@@ -225,6 +238,8 @@ Once `NEXT_PUBLIC_BETA_MODE=false`:
 |---|---|
 | Buyers report "I paid but no order" | Stripe webhook deliveries to `/api/stripe/webhook` — check signature secret matches |
 | Sellers report "no payout" | Connected account `charges_enabled` + `payouts_enabled` in `profiles`; Stripe Connect dashboard for the seller |
+| Listings stay Active after sale | Migration 0043 didn't run — check `consume_listing_quantity` exists in Supabase (Database → Functions). Stripe webhook logs will show "rpc failed" entries |
+| Cart checkout errors "needs Stripe setup" | One of the cart sellers hasn't finished Connect — error names the username. Buyer must remove their item and retry |
 | Inviting a user errors "already exists" | Account exists in Supabase Auth — they should sign in instead via `/login` |
 | Bell icon stays empty after lifecycle event | Check the `notification_type` value in the insert matches the enum (we caught two crons using invalid types in beta) |
 | Robots.txt still gating after launch | `NEXT_PUBLIC_BETA_MODE` env var didn't flip — needs redeploy after change |
