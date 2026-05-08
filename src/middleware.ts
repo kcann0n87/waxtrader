@@ -8,12 +8,16 @@ const PROTECTED_PREFIXES = ["/account", "/sell", "/cart", "/admin"];
 // Routes always reachable by anyone, even with the beta gate ON. Everything
 // else gets redirected to /coming-soon for anon visitors.
 //
-// While beta-gated we're invite-only — /signup is intentionally NOT public.
-// Invitees get accounts provisioned manually (or via emailed magic links)
-// and reach the site through /login. Re-add "/signup" here when launching.
+// /signup IS reachable during beta — but its component renders an
+// "invite-only" explainer instead of the signup form when
+// NEXT_PUBLIC_BETA_MODE !== "false". This stops the loop where the
+// "Create an account" link on /login bounced people to /coming-soon.
+// When launching, the same component shows the real signup form
+// automatically once the env flips.
 const ALWAYS_PUBLIC_PREFIXES = [
   "/coming-soon",
   "/login",
+  "/signup",
   "/forgot",
   "/reset",
   "/auth",
