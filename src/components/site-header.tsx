@@ -24,9 +24,14 @@ const SPORT_TABS: { id: string; label: string }[] = [
 async function loadYearsBySport(): Promise<Record<string, number[]>> {
   try {
     const supabase = await createClient();
+    // Only count years where at least one SKU is actually live —
+    // otherwise the dropdown surfaces years for SKUs we've hidden via
+    // the focus-catalog migration, which feels broken (clicking the
+    // year takes you to an empty grid).
     const { data } = await supabase
       .from("skus")
       .select("sport, year")
+      .eq("is_published", true)
       .order("year", { ascending: false });
     const out: Record<string, Set<number>> = {};
     for (const row of data ?? []) {
