@@ -332,7 +332,11 @@ export async function adminCreateSku(input: {
   await logAdminAction(admin.id, "create_sku", "sku", data?.id ?? input.slug, {
     slug: input.slug,
   });
+  // Flush homepage / browse caches too — a fresh SKU should appear
+  // on the public-facing rails immediately (esp. the +variant flow
+  // where the admin expects to navigate back and see the new card).
   revalidatePath("/admin/catalog");
+  revalidatePath("/", "layout");
   return { ok: true, data };
 }
 
@@ -365,6 +369,9 @@ export async function adminUpdateSku(
   await logAdminAction(admin.id, "update_sku", "sku", id, { patch });
   revalidatePath("/admin/catalog");
   revalidatePath(`/admin/catalog/${id}`);
+  // Edits to title / image / gradient / is_published all show on the
+  // public homepage and product pages — flush root layout too.
+  revalidatePath("/", "layout");
   return { ok: true };
 }
 
@@ -552,7 +559,12 @@ export async function adminDeleteSku(id: string): Promise<Result> {
   if (error) return { error: error.message };
 
   await logAdminAction(admin.id, "delete_sku", "sku", id);
+  // Revalidate the admin catalog list AND the root layout — the
+  // homepage / browse pages cache catalog data aggressively at the
+  // data layer, so deleting a SKU without flushing root leaves the
+  // deleted card visible on the homepage until the next deploy.
   revalidatePath("/admin/catalog");
+  revalidatePath("/", "layout");
   return { ok: true };
 }
 
