@@ -3,16 +3,20 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, Loader2, Trash2, X } from "lucide-react";
-import { adminDeleteSku } from "@/app/actions/admin";
+import { adminRemoveSku } from "@/app/actions/admin";
 
 /**
- * Admin-only X delete button. Renders as a small ✕ icon in the
- * top-right of whatever container mounts it (positioned absolutely
- * so it floats over the H1 area). Click → confirmation modal in
- * the center of the screen with a clear "this can't be undone".
+ * Admin-only ✕ "remove from catalog" button. Renders as a small icon
+ * in the top-right of whatever container mounts it. Click → confirm
+ * modal → server action runs adminRemoveSku which always succeeds:
+ *   - hard-deletes when nothing references the SKU
+ *   - falls back to is_published=false when listings / orders / sales
+ *     / bids / watches reference it (preserves historical FK
+ *     integrity, hides from public catalog)
  *
- * Server-side: adminDeleteSku refuses to delete if any listings
- * reference this SKU, surfaces the error inline.
+ * The admin doesn't have to think "delete vs hide" — clicking ✕ just
+ * makes the SKU disappear from the public catalog. The modal reports
+ * which path was taken on success.
  *
  * Renders nothing for non-admins.
  */
@@ -50,11 +54,13 @@ export function AdminDeleteSkuButton({
   const doDelete = () => {
     setError(null);
     start(async () => {
-      const res = await adminDeleteSku(skuId);
+      const res = await adminRemoveSku(skuId);
       if (res.error) {
         setError(res.error);
         return;
       }
+      // Always navigate away on success — whether deleted or hidden,
+      // the SKU is no longer on the public catalog.
       router.push("/admin/catalog");
     });
   };
@@ -98,12 +104,10 @@ export function AdminDeleteSkuButton({
                   <span className="font-mono text-rose-200">{skuLabel}</span>
                 </p>
                 <p className="mt-3 text-sm text-white/70">
-                  Permanently removes this product from the catalog. If any
-                  listings reference it, the delete is blocked. Re-add via{" "}
-                  <span className="font-mono text-white/80">
-                    /admin/catalog/new
-                  </span>{" "}
-                  if you change your mind.
+                  Removes this SKU from the public catalog. If listings,
+                  orders, or sales reference it, we hide it instead of
+                  deleting (preserves historical records). Either way it
+                  stops showing on the homepage and search.
                 </p>
               </div>
             </div>
@@ -134,7 +138,7 @@ export function AdminDeleteSkuButton({
                 ) : (
                   <Trash2 size={11} />
                 )}
-                {pending ? "Deleting…" : "Delete permanently"}
+                {pending ? "Removing…" : "Remove from catalog"}
               </button>
             </div>
           </div>

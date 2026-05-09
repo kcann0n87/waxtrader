@@ -569,6 +569,72 @@ export async function adminDeleteSku(id: string): Promise<Result> {
 }
 
 /**
+ * "Just make it go away" SKU removal.
+ *
+ * Tries a hard delete first. If anything's referencing the SKU
+ * (listings, orders, sales, bids, watches — any FK constraint), falls
+ * back to setting is_published=false so the SKU disappears from public
+ * browse/search/homepage but historical records (orders, sales) keep
+ * their FK pointer intact.
+ *
+ * The X button on product pages calls this — admins shouldn't have to
+ * think "delete vs hide", they should just click ✕ and have the
+ * catalog clean itself up correctly.
+ *
+ * Returns ok with `mode` indicating which path was taken so the UI can
+ * confirm "Deleted" vs "Hidden — preserved for X linked records".
+ */
+export async function adminRemoveSku(
+  id: string,
+): Promise<Result & { mode?: "deleted" | "hidden"; reason?: string }> {
+  const admin = await requireAdmin();
+  if (!admin) return { error: "Forbidden" };
+
+  const sb = serviceRoleClient();
+
+  // Try the hard delete first. Postgres returns the FK violation as
+  // error code "23503" — anything else is a real failure we should
+  // surface to the admin.
+  const { error: delError } = await sb.from("skus").delete().eq("id", id);
+
+  if (!delError) {
+    await logAdminAction(admin.id, "delete_sku", "sku", id);
+    revalidatePath("/admin/catalog");
+    revalidatePath("/", "layout");
+    return { ok: true, mode: "deleted" };
+  }
+
+  // FK constraint violation — something references this SKU. Fall
+  // back to hiding so the public catalog still gets cleaned up.
+  // Postgres FK error code is 23503; supabase-js exposes it on .code.
+  const isFkError =
+    (delError as { code?: string }).code === "23503" ||
+    /foreign key/i.test(delError.message);
+
+  if (!isFkError) {
+    return { error: delError.message };
+  }
+
+  const { error: hideError } = await sb
+    .from("skus")
+    .update({ is_published: false })
+    .eq("id", id);
+  if (hideError) return { error: hideError.message };
+
+  await logAdminAction(admin.id, "hide_sku", "sku", id, {
+    reason: "fk_blocked",
+  });
+  revalidatePath("/admin/catalog");
+  revalidatePath("/", "layout");
+  return {
+    ok: true,
+    mode: "hidden",
+    reason:
+      "Hidden instead of deleted — listings, orders, or other records reference this SKU and would break if it were removed. The SKU no longer appears on the public catalog.",
+  };
+}
+
+/**
  * Send a Supabase magic-link invite to an email address. The invitee gets
  * an email with a link that signs them in and lands them at NEXT_PUBLIC_SITE_URL
  * (or localhost in dev). On first sign-in the handle_new_user trigger
