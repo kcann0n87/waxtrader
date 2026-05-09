@@ -19,6 +19,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Loader2, Save } from "lucide-react";
 import { adminReorderSkus } from "@/app/actions/admin";
+import { AdminCardDeleteButton } from "./admin-card-delete-button";
 
 /**
  * Drag-and-drop wrapper around the catalog grid. Renders the same 4-col
@@ -38,11 +39,21 @@ import { adminReorderSkus } from "@/app/actions/admin";
  * <ProductCard /> nodes; this client component just adds a drag
  * handle + transform without re-implementing the card.
  */
+type GridItem = {
+  id: string;
+  node: React.ReactNode;
+  // Variant-group level metadata for the rose ✕ delete button.
+  // Optional so callers that don't want delete (e.g. featured rails)
+  // can omit; the button only renders when both are present.
+  variantGroup?: string;
+  productLabel?: string;
+};
+
 export function SortableProductGrid({
   items: initialItems,
   isAdmin,
 }: {
-  items: { id: string; node: React.ReactNode }[];
+  items: GridItem[];
   isAdmin: boolean;
 }) {
   const router = useRouter();
@@ -137,7 +148,12 @@ export function SortableProductGrid({
         >
           <Grid>
             {items.map((it) => (
-              <SortableCard key={it.id} id={it.id}>
+              <SortableCard
+                key={it.id}
+                id={it.id}
+                variantGroup={it.variantGroup}
+                productLabel={it.productLabel}
+              >
                 {it.node}
               </SortableCard>
             ))}
@@ -150,9 +166,13 @@ export function SortableProductGrid({
 
 function SortableCard({
   id,
+  variantGroup,
+  productLabel,
   children,
 }: {
   id: string;
+  variantGroup?: string;
+  productLabel?: string;
   children: React.ReactNode;
 }) {
   const {
@@ -189,6 +209,17 @@ function SortableCard({
       >
         <GripVertical size={14} />
       </button>
+      {/* Rose ✕ delete — admin-only. Removes the entire variant_group
+          (every Hobby Box / Hobby Case / Mega Box variant of this
+          product) in one click, falling back to hide for variants
+          referenced by orders/listings. */}
+      {variantGroup && productLabel && (
+        <AdminCardDeleteButton
+          variantGroup={variantGroup}
+          productLabel={productLabel}
+          isAdmin={true}
+        />
+      )}
     </div>
   );
 }

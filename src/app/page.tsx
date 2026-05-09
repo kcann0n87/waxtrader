@@ -667,6 +667,8 @@ function BrowseGrid({
                 isAdmin={isAdmin}
                 items={group.map((c) => ({
                   id: c.sku.id,
+                  variantGroup: c.sku.variantGroup,
+                  productLabel: `${c.sku.year} ${c.sku.brand} ${c.sku.set} ${c.sku.sport}`,
                   node: (
                     <ProductCard
                       key={c.sku.variantGroup ?? c.sku.id}
@@ -686,6 +688,8 @@ function BrowseGrid({
           isAdmin={isAdmin}
           items={sorted.map((c) => ({
             id: c.sku.id,
+            variantGroup: c.sku.variantGroup,
+            productLabel: `${c.sku.year} ${c.sku.brand} ${c.sku.set} ${c.sku.sport}`,
             node: (
               <ProductCard
                 key={c.sku.variantGroup ?? c.sku.id}

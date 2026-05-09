@@ -635,6 +635,90 @@ export async function adminRemoveSku(
 }
 
 /**
+ * "Delete the whole product" — removes every SKU sharing the given
+ * variant_group. A product on the homepage is one card per variant
+ * group (Hobby Box + Hobby Case + Mega Box + … all collapsed into one
+ * "2025 Topps Chrome Football" tile), so deleting from the homepage
+ * grid should nuke the entire group, not just one variant.
+ *
+ * Per-row uses adminRemoveSku semantics: hard-delete when nothing
+ * references it, fall back to is_published=false otherwise. Returns
+ * counts so the UI can confirm "Removed 12 variants (8 deleted, 4
+ * hidden)".
+ */
+export async function adminRemoveVariantGroup(
+  variantGroup: string,
+): Promise<
+  Result & {
+    deleted?: number;
+    hidden?: number;
+    total?: number;
+  }
+> {
+  const admin = await requireAdmin();
+  if (!admin) return { error: "Forbidden" };
+  if (!variantGroup || typeof variantGroup !== "string")
+    return { error: "Missing variant_group." };
+
+  const sb = serviceRoleClient();
+
+  // Pull every SKU in the group so we can iterate. Includes hidden
+  // ones — deleting a product should nuke the hidden variants too.
+  const { data: rows, error: fetchError } = await sb
+    .from("skus")
+    .select("id, slug")
+    .eq("variant_group", variantGroup);
+  if (fetchError) return { error: fetchError.message };
+  if (!rows || rows.length === 0) {
+    return { error: `No SKUs found for variant_group "${variantGroup}".` };
+  }
+
+  let deleted = 0;
+  let hidden = 0;
+  for (const row of rows) {
+    const { error: delError } = await sb.from("skus").delete().eq("id", row.id);
+    if (!delError) {
+      deleted++;
+      continue;
+    }
+    const isFkError =
+      (delError as { code?: string }).code === "23503" ||
+      /foreign key/i.test(delError.message);
+    if (!isFkError) {
+      // Non-FK error — bail. Anything we already deleted/hid stays
+      // that way, but surface the issue to the admin so they know.
+      return {
+        error: `Failed on ${row.slug}: ${delError.message}`,
+        deleted,
+        hidden,
+        total: rows.length,
+      };
+    }
+    const { error: hideError } = await sb
+      .from("skus")
+      .update({ is_published: false })
+      .eq("id", row.id);
+    if (hideError)
+      return {
+        error: `Failed to hide ${row.slug}: ${hideError.message}`,
+        deleted,
+        hidden,
+        total: rows.length,
+      };
+    hidden++;
+  }
+
+  await logAdminAction(admin.id, "remove_variant_group", "sku", variantGroup, {
+    deleted,
+    hidden,
+    total: rows.length,
+  });
+  revalidatePath("/admin/catalog");
+  revalidatePath("/", "layout");
+  return { ok: true, deleted, hidden, total: rows.length };
+}
+
+/**
  * Send a Supabase magic-link invite to an email address. The invitee gets
  * an email with a link that signs them in and lands them at NEXT_PUBLIC_SITE_URL
  * (or localhost in dev). On first sign-in the handle_new_user trigger
