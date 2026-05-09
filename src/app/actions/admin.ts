@@ -5,6 +5,50 @@ import { stripe } from "@/lib/stripe";
 import { requireAdmin, logAdminAction } from "@/lib/admin";
 import { serviceRoleClient } from "@/lib/supabase/admin";
 import { releaseOrderToSeller } from "@/app/actions/orders";
+import { pairedVariantType } from "@/lib/variants";
+
+/**
+ * Image-sync helper for the box ↔ case pair. When an admin sets an
+ * image on one variant (e.g. Hobby Box), the matching variant in the
+ * same variant_group (Hobby Case) gets the same image so we never
+ * end up with a half-illustrated product page.
+ *
+ * Looks up the source SKU's variant_group + variant_type, computes
+ * the paired variant_type via VARIANT_PAIR (src/lib/variants.ts), and
+ * writes image_url onto whatever sibling SKU exists. No-op if there's
+ * no canonical pair (Pokemon ETB-only, retail one-offs, etc.) or if
+ * the sibling doesn't exist in the DB.
+ *
+ * Caller is responsible for revalidating cache after — this just
+ * does the data write.
+ */
+async function syncImageToPairedVariant(
+  sb: ReturnType<typeof serviceRoleClient>,
+  sourceSkuId: string,
+  imageUrl: string,
+): Promise<{ syncedSkuId: string | null }> {
+  const { data: source } = await sb
+    .from("skus")
+    .select("variant_group, variant_type")
+    .eq("id", sourceSkuId)
+    .maybeSingle();
+  if (!source?.variant_group || !source?.variant_type)
+    return { syncedSkuId: null };
+
+  const pairedType = pairedVariantType(source.variant_type);
+  if (!pairedType) return { syncedSkuId: null };
+
+  const { data: pair } = await sb
+    .from("skus")
+    .select("id")
+    .eq("variant_group", source.variant_group)
+    .eq("variant_type", pairedType)
+    .maybeSingle();
+  if (!pair?.id) return { syncedSkuId: null };
+
+  await sb.from("skus").update({ image_url: imageUrl }).eq("id", pair.id);
+  return { syncedSkuId: pair.id as string };
+}
 
 type Result = { ok?: boolean; error?: string; data?: unknown };
 
@@ -366,6 +410,15 @@ export async function adminUpdateSku(
   const { error } = await sb.from("skus").update(patch).eq("id", id);
   if (error) return { error: error.message };
 
+  // If the patch set an image URL, mirror it to the paired box/case
+  // sibling in the same variant_group. Skips when the patch nulled
+  // the URL (admin clearing an image — only the source clears, the
+  // pair keeps whatever it had so they don't both go dark from one
+  // accidental clear).
+  if (typeof patch.image_url === "string" && patch.image_url.length > 0) {
+    await syncImageToPairedVariant(sb, id, patch.image_url);
+  }
+
   await logAdminAction(admin.id, "update_sku", "sku", id, { patch });
   revalidatePath("/admin/catalog");
   revalidatePath(`/admin/catalog/${id}`);
@@ -446,8 +499,12 @@ export async function adminUploadSkuImage(
       console.error("adminUploadSkuImage skus update failed:", updateErr);
       return { error: `Saved file but couldn't update SKU: ${updateErr.message}` };
     }
+    // Mirror the image to the paired box/case variant so a single
+    // upload covers both rows on the product page.
+    await syncImageToPairedVariant(sb, skuId, publicUrl);
     revalidatePath("/admin/catalog");
     revalidatePath(`/admin/catalog/${skuId}`);
+    revalidatePath("/", "layout");
   }
 
   await logAdminAction(admin.id, "upload_sku_image", "sku", skuId ?? slug, {

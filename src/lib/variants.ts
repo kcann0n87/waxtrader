@@ -150,3 +150,53 @@ export function sortByVariantOrder<T extends { variantType?: string | null }>(
       variantSortIndex(b.variantType ?? null),
   );
 }
+
+/**
+ * Box ↔ Case pairing map. Used by the image-sync hook in
+ * src/app/actions/admin.ts: when an admin uploads or pastes an image
+ * for a Hobby Box, we mirror it to the Hobby Case (and vice versa)
+ * so a product page never has one variant with a real photo and the
+ * other showing a generic gradient.
+ *
+ * Mostly a swap of -box ↔ -case at the end of the slug, but a few
+ * special cases:
+ *   - booster-box ↔ booster-box-case (append -case, don't swap)
+ *   - elite-trainer-box ↔ elite-trainer-box-case (same)
+ *   - first-day-issue-hobby-jumbo-box has no case sibling (Topps
+ *     never made one — leave unmapped so we don't accidentally write
+ *     it to a non-existent SKU)
+ */
+const VARIANT_PAIR: Record<string, string> = {
+  "hobby-box": "hobby-case",
+  "hobby-case": "hobby-box",
+  "mega-box": "mega-case",
+  "mega-case": "mega-box",
+  "blaster-box": "blaster-case",
+  "blaster-case": "blaster-box",
+  "hanger-box": "hanger-case",
+  "hanger-case": "hanger-box",
+  "jumbo-box": "jumbo-case",
+  "jumbo-case": "jumbo-box",
+  "hobby-jumbo-box": "hobby-jumbo-case",
+  "hobby-jumbo-case": "hobby-jumbo-box",
+  "fotl-hobby-box": "fotl-hobby-case",
+  "fotl-hobby-case": "fotl-hobby-box",
+  "first-day-issue-hobby-box": "first-day-issue-hobby-case",
+  "first-day-issue-hobby-case": "first-day-issue-hobby-box",
+  "booster-box": "booster-box-case",
+  "booster-box-case": "booster-box",
+  "elite-trainer-box": "elite-trainer-box-case",
+  "elite-trainer-box-case": "elite-trainer-box",
+};
+
+/**
+ * Returns the matching variant_type for a box/case pair, or null if
+ * the variant has no canonical pair (Pokemon ETB-only products,
+ * one-off retail variants, etc.).
+ */
+export function pairedVariantType(
+  type: string | null | undefined,
+): string | null {
+  if (!type) return null;
+  return VARIANT_PAIR[type] ?? null;
+}
