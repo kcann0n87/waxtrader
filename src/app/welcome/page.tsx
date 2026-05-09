@@ -15,6 +15,8 @@ const sports = [
   // Hockey hidden until we reopen the NHL catalog — re-add this row
   // (and the SPORT_TABS entry in src/components/site-header.tsx) when
   // ready.
+  { id: "Soccer", label: "Soccer", emoji: "⚽" },
+  { id: "Pokemon", label: "Pokemon", emoji: "🎴" },
 ];
 
 type Step = "intro" | "sports" | "notifications" | "follow" | "done";

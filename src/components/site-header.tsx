@@ -16,6 +16,7 @@ const SPORT_TABS: { id: string; label: string }[] = [
   // here when the catalog reopens. SKUs themselves are kept (just
   // is_published=false) so this is a one-line revert.
   { id: "Soccer", label: "Soccer" },
+  { id: "Pokemon", label: "Pokemon" },
 ];
 
 /**

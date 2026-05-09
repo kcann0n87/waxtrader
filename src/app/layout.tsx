@@ -28,7 +28,7 @@ const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://waxdepot.io";
 const TITLE = "WaxDepot — Sealed sports wax. Bought right. Sold right.";
 const DESCRIPTION =
-  "Buy and sell sealed NBA, MLB, and NFL wax at real market prices. Live bid and ask, escrow on every order, no eBay tax.";
+  "Buy and sell sealed NBA, MLB, NFL, soccer, and Pokemon TCG wax at real market prices. Live bid and ask, escrow on every order, no eBay tax.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
