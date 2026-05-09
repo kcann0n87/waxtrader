@@ -12,7 +12,9 @@ const SPORT_TABS: { id: string; label: string }[] = [
   { id: "NBA", label: "NBA" },
   { id: "MLB", label: "MLB" },
   { id: "NFL", label: "NFL" },
-  { id: "NHL", label: "NHL" },
+  // NHL hidden until we're ready to seed listings — re-add the tab
+  // here when the catalog reopens. SKUs themselves are kept (just
+  // is_published=false) so this is a one-line revert.
   { id: "Soccer", label: "Soccer" },
 ];
 
