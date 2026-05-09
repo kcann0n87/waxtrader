@@ -641,12 +641,17 @@ function BrowseGrid({
             Clear filter
           </Link>
         </div>
-      ) : sport && !year ? (
+      ) : sport && !year && sport !== "Pokemon" ? (
         // Year-grouped sections when a sport filter is active without a
         // specific year — gives Soccer / NBA / etc. a "by season" feel
         // instead of one giant grid. Each section header uses the
         // formatSeasonYear logic so NBA/NHL show "2024-25", Soccer's
         // UEFA-derived years show "2024-25", MLS/WC stay single-year.
+        //
+        // Pokemon is excluded — sets release quarterly under a single
+        // calendar and collectors browse by set name rather than year,
+        // so the flat grid (all sets together, sorted by release date)
+        // matches their mental model better.
         Object.entries(
           sorted.reduce((acc, c) => {
             const k = String(c.sku.year);
