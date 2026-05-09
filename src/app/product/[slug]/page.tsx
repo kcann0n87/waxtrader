@@ -34,7 +34,6 @@ import {
 } from "@/lib/db";
 import { sortByVariantOrder, variantLabel } from "@/lib/variants";
 import {
-  formatSeasonYear,
   formatSkuTitle,
   formatUSD,
   formatUSDFull,
@@ -50,15 +49,16 @@ import type { Metadata } from "next";
  */
 function groupTitle(year: number, brand: string, set: string, sport: string): string {
   // Dedupe brand/set when set name already includes the brand (e.g. set
-  // "Bowman" with brand "Bowman" should render as "2025 Bowman MLB", not
-  // "2025 Bowman Bowman MLB").
+  // "Bowman" with brand "Bowman" should render as "Bowman MLB", not
+  // "Bowman Bowman MLB").
   const setLabel =
     set === brand || set.startsWith(`${brand} `) ? set : `${brand} ${set}`;
-  // formatSeasonYear handles split-season prefixes (NBA/NHL → "2025-26",
-  // Soccer UEFA/PL → "2025-26", MLS/World Cup → "2025"). Without this we
-  // got "2025 Topps Inception NBA" on the product page H1 when it should
-  // read "2025-26 Topps Inception NBA".
-  return `${formatSeasonYear(year, sport, set)} ${setLabel} ${sport === "Pokemon" ? "TCG" : sport}`;
+  // Year dropped from the H1 — the spec row right under the title still
+  // shows it. Pokemon products end with "Collection" instead of the
+  // sport tag, since the brand-as-sport ("Pokemon Pokemon") would feel
+  // awkward and "TCG" was duplicating context already in the navigation.
+  const suffix = sport === "Pokemon" ? "Collection" : sport;
+  return `${setLabel} ${suffix}`;
 }
 
 export async function generateMetadata({
