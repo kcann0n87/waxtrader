@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Bell,
@@ -22,6 +23,11 @@ import {
   updateNotificationPrefs,
   updatePassword,
 } from "../../actions/account";
+import {
+  addAddress,
+  deleteAddress,
+  setDefaultAddress,
+} from "../../actions/addresses";
 
 type NotifPrefs = {
   order_emails: boolean;
@@ -42,27 +48,19 @@ type Address = {
   isDefault: boolean;
 };
 
-const initialCards: CardOnFile[] = [
-  { id: "c1", brand: "Visa", last4: "4242", exp: "08/27", isDefault: true },
-  { id: "c2", brand: "Mastercard", last4: "5454", exp: "02/26", isDefault: false },
-];
-
-const initialAddresses: Address[] = [
-  { id: "a1", name: "Home", addr1: "123 Main St", city: "Austin", state: "TX", zip: "78701", isDefault: true },
-];
-
 export function SettingsClient({
   initialDisplayName,
   initialUsername,
   email,
+  initialAddresses,
   initialPrefs,
 }: {
   initialDisplayName: string;
   initialUsername: string;
   email: string;
+  initialAddresses: Address[];
   initialPrefs: NotifPrefs;
 }) {
-  const [cards, setCards] = useState<CardOnFile[]>(initialCards);
   const [addresses, setAddresses] = useState<Address[]>(initialAddresses);
   const [prefs, setPrefs] = useState<NotifPrefs>(initialPrefs);
 
@@ -276,49 +274,7 @@ export function SettingsClient({
       </Section>
 
       <Section icon={<MapPin size={16} />} title="Addresses" subtitle="Where you ship to">
-        <ul className="divide-y divide-white/5 rounded-lg border border-white/10">
-          {addresses.map((a) => (
-            <li key={a.id} className="flex items-start gap-3 px-4 py-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 text-sm font-bold text-white">
-                  {a.name}
-                  {a.isDefault && (
-                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
-                      DEFAULT
-                    </span>
-                  )}
-                </div>
-                <div className="text-xs text-white/50">
-                  {a.addr1}, {a.city}, {a.state} {a.zip}
-                </div>
-              </div>
-              <div className="flex shrink-0 items-center gap-1">
-                {!a.isDefault && (
-                  <button
-                    onClick={() =>
-                      setAddresses((arr) => arr.map((x) => ({ ...x, isDefault: x.id === a.id })))
-                    }
-                    className="rounded-md px-2 py-1 text-xs font-semibold text-amber-300 hover:bg-amber-500/10"
-                  >
-                    Set default
-                  </button>
-                )}
-                <button
-                  onClick={() => setAddresses((arr) => arr.filter((x) => x.id !== a.id))}
-                  className="rounded-md p-1.5 text-white/60 hover:bg-rose-500/10 hover:text-rose-400"
-                  aria-label="Delete"
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <div className="mt-3 rounded-md border border-dashed border-white/15 bg-white/[0.02] px-3 py-2.5 text-xs text-white/60">
-          Shipping address is collected at checkout for each order. Saved
-          addresses on your profile are coming soon — for now, your most
-          recent shipping address auto-fills the next checkout.
-        </div>
+        <AddressManager initialAddresses={addresses} onChange={setAddresses} />
       </Section>
 
       <Section
@@ -327,44 +283,7 @@ export function SettingsClient({
         subtitle="Cards on file"
         right={<Lock size={11} className="text-white/60" />}
       >
-        <ul className="divide-y divide-white/5 rounded-lg border border-white/10">
-          {cards.map((c) => (
-            <li key={c.id} className="flex items-center gap-3 px-4 py-3">
-              <div className="flex h-8 w-12 shrink-0 items-center justify-center rounded bg-slate-900 text-[10px] font-bold text-white">
-                {c.brand.slice(0, 4).toUpperCase()}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 text-sm font-bold text-white">
-                  {c.brand} •••{c.last4}
-                  {c.isDefault && (
-                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
-                      DEFAULT
-                    </span>
-                  )}
-                </div>
-                <div className="text-xs text-white/50">Expires {c.exp}</div>
-              </div>
-              <div className="flex shrink-0 items-center gap-1">
-                {!c.isDefault && (
-                  <button
-                    onClick={() => setCards((arr) => arr.map((x) => ({ ...x, isDefault: x.id === c.id })))}
-                    className="rounded-md px-2 py-1 text-xs font-semibold text-amber-300 hover:bg-amber-500/10"
-                  >
-                    Set default
-                  </button>
-                )}
-                <button
-                  onClick={() => setCards((arr) => arr.filter((x) => x.id !== c.id))}
-                  className="rounded-md p-1.5 text-white/60 hover:bg-rose-500/10 hover:text-rose-400"
-                  aria-label="Delete"
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <div className="mt-3 rounded-md border border-dashed border-white/15 bg-white/[0.02] px-3 py-2.5 text-xs text-white/60">
+        <div className="rounded-md border border-dashed border-white/15 bg-white/[0.02] px-3 py-2.5 text-xs text-white/60">
           Payment cards are entered securely at Stripe checkout for each
           order — WaxDepot never stores card numbers directly. Stripe
           remembers your card automatically when you opt in at checkout, so
@@ -577,5 +496,225 @@ function NotifRow({
         </span>
       </button>
     </li>
+  );
+}
+
+/**
+ * Address list + add-form. Backed by the user_addresses table via
+ * server actions in src/app/actions/addresses.ts. RLS scopes every
+ * row to the owning user, so we don't need service-role.
+ *
+ * UX: list at the top, "Add address" button toggles an inline form
+ * below. After successful add, the form clears + collapses, and the
+ * router refresh repulls the list.
+ */
+function AddressManager({
+  initialAddresses,
+  onChange,
+}: {
+  initialAddresses: Address[];
+  onChange: (xs: Address[]) => void;
+}) {
+  const router = useRouter();
+  const [list, setList] = useState<Address[]>(initialAddresses);
+  const [adding, setAdding] = useState(false);
+  const [pending, start] = useTransition();
+  const [err, setErr] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    name: "",
+    addr1: "",
+    city: "",
+    state: "",
+    zip: "",
+  });
+
+  // Keep the parent SettingsClient state in sync if it cares.
+  useEffect(() => {
+    onChange(list);
+  }, [list, onChange]);
+
+  // If the server-rendered initialAddresses list updates (after a
+  // server action + router.refresh), pull it back in.
+  useEffect(() => {
+    setList(initialAddresses);
+  }, [initialAddresses]);
+
+  const submit = () => {
+    setErr(null);
+    start(async () => {
+      const res = await addAddress(form);
+      if (res.error) {
+        setErr(res.error);
+        return;
+      }
+      setForm({ name: "", addr1: "", city: "", state: "", zip: "" });
+      setAdding(false);
+      router.refresh();
+    });
+  };
+
+  const remove = (id: string) => {
+    start(async () => {
+      const res = await deleteAddress(id);
+      if (res.error) {
+        setErr(res.error);
+        return;
+      }
+      setList((arr) => arr.filter((x) => x.id !== id));
+      router.refresh();
+    });
+  };
+
+  const setDefault = (id: string) => {
+    start(async () => {
+      const res = await setDefaultAddress(id);
+      if (res.error) {
+        setErr(res.error);
+        return;
+      }
+      setList((arr) => arr.map((x) => ({ ...x, isDefault: x.id === id })));
+      router.refresh();
+    });
+  };
+
+  return (
+    <>
+      {list.length > 0 ? (
+        <ul className="divide-y divide-white/5 rounded-lg border border-white/10">
+          {list.map((a) => (
+            <li key={a.id} className="flex items-start gap-3 px-4 py-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 text-sm font-bold text-white">
+                  {a.name}
+                  {a.isDefault && (
+                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+                      DEFAULT
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs text-white/50">
+                  {a.addr1}, {a.city}, {a.state} {a.zip}
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                {!a.isDefault && (
+                  <button
+                    onClick={() => setDefault(a.id)}
+                    disabled={pending}
+                    className="rounded-md px-2 py-1 text-xs font-semibold text-amber-300 hover:bg-amber-500/10 disabled:opacity-50"
+                  >
+                    Set default
+                  </button>
+                )}
+                <button
+                  onClick={() => remove(a.id)}
+                  disabled={pending}
+                  className="rounded-md p-1.5 text-white/60 hover:bg-rose-500/10 hover:text-rose-400 disabled:opacity-50"
+                  aria-label="Delete"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="rounded-md border border-dashed border-white/10 bg-white/[0.02] px-3 py-4 text-center text-xs text-white/50">
+          No saved addresses yet. Add one below for one-click checkout.
+        </div>
+      )}
+
+      {err && (
+        <div className="mt-3 rounded-md border border-rose-700/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+          {err}
+        </div>
+      )}
+
+      {!adding ? (
+        <button
+          type="button"
+          onClick={() => setAdding(true)}
+          className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-dashed border-white/15 px-3 py-2 text-sm font-semibold text-white/80 hover:border-white/30 hover:bg-white/[0.02]"
+        >
+          <Plus size={14} />
+          Add address
+        </button>
+      ) : (
+        <div className="mt-3 space-y-2 rounded-lg border border-white/10 bg-white/[0.02] p-3">
+          <div className="text-xs font-semibold text-white">Add a new address</div>
+          <Field label="Label">
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              placeholder="Home, Work, Mom's house..."
+              className="w-full rounded-md border border-white/10 bg-[#101012] px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:outline-none"
+            />
+          </Field>
+          <Field label="Street address">
+            <input
+              type="text"
+              value={form.addr1}
+              onChange={(e) => setForm((f) => ({ ...f, addr1: e.target.value }))}
+              placeholder="123 Main St, Apt 4B"
+              className="w-full rounded-md border border-white/10 bg-[#101012] px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:outline-none"
+            />
+          </Field>
+          <div className="grid grid-cols-3 gap-2">
+            <Field label="City">
+              <input
+                type="text"
+                value={form.city}
+                onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+                placeholder="Austin"
+                className="w-full rounded-md border border-white/10 bg-[#101012] px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:outline-none"
+              />
+            </Field>
+            <Field label="State">
+              <input
+                type="text"
+                value={form.state}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, state: e.target.value.toUpperCase() }))
+                }
+                placeholder="TX"
+                maxLength={2}
+                className="w-full rounded-md border border-white/10 bg-[#101012] px-3 py-2 text-sm text-white uppercase placeholder:text-white/30 focus:border-amber-400/50 focus:outline-none"
+              />
+            </Field>
+            <Field label="Zip">
+              <input
+                type="text"
+                value={form.zip}
+                onChange={(e) => setForm((f) => ({ ...f, zip: e.target.value }))}
+                placeholder="78701"
+                className="w-full rounded-md border border-white/10 bg-[#101012] px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-400/50 focus:outline-none"
+              />
+            </Field>
+          </div>
+          <div className="flex justify-end gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => {
+                setAdding(false);
+                setErr(null);
+              }}
+              disabled={pending}
+              className="rounded-md border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/80 hover:bg-white/10 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={submit}
+              disabled={pending}
+              className="rounded-md bg-amber-400 px-3 py-1.5 text-xs font-bold text-slate-900 hover:bg-amber-300 disabled:opacity-50"
+            >
+              {pending ? "Saving…" : "Save address"}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

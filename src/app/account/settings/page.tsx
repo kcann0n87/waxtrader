@@ -13,18 +13,37 @@ export default async function SettingsPage() {
   // notification_prefs is on profiles too — fetch separately rather than
   // bloating getProfile() which is used in many places that don't need it.
   const supabase = await createClient();
-  const { data: prefRow } = await supabase
-    .from("profiles")
-    .select("notification_prefs")
-    .eq("id", user.id)
-    .maybeSingle();
+  const [{ data: prefRow }, { data: addressRows }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("notification_prefs")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("user_addresses")
+      .select("id, name, addr1, city, state, zip, is_default")
+      .eq("user_id", user.id)
+      .order("is_default", { ascending: false })
+      .order("created_at", { ascending: false }),
+  ]);
   const prefs = (prefRow?.notification_prefs ?? {}) as Record<string, boolean>;
+
+  const addresses = (addressRows ?? []).map((a) => ({
+    id: a.id,
+    name: a.name,
+    addr1: a.addr1,
+    city: a.city,
+    state: a.state,
+    zip: a.zip,
+    isDefault: a.is_default,
+  }));
 
   return (
     <SettingsClient
       initialDisplayName={profile?.display_name ?? user.email?.split("@")[0] ?? ""}
       initialUsername={profile?.username ?? ""}
       email={user.email ?? ""}
+      initialAddresses={addresses}
       initialPrefs={{
         order_emails: prefs.order_emails !== false,
         bid_emails: prefs.bid_emails !== false,
