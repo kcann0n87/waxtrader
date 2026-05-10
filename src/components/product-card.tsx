@@ -55,8 +55,13 @@ export function ProductCard({
     sku.set === sku.brand || sku.set.startsWith(`${sku.brand} `)
       ? sku.set
       : `${sku.brand} ${sku.set}`;
+  // Collection-card title format mirrors the product detail page H1:
+  // - Year dropped (release date already lives in the spec strip)
+  // - Pokemon products end with "Collection" instead of the sport tag
+  //   ("Brand: Pokemon" + "Sport: Pokemon" was redundant; "Collection"
+  //   matches how Pokemon Center markets the sets)
   const title = isMultiVariant
-    ? `${sku.year} ${setLabel} ${(sku.sport as string) === "Pokemon" ? "TCG" : sku.sport}`
+    ? `${setLabel} ${(sku.sport as string) === "Pokemon" ? "Collection" : sku.sport}`
     : formatSkuTitle(sku);
 
   return (
@@ -108,7 +113,13 @@ export function ProductCard({
           {title}
         </div>
         <div className="mt-1 text-[11px] tracking-wide text-white/60">
-          {sku.sport} · {sku.brand} · {sku.year}
+          {/* Pokemon: drop sport (= brand) and year — "Pokemon · Pokemon · 2025"
+              was three rows of redundancy. Other sports keep brand + sport
+              context since brand ≠ sport for them. Year removed across the
+              board to match the H1 simplification. */}
+          {sku.sport === "Pokemon"
+            ? sku.brand
+            : `${sku.sport} · ${sku.brand}`}
         </div>
         <div className="mt-3 flex items-end justify-between">
           <div>
