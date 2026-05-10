@@ -278,7 +278,7 @@ function SortableChip({
     : {};
 
   return (
-    <div ref={setNodeRef} style={style} className="group relative inline-block">
+    <div ref={setNodeRef} style={style} className="group relative">
       <VariantChip groupSlug={groupSlug} variant={variant} active={active} />
       {/* Small grip handle — invisible until hover. Positioned just
           above the chip's top-left corner. The button only renders
@@ -321,8 +321,8 @@ function VariantChip({
       onBlur={() => emitPreview(null)}
       className={
         active
-          ? "rounded-md border border-amber-400/60 bg-amber-500/[0.08] px-3 py-2 text-sm font-bold text-amber-200 shadow-md shadow-amber-500/10"
-          : "rounded-md border border-white/10 bg-white/[0.02] px-3 py-2 text-sm font-semibold text-white/80 transition hover:border-amber-400/40 hover:bg-white/5 hover:text-white"
+          ? "block rounded-md border border-amber-400/60 bg-amber-500/[0.08] px-3 py-2 text-sm font-bold text-amber-200 shadow-md shadow-amber-500/10"
+          : "block rounded-md border border-white/10 bg-white/[0.02] px-3 py-2 text-sm font-semibold text-white/80 transition hover:border-amber-400/40 hover:bg-white/5 hover:text-white"
       }
     >
       <div>{variantLabel(variant.variantType)}</div>
