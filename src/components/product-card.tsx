@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CalendarClock, Layers } from "lucide-react";
 import type { Sku } from "@/lib/data";
-import { daysUntilRelease, formatSkuTitle, formatUSD } from "@/lib/utils";
+import { daysUntilRelease, formatUSD } from "@/lib/utils";
 import { ProductImage } from "./product-image";
 import { WatchButton } from "./watch-button";
 
@@ -55,14 +55,13 @@ export function ProductCard({
     sku.set === sku.brand || sku.set.startsWith(`${sku.brand} `)
       ? sku.set
       : `${sku.brand} ${sku.set}`;
-  // Collection-card title format mirrors the product detail page H1:
-  // - Year dropped (release date already lives in the spec strip)
-  // - Pokemon products end with "Collection" instead of the sport tag
-  //   ("Brand: Pokemon" + "Sport: Pokemon" was redundant; "Collection"
-  //   matches how Pokemon Center markets the sets)
-  const title = isMultiVariant
-    ? `${setLabel} ${(sku.sport as string) === "Pokemon" ? "Collection" : sku.sport}`
-    : formatSkuTitle(sku);
+  // Collection-card title format. Always uses brand+set+sport (or
+  // "Collection" for Pokemon) — no variant suffix even for single-
+  // variant products. The card represents a release, not a specific
+  // SKU, so "Topps Chrome Premier League Soccer" reads cleaner than
+  // "Topps Chrome Premier League Hobby Box". The variant detail
+  // surfaces on the product page once the buyer clicks in.
+  const title = `${setLabel} ${(sku.sport as string) === "Pokemon" ? "Collection" : sku.sport}`;
 
   return (
     <Link
