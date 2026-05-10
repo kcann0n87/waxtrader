@@ -27,6 +27,17 @@ const nextConfig: NextConfig = {
       // supabase.co subdomain. Wildcard so we don't have to bake the
       // project ref into next.config.
       { protocol: "https", hostname: "*.supabase.co" },
+      // TCGplayer product images — Pokemon catalog uses these heavily
+      // since TCGplayer's CDN is the cleanest source for sealed-product
+      // photos. Without these hosts whitelisted, every Pokemon card on
+      // the homepage falls back to unoptimized rendering (no AVIF/WebP).
+      { protocol: "https", hostname: "product-images.tcgplayer.com" },
+      { protocol: "https", hostname: "tcgplayer-cdn.tcgplayer.com" },
+      // Pokemon TCG API images (set logos / symbols, used as fallback)
+      { protocol: "https", hostname: "images.pokemontcg.io" },
+      // Walmart product images — admins occasionally paste these for
+      // sports-card products that lack a Topps/Panini direct URL.
+      { protocol: "https", hostname: "i5.walmartimages.com" },
     ],
   },
 };

@@ -5,7 +5,15 @@
 -- as described" or "item not received" claims, since it proves what
 -- physically left the seller's hands.
 --
--- Nullable since the upload is optional (low-value orders, sellers
--- in a hurry, etc.) but heavily encouraged in the form copy.
+-- Required for orders > $500 (enforced in src/app/actions/orders.ts);
+-- optional but encouraged on smaller orders.
 
 alter table orders add column if not exists shipped_photo_url text;
+
+-- Storage bucket for the photos. Public reads (so the buyer sees
+-- the photo on their order page without signed URLs) but writes
+-- only via the service-role client used by markShipped — buyers
+-- can never upload to other people's orders.
+insert into storage.buckets (id, name, public)
+values ('shipped-photos', 'shipped-photos', true)
+on conflict (id) do nothing;
