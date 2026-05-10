@@ -340,7 +340,9 @@ export default async function ProductPage({
               <VariantSelector
                 groupSlug={sku.variantGroup}
                 activeType={sku.variantType}
+                isAdmin={isAdmin}
                 variants={variants.map((v) => ({
+                  skuId: v.id,
                   variantType: v.variantType ?? "box",
                   lowestAskCents: v.lowestAskCents,
                   imageUrl: v.imageUrl ?? null,
