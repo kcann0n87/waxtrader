@@ -439,6 +439,7 @@ export default async function OrderDetailPage({
                 initialCarrier={order.carrier}
                 initialTracking={order.tracking}
                 needsShipBy={daysFromNow(order.placed_at, 2)}
+                requiresPhoto={order.total_cents > 50_000}
               />
             </div>
           )}

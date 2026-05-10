@@ -296,6 +296,7 @@ export default async function ListingDetailPage({
                 initialCarrier={order.carrier}
                 initialTracking={order.tracking}
                 needsShipBy={daysFromNow(2)}
+                requiresPhoto={order.total_cents > 50_000}
               />
             </div>
           )}

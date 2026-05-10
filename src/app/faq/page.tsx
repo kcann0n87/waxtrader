@@ -233,9 +233,10 @@ const SECTIONS: Section[] = [
               </li>
               <li>
                 <strong className="text-white">Photo proof at packing</strong>{" "}
-                (recommended) — sellers who photograph the sealed box and
-                shipping label before drop-off win disputes at significantly
-                higher rates
+                — required on every order over $500, encouraged on every
+                order. Sellers who photograph the sealed box and shipping
+                label before drop-off win disputes at significantly higher
+                rates
               </li>
             </ul>
             <span className="mt-3 block text-xs text-white/50">
