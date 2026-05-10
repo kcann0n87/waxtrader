@@ -554,6 +554,44 @@ export async function adminSetFeaturedRank(
 }
 
 /**
+ * Reorder variants WITHIN a variant_group. Drives the drag-drop
+ * variant selector on the product detail page — admin grabs a chip,
+ * drops it, the row of skuIds in the new order comes back, we write
+ * variant_sort = 1..N.
+ *
+ * SKUs not in the input list keep their existing variant_sort, so
+ * dragging within "Single" row doesn't clobber any manual sort
+ * already set on Case-row siblings (and vice versa).
+ */
+export async function adminReorderVariants(
+  skuIds: string[],
+): Promise<Result> {
+  const admin = await requireAdmin();
+  if (!admin) return { error: "Forbidden" };
+  if (!Array.isArray(skuIds) || skuIds.length === 0) return { ok: true };
+  if (skuIds.length > 32767) return { error: "Too many variants to reorder." };
+
+  const sb = serviceRoleClient();
+  for (let i = 0; i < skuIds.length; i++) {
+    const { error } = await sb
+      .from("skus")
+      .update({ variant_sort: i + 1 })
+      .eq("id", skuIds[i]);
+    if (error) return { error: `Row ${i + 1}: ${error.message}` };
+  }
+
+  await logAdminAction(admin.id, "reorder_variants", "sku", "bulk", {
+    count: skuIds.length,
+    first: skuIds[0],
+    last: skuIds[skuIds.length - 1],
+  });
+  // Variant order is rendered on every product detail page in the
+  // group — the simplest flush is the root layout.
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+/**
  * Bulk-reorder SKUs by writing featured_rank = 1..N in the order the
  * admin dropped them. Drives the homepage drag-and-drop reorder UX —
  * admin grabs a card, drops it, the visible list comes back as

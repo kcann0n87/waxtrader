@@ -17,8 +17,13 @@ function rowToSku(row: {
   gradient_to: string | null;
   variant_group?: string | null;
   variant_type?: string | null;
+  variant_sort?: number | null;
   featured_rank?: number | null;
-}): Sku & { uuid: string; featuredRank: number | null } {
+}): Sku & {
+  uuid: string;
+  featuredRank: number | null;
+  variantSort: number | null;
+} {
   return {
     id: row.id, // uuid
     uuid: row.id,
@@ -35,6 +40,7 @@ function rowToSku(row: {
     variantGroup: row.variant_group ?? undefined,
     variantType: row.variant_type ?? undefined,
     featuredRank: row.featured_rank ?? null,
+    variantSort: row.variant_sort ?? null,
   };
 }
 

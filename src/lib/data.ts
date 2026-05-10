@@ -23,6 +23,11 @@ export type Sku = {
   // Manual sort priority for homepage rails. Lower = higher up. Null
   // = use default ordering. Added in migration 0074.
   featuredRank?: number | null;
+  // Manual sort priority WITHIN a variant_group (variant selector
+  // chip order on product detail page). Lower = lefter / earlier.
+  // Null = fall through to canonical order in src/lib/variants.ts
+  // VARIANT_ORDER. Added in migration 0077.
+  variantSort?: number | null;
 };
 
 export type Listing = {

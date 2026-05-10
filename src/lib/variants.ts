@@ -120,14 +120,30 @@ export function variantSortIndex(type: string | null | undefined): number {
   return i === -1 ? VARIANT_ORDER.length : i;
 }
 
-export function sortByVariantOrder<T extends { variantType?: string | null }>(
-  arr: T[],
-): T[] {
-  return [...arr].sort(
-    (a, b) =>
+/**
+ * Sort variants by manual variant_sort first (admin drag-drop on the
+ * variant selector chips), falling through to the canonical
+ * VARIANT_ORDER for any sibling that hasn't been manually sorted.
+ *
+ * Manual rank null + canonical rank tie → stable input order.
+ */
+export function sortByVariantOrder<
+  T extends {
+    variantType?: string | null;
+    variantSort?: number | null;
+  },
+>(arr: T[]): T[] {
+  return [...arr].sort((a, b) => {
+    const ra = a.variantSort ?? null;
+    const rb = b.variantSort ?? null;
+    if (ra !== null && rb !== null) return ra - rb;
+    if (ra !== null) return -1; // manually-ranked floats above unranked
+    if (rb !== null) return 1;
+    return (
       variantSortIndex(a.variantType ?? null) -
-      variantSortIndex(b.variantType ?? null),
-  );
+      variantSortIndex(b.variantType ?? null)
+    );
+  });
 }
 
 /**
