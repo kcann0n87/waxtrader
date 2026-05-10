@@ -10,11 +10,16 @@ export function ShipForm({
   initialCarrier,
   initialTracking,
   needsShipBy,
+  requiresPhoto = false,
 }: {
   orderId: string;
   initialCarrier?: string | null;
   initialTracking?: string | null;
   needsShipBy?: string;
+  // True for orders over $500 — server-enforced too, this gates the
+  // submit button + flips the callout copy from "recommended" to
+  // "required for orders over $500".
+  requiresPhoto?: boolean;
 }) {
   const router = useRouter();
   const [carrier, setCarrier] = useState(initialCarrier ?? "");
@@ -26,7 +31,8 @@ export function ShipForm({
   const [shipped, setShipped] = useState(!!initialTracking);
   const [pending, startTransition] = useTransition();
 
-  const valid = carrier && tracking.length >= 8;
+  const photoOk = !requiresPhoto || photo !== null;
+  const valid = carrier && tracking.length >= 8 && photoOk;
 
   const onPickPhoto = (file: File | null) => {
     if (!file) {
@@ -128,17 +134,51 @@ export function ShipForm({
         </label>
       </div>
 
-      <div className="mt-4 rounded-md border border-emerald-700/40 bg-emerald-500/[0.04] p-3">
+      <div
+        className={
+          requiresPhoto
+            ? "mt-4 rounded-md border border-amber-500/50 bg-amber-500/[0.06] p-3"
+            : "mt-4 rounded-md border border-emerald-700/40 bg-emerald-500/[0.04] p-3"
+        }
+      >
         <div className="flex items-start gap-2">
-          <Camera size={14} className="mt-0.5 text-emerald-300" />
+          <Camera
+            size={14}
+            className={
+              requiresPhoto
+                ? "mt-0.5 text-amber-300"
+                : "mt-0.5 text-emerald-300"
+            }
+          />
           <div className="flex-1">
-            <div className="text-xs font-bold text-emerald-200">
-              Add a packing photo (recommended)
+            <div
+              className={
+                requiresPhoto
+                  ? "flex items-center gap-2 text-xs font-bold text-amber-100"
+                  : "text-xs font-bold text-emerald-200"
+              }
+            >
+              {requiresPhoto ? (
+                <>
+                  Packing photo
+                  <span className="rounded-full bg-amber-500/30 px-1.5 py-0.5 text-[9px] font-black tracking-wider uppercase text-amber-100">
+                    Required
+                  </span>
+                </>
+              ) : (
+                "Add a packing photo (recommended)"
+              )}
             </div>
-            <p className="mt-0.5 text-[11px] leading-relaxed text-emerald-200/70">
-              A photo of the sealed box + shipping label is the strongest
-              chargeback defense we offer. Sellers who include one win
-              disputes at significantly higher rates.
+            <p
+              className={
+                requiresPhoto
+                  ? "mt-0.5 text-[11px] leading-relaxed text-amber-100/80"
+                  : "mt-0.5 text-[11px] leading-relaxed text-emerald-200/70"
+              }
+            >
+              {requiresPhoto
+                ? "Required for orders over $500. Snap a photo of the sealed box + shipping label before drop-off — this is the single strongest piece of evidence in a chargeback dispute."
+                : "A photo of the sealed box + shipping label is the strongest chargeback defense we offer. Sellers who include one win disputes at significantly higher rates."}
             </p>
           </div>
         </div>

@@ -285,7 +285,7 @@ export async function markShipped(formData: FormData): Promise<ActionResult> {
     const { data: order } = await supabase
       .from("orders")
       .select(
-        "id, seller_id, buyer_id, status, sku:skus!orders_sku_id_fkey(slug, year, brand, product)",
+        "id, seller_id, buyer_id, status, total_cents, sku:skus!orders_sku_id_fkey(slug, year, brand, product)",
       )
       .eq("id", orderId)
       .maybeSingle();
@@ -293,6 +293,23 @@ export async function markShipped(formData: FormData): Promise<ActionResult> {
     if (order.seller_id !== user.id) return { error: "This isn't your order to ship." };
     if (!["Charged", "InEscrow"].includes(order.status))
       return { error: `Order is already ${order.status}.` };
+
+    // Photo is REQUIRED for orders over $500 — these are the orders
+    // that draw the highest-stakes chargebacks, and Stripe weighs photo
+    // evidence heavily in dispute adjudication. We enforce on the
+    // server (not just the client) so the seller can't bypass via
+    // direct API call or stale UI.
+    const PHOTO_REQUIRED_THRESHOLD_CENTS = 50_000;
+    const photoRequired = order.total_cents > PHOTO_REQUIRED_THRESHOLD_CENTS;
+    if (
+      photoRequired &&
+      !(photo instanceof File && photo.size > 0)
+    ) {
+      return {
+        error:
+          "A packing photo is required for orders over $500. Snap a photo of the sealed box + shipping label and re-submit.",
+      };
+    }
 
     // Writes happen via service role: ownership + state transition were just
     // validated in code, so the wide-open "orders seller update" RLS policy
