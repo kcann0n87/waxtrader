@@ -17,7 +17,8 @@ function rowToSku(row: {
   gradient_to: string | null;
   variant_group?: string | null;
   variant_type?: string | null;
-}): Sku & { uuid: string } {
+  featured_rank?: number | null;
+}): Sku & { uuid: string; featuredRank: number | null } {
   return {
     id: row.id, // uuid
     uuid: row.id,
@@ -33,6 +34,7 @@ function rowToSku(row: {
     gradient: [row.gradient_from ?? "#475569", row.gradient_to ?? "#0f172a"],
     variantGroup: row.variant_group ?? undefined,
     variantType: row.variant_type ?? undefined,
+    featuredRank: row.featured_rank ?? null,
   };
 }
 
@@ -65,11 +67,11 @@ function fillVariantImageFallback<T extends Sku>(skus: T[]): T[] {
 
 export async function getAllSkus(): Promise<Sku[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("skus")
-    .select("*")
-    .eq("is_published", true)
-    .order("release_date", { ascending: false });
+  const { isPreviewModeOn } = await import("./preview-mode");
+  const preview = await isPreviewModeOn();
+  let q = supabase.from("skus").select("*").order("release_date", { ascending: false });
+  if (!preview) q = q.eq("is_published", true);
+  const { data, error } = await q;
   if (error) throw error;
   return fillVariantImageFallback((data ?? []).map(rowToSku));
 }
@@ -121,14 +123,26 @@ export function formatTierExpires(expiresAt: string | null | undefined): string 
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-export async function getSkuBySlug(slug: string): Promise<Sku | null> {
+export async function getSkuBySlug(
+  slug: string,
+  options: { includeUnpublished?: boolean } = {},
+): Promise<Sku | null> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("skus")
-    .select("*")
-    .eq("slug", slug)
-    .eq("is_published", true)
-    .maybeSingle();
+  // Three modes:
+  //   - includeUnpublished === true  → bypass filter (admin contexts)
+  //   - includeUnpublished === false → strict published-only, NO
+  //     preview-mode check (Edge-runtime callers like opengraph-image
+  //     can't afford to bundle the cookies/admin chain)
+  //   - undefined (default)          → defer to wd_preview cookie +
+  //     admin gate via isPreviewModeOn()
+  let showAll = options.includeUnpublished === true;
+  if (options.includeUnpublished === undefined) {
+    const { isPreviewModeOn } = await import("./preview-mode");
+    showAll = await isPreviewModeOn();
+  }
+  let q = supabase.from("skus").select("*").eq("slug", slug);
+  if (!showAll) q = q.eq("is_published", true);
+  const { data, error } = await q.maybeSingle();
   if (error) throw error;
   if (!data) return null;
   const sku = rowToSku(data);
@@ -158,13 +172,20 @@ export async function getSkuBySlug(slug: string): Promise<Sku | null> {
  */
 export async function getVariantsForGroup(
   group: string,
+  options: { includeUnpublished?: boolean } = {},
 ): Promise<Array<Sku & { lowestAskCents: number | null }>> {
   const supabase = await createClient();
-  const { data: skuRows, error } = await supabase
-    .from("skus")
-    .select("*")
-    .eq("variant_group", group)
-    .eq("is_published", true);
+  // Same three-mode pattern as getSkuBySlug — Edge runtimes (e.g.
+  // opengraph-image) pass `includeUnpublished: false` to opt out of
+  // the dynamic import chain that bundles cookies/admin checks.
+  let showAll = options.includeUnpublished === true;
+  if (options.includeUnpublished === undefined) {
+    const { isPreviewModeOn } = await import("./preview-mode");
+    showAll = await isPreviewModeOn();
+  }
+  let q = supabase.from("skus").select("*").eq("variant_group", group);
+  if (!showAll) q = q.eq("is_published", true);
+  const { data: skuRows, error } = await q;
   if (error) throw error;
   if (!skuRows || skuRows.length === 0) return [];
 
@@ -559,13 +580,21 @@ export async function getCatalogWithPricing(): Promise<
   try {
     const supabase = await createClient();
     const since90d = new Date(Date.now() - 90 * 86400000).toISOString();
+    const { isPreviewModeOn } = await import("./preview-mode");
+    const preview = await isPreviewModeOn();
+
+    // Featured rank first (admin-set manual priority), then release
+    // date desc. Postgrest puts NULLs last on ASC by default, so the
+    // ranked rows float to the top and the rest stay newest-first.
+    let skuQuery = supabase
+      .from("skus")
+      .select("*")
+      .order("featured_rank", { ascending: true, nullsFirst: false })
+      .order("release_date", { ascending: false });
+    if (!preview) skuQuery = skuQuery.eq("is_published", true);
 
     const [skusRes, listingsRes, salesRes] = await Promise.all([
-      supabase
-        .from("skus")
-        .select("*")
-        .eq("is_published", true)
-        .order("release_date", { ascending: false }),
+      skuQuery,
       supabase
         .from("listings")
         .select("sku_id, price_cents")

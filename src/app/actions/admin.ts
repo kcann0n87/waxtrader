@@ -5,6 +5,50 @@ import { stripe } from "@/lib/stripe";
 import { requireAdmin, logAdminAction } from "@/lib/admin";
 import { serviceRoleClient } from "@/lib/supabase/admin";
 import { releaseOrderToSeller } from "@/app/actions/orders";
+import { pairedVariantType } from "@/lib/variants";
+
+/**
+ * Image-sync helper for the box ↔ case pair. When an admin sets an
+ * image on one variant (e.g. Hobby Box), the matching variant in the
+ * same variant_group (Hobby Case) gets the same image so we never
+ * end up with a half-illustrated product page.
+ *
+ * Looks up the source SKU's variant_group + variant_type, computes
+ * the paired variant_type via VARIANT_PAIR (src/lib/variants.ts), and
+ * writes image_url onto whatever sibling SKU exists. No-op if there's
+ * no canonical pair (Pokemon ETB-only, retail one-offs, etc.) or if
+ * the sibling doesn't exist in the DB.
+ *
+ * Caller is responsible for revalidating cache after — this just
+ * does the data write.
+ */
+async function syncImageToPairedVariant(
+  sb: ReturnType<typeof serviceRoleClient>,
+  sourceSkuId: string,
+  imageUrl: string,
+): Promise<{ syncedSkuId: string | null }> {
+  const { data: source } = await sb
+    .from("skus")
+    .select("variant_group, variant_type")
+    .eq("id", sourceSkuId)
+    .maybeSingle();
+  if (!source?.variant_group || !source?.variant_type)
+    return { syncedSkuId: null };
+
+  const pairedType = pairedVariantType(source.variant_type);
+  if (!pairedType) return { syncedSkuId: null };
+
+  const { data: pair } = await sb
+    .from("skus")
+    .select("id")
+    .eq("variant_group", source.variant_group)
+    .eq("variant_type", pairedType)
+    .maybeSingle();
+  if (!pair?.id) return { syncedSkuId: null };
+
+  await sb.from("skus").update({ image_url: imageUrl }).eq("id", pair.id);
+  return { syncedSkuId: pair.id as string };
+}
 
 type Result = { ok?: boolean; error?: string; data?: unknown };
 
@@ -284,9 +328,27 @@ export async function adminCreateSku(input: {
   gradient_from?: string;
   gradient_to?: string;
   is_published?: boolean;
+  // Sibling-variant flow (the floating "+" on a product page) passes
+  // variant_group through so the new SKU joins the source's product
+  // page instead of standing alone. variant_type is derived from the
+  // product label here so the DB trigger doesn't have to know about
+  // every suffix variant we support (mega-case, fotl-hobby-case, etc.).
+  variant_group?: string;
+  variant_type?: string;
 }): Promise<Result> {
   const admin = await requireAdmin();
   if (!admin) return { error: "Forbidden" };
+
+  // Derive variant_type from the product label if the caller didn't
+  // pass one explicitly. "Hobby Box" → "hobby-box", "Mega Case" →
+  // "mega-case", etc. — matches the keys in src/lib/variants.ts.
+  const variantType =
+    input.variant_type ??
+    input.product
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
 
   const sb = serviceRoleClient();
   const { data, error } = await sb
@@ -304,6 +366,8 @@ export async function adminCreateSku(input: {
       gradient_from: input.gradient_from ?? "#475569",
       gradient_to: input.gradient_to ?? "#0f172a",
       is_published: input.is_published ?? true,
+      variant_group: input.variant_group ?? null,
+      variant_type: variantType || null,
     })
     .select("id, slug")
     .maybeSingle();
@@ -312,7 +376,11 @@ export async function adminCreateSku(input: {
   await logAdminAction(admin.id, "create_sku", "sku", data?.id ?? input.slug, {
     slug: input.slug,
   });
+  // Flush homepage / browse caches too — a fresh SKU should appear
+  // on the public-facing rails immediately (esp. the +variant flow
+  // where the admin expects to navigate back and see the new card).
   revalidatePath("/admin/catalog");
+  revalidatePath("/", "layout");
   return { ok: true, data };
 }
 
@@ -342,9 +410,21 @@ export async function adminUpdateSku(
   const { error } = await sb.from("skus").update(patch).eq("id", id);
   if (error) return { error: error.message };
 
+  // If the patch set an image URL, mirror it to the paired box/case
+  // sibling in the same variant_group. Skips when the patch nulled
+  // the URL (admin clearing an image — only the source clears, the
+  // pair keeps whatever it had so they don't both go dark from one
+  // accidental clear).
+  if (typeof patch.image_url === "string" && patch.image_url.length > 0) {
+    await syncImageToPairedVariant(sb, id, patch.image_url);
+  }
+
   await logAdminAction(admin.id, "update_sku", "sku", id, { patch });
   revalidatePath("/admin/catalog");
   revalidatePath(`/admin/catalog/${id}`);
+  // Edits to title / image / gradient / is_published all show on the
+  // public homepage and product pages — flush root layout too.
+  revalidatePath("/", "layout");
   return { ok: true };
 }
 
@@ -419,8 +499,12 @@ export async function adminUploadSkuImage(
       console.error("adminUploadSkuImage skus update failed:", updateErr);
       return { error: `Saved file but couldn't update SKU: ${updateErr.message}` };
     }
+    // Mirror the image to the paired box/case variant so a single
+    // upload covers both rows on the product page.
+    await syncImageToPairedVariant(sb, skuId, publicUrl);
     revalidatePath("/admin/catalog");
     revalidatePath(`/admin/catalog/${skuId}`);
+    revalidatePath("/", "layout");
   }
 
   await logAdminAction(admin.id, "upload_sku_image", "sku", skuId ?? slug, {
@@ -436,6 +520,86 @@ export async function adminUploadSkuImage(
 /**
  * Delete a SKU. Refuses if any listings reference it.
  */
+/**
+ * Manually pin a SKU's homepage sort position. Lower numbers rise
+ * higher in the rail. Pass null to clear (back to default ordering).
+ *
+ * Surfaces from the floating "Featured rank" pill on product pages —
+ * admins can rank top picks without leaving whatever page they're on.
+ */
+export async function adminSetFeaturedRank(
+  id: string,
+  rank: number | null,
+): Promise<Result> {
+  const admin = await requireAdmin();
+  if (!admin) return { error: "Forbidden" };
+
+  // Smallint range — Postgres rejects anything outside ±32767.
+  if (rank !== null && (rank < 0 || rank > 32767 || !Number.isInteger(rank))) {
+    return { error: "Rank must be an integer 0–32767, or null to clear." };
+  }
+
+  const sb = serviceRoleClient();
+  const { error } = await sb
+    .from("skus")
+    .update({ featured_rank: rank })
+    .eq("id", id);
+  if (error) return { error: error.message };
+
+  await logAdminAction(admin.id, "set_featured_rank", "sku", id, { rank });
+  // Homepage + browse pages cache aggressively at the data layer.
+  // Revalidate root layout to flush.
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+/**
+ * Bulk-reorder SKUs by writing featured_rank = 1..N in the order the
+ * admin dropped them. Drives the homepage drag-and-drop reorder UX —
+ * admin grabs a card, drops it, the visible list comes back as
+ * skuIds in new order, and we persist that order verbatim.
+ *
+ * Only the SKUs in the input list get touched. Anything not in the
+ * list keeps whatever featured_rank it had (so reordering one section
+ * doesn't clobber pins set elsewhere). To "unpin" something, drop a
+ * shorter list — items omitted from the new order keep their old rank
+ * (the homepage's "below the pinned" zone falls through to release-
+ * date sort).
+ *
+ * Empty list = no-op (defensive — protects against a bad client send).
+ */
+export async function adminReorderSkus(skuIds: string[]): Promise<Result> {
+  const admin = await requireAdmin();
+  if (!admin) return { error: "Forbidden" };
+  if (!Array.isArray(skuIds) || skuIds.length === 0) return { ok: true };
+  // Cap at the smallint upper bound. We're nowhere near it in practice
+  // but better to reject a 50K-item drop than write garbage.
+  if (skuIds.length > 32767) return { error: "Too many SKUs to reorder at once." };
+
+  const sb = serviceRoleClient();
+  // Postgres has no "update many with different values per row" in a
+  // single query without CTEs. For ~100 rows the per-row update is
+  // fine; if this ever grows past a few hundred we'd switch to a
+  // batched RPC. Run them sequentially to keep transaction semantics
+  // simple — partial failure leaves the catalog in a half-renumbered
+  // state, which is recoverable by re-dropping.
+  for (let i = 0; i < skuIds.length; i++) {
+    const { error } = await sb
+      .from("skus")
+      .update({ featured_rank: i + 1 })
+      .eq("id", skuIds[i]);
+    if (error) return { error: `Row ${i + 1}: ${error.message}` };
+  }
+
+  await logAdminAction(admin.id, "reorder_skus", "sku", "bulk", {
+    count: skuIds.length,
+    first: skuIds[0],
+    last: skuIds[skuIds.length - 1],
+  });
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
 export async function adminDeleteSku(id: string): Promise<Result> {
   const admin = await requireAdmin();
   if (!admin) return { error: "Forbidden" };
@@ -452,8 +616,163 @@ export async function adminDeleteSku(id: string): Promise<Result> {
   if (error) return { error: error.message };
 
   await logAdminAction(admin.id, "delete_sku", "sku", id);
+  // Revalidate the admin catalog list AND the root layout — the
+  // homepage / browse pages cache catalog data aggressively at the
+  // data layer, so deleting a SKU without flushing root leaves the
+  // deleted card visible on the homepage until the next deploy.
   revalidatePath("/admin/catalog");
+  revalidatePath("/", "layout");
   return { ok: true };
+}
+
+/**
+ * "Just make it go away" SKU removal.
+ *
+ * Tries a hard delete first. If anything's referencing the SKU
+ * (listings, orders, sales, bids, watches — any FK constraint), falls
+ * back to setting is_published=false so the SKU disappears from public
+ * browse/search/homepage but historical records (orders, sales) keep
+ * their FK pointer intact.
+ *
+ * The X button on product pages calls this — admins shouldn't have to
+ * think "delete vs hide", they should just click ✕ and have the
+ * catalog clean itself up correctly.
+ *
+ * Returns ok with `mode` indicating which path was taken so the UI can
+ * confirm "Deleted" vs "Hidden — preserved for X linked records".
+ */
+export async function adminRemoveSku(
+  id: string,
+): Promise<Result & { mode?: "deleted" | "hidden"; reason?: string }> {
+  const admin = await requireAdmin();
+  if (!admin) return { error: "Forbidden" };
+
+  const sb = serviceRoleClient();
+
+  // Try the hard delete first. Postgres returns the FK violation as
+  // error code "23503" — anything else is a real failure we should
+  // surface to the admin.
+  const { error: delError } = await sb.from("skus").delete().eq("id", id);
+
+  if (!delError) {
+    await logAdminAction(admin.id, "delete_sku", "sku", id);
+    revalidatePath("/admin/catalog");
+    revalidatePath("/", "layout");
+    return { ok: true, mode: "deleted" };
+  }
+
+  // FK constraint violation — something references this SKU. Fall
+  // back to hiding so the public catalog still gets cleaned up.
+  // Postgres FK error code is 23503; supabase-js exposes it on .code.
+  const isFkError =
+    (delError as { code?: string }).code === "23503" ||
+    /foreign key/i.test(delError.message);
+
+  if (!isFkError) {
+    return { error: delError.message };
+  }
+
+  const { error: hideError } = await sb
+    .from("skus")
+    .update({ is_published: false })
+    .eq("id", id);
+  if (hideError) return { error: hideError.message };
+
+  await logAdminAction(admin.id, "hide_sku", "sku", id, {
+    reason: "fk_blocked",
+  });
+  revalidatePath("/admin/catalog");
+  revalidatePath("/", "layout");
+  return {
+    ok: true,
+    mode: "hidden",
+    reason:
+      "Hidden instead of deleted — listings, orders, or other records reference this SKU and would break if it were removed. The SKU no longer appears on the public catalog.",
+  };
+}
+
+/**
+ * "Delete the whole product" — removes every SKU sharing the given
+ * variant_group. A product on the homepage is one card per variant
+ * group (Hobby Box + Hobby Case + Mega Box + … all collapsed into one
+ * "2025 Topps Chrome Football" tile), so deleting from the homepage
+ * grid should nuke the entire group, not just one variant.
+ *
+ * Per-row uses adminRemoveSku semantics: hard-delete when nothing
+ * references it, fall back to is_published=false otherwise. Returns
+ * counts so the UI can confirm "Removed 12 variants (8 deleted, 4
+ * hidden)".
+ */
+export async function adminRemoveVariantGroup(
+  variantGroup: string,
+): Promise<
+  Result & {
+    deleted?: number;
+    hidden?: number;
+    total?: number;
+  }
+> {
+  const admin = await requireAdmin();
+  if (!admin) return { error: "Forbidden" };
+  if (!variantGroup || typeof variantGroup !== "string")
+    return { error: "Missing variant_group." };
+
+  const sb = serviceRoleClient();
+
+  // Pull every SKU in the group so we can iterate. Includes hidden
+  // ones — deleting a product should nuke the hidden variants too.
+  const { data: rows, error: fetchError } = await sb
+    .from("skus")
+    .select("id, slug")
+    .eq("variant_group", variantGroup);
+  if (fetchError) return { error: fetchError.message };
+  if (!rows || rows.length === 0) {
+    return { error: `No SKUs found for variant_group "${variantGroup}".` };
+  }
+
+  let deleted = 0;
+  let hidden = 0;
+  for (const row of rows) {
+    const { error: delError } = await sb.from("skus").delete().eq("id", row.id);
+    if (!delError) {
+      deleted++;
+      continue;
+    }
+    const isFkError =
+      (delError as { code?: string }).code === "23503" ||
+      /foreign key/i.test(delError.message);
+    if (!isFkError) {
+      // Non-FK error — bail. Anything we already deleted/hid stays
+      // that way, but surface the issue to the admin so they know.
+      return {
+        error: `Failed on ${row.slug}: ${delError.message}`,
+        deleted,
+        hidden,
+        total: rows.length,
+      };
+    }
+    const { error: hideError } = await sb
+      .from("skus")
+      .update({ is_published: false })
+      .eq("id", row.id);
+    if (hideError)
+      return {
+        error: `Failed to hide ${row.slug}: ${hideError.message}`,
+        deleted,
+        hidden,
+        total: rows.length,
+      };
+    hidden++;
+  }
+
+  await logAdminAction(admin.id, "remove_variant_group", "sku", variantGroup, {
+    deleted,
+    hidden,
+    total: rows.length,
+  });
+  revalidatePath("/admin/catalog");
+  revalidatePath("/", "layout");
+  return { ok: true, deleted, hidden, total: rows.length };
 }
 
 /**

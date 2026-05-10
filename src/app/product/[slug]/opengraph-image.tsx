@@ -3,9 +3,17 @@ import { getLowestAsk, getSkuBySlug, getVariantsForGroup } from "@/lib/db";
 import { sortByVariantOrder } from "@/lib/variants";
 import { formatSkuTitle, formatUSDFull } from "@/lib/utils";
 
-// Edge runtime so the OG image generation doesn't cold-start a Node lambda
+// Node runtime — Edge has a 1MB bundle limit and our shared db.ts
+// helper imports a dynamic preview-mode module that pushes the
+// bundle over. OG cards are static-cached after first render so
+// the slower Node cold start is fine.
+//
+// LEGACY (kept for reference): we used Edge here to skip the cold
+// start, but that required a custom inline supabase query in this
+// file. Switching to Node lets us reuse getSkuBySlug + the variant
+// fallback for image inheritance.
 // for every social-share crawler hit.
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const alt = "WaxDepot product";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -28,9 +36,15 @@ export default async function OG({ params }: { params: { slug: string } }) {
   // slug (canonical post-0013). Try direct lookup first; fall back to
   // the first variant in the group so the OG card still renders for
   // canonical URLs that the page handler resolves via group lookup.
-  let sku = await getSkuBySlug(slug);
+  // Pass includeUnpublished:false explicitly — OG image is public-
+  // facing (Twitter/Facebook scrapers), shouldn't honor the admin
+  // preview cookie, AND must opt out of the dynamic preview-mode
+  // import that pulls cookies/admin chains over the 1MB Edge limit.
+  let sku = await getSkuBySlug(slug, { includeUnpublished: false });
   if (!sku) {
-    const variants = sortByVariantOrder(await getVariantsForGroup(slug));
+    const variants = sortByVariantOrder(
+      await getVariantsForGroup(slug, { includeUnpublished: false }),
+    );
     sku = variants[0] ?? null;
   }
 

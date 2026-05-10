@@ -3,6 +3,7 @@ import { ArrowUpRight, Flame, Hammer, ShieldCheck, Sparkles, Star } from "lucide
 import { ProductCard } from "@/components/product-card";
 import { RecentSalesTicker } from "@/components/recent-sales-ticker";
 import { RecentlyViewed } from "@/components/recently-viewed";
+import { SortableProductGrid } from "@/components/sortable-product-grid";
 import { getCatalogWithPricing, getMarketplaceStats } from "@/lib/db";
 import { formatSeasonYear, formatUSD, isPresale } from "@/lib/utils";
 import type { Sku } from "@/lib/data";
@@ -68,6 +69,11 @@ export default async function Home({
   const { sport, year, sort } = await searchParams;
   const yearNum = year ? Number(year) : undefined;
   const isBrowseMode = !!(sport || yearNum);
+  // Admin status — used to enable the drag-to-reorder UX on the
+  // browse-mode grid. Non-admins get a plain (non-draggable) grid.
+  const { requireAdmin } = await import("@/lib/admin");
+  const adminUser = await requireAdmin();
+  const isAdmin = !!adminUser;
   const [all, stats] = await Promise.all([
     getCatalogWithPricing(),
     getMarketplaceStats(),
@@ -248,7 +254,13 @@ export default async function Home({
 
         {isBrowseMode ? (
           /* BROWSE MODE: flat sortable grid of every product matching the filter. */
-          <BrowseGrid filtered={filtered} sort={sort} sport={sport} year={year} />
+          <BrowseGrid
+            filtered={filtered}
+            sort={sort}
+            sport={sport}
+            year={year}
+            isAdmin={isAdmin}
+          />
         ) : !hasMarketplaceActivity ? (
           /* EMPTY-STATE MODE: order book has no listings + no sales yet.
              Show "What's Hot" ranked by objective market signals so the
@@ -530,11 +542,13 @@ function BrowseGrid({
   sort,
   sport,
   year,
+  isAdmin,
 }: {
   filtered: FilteredSku[];
   sort?: string;
   sport?: string;
   year?: string;
+  isAdmin: boolean;
 }) {
   // Collapse multi-variant releases into one card per release. e.g. all
   // 12 variants of Topps Chrome NBA become a single "Topps Chrome NBA"
@@ -627,12 +641,17 @@ function BrowseGrid({
             Clear filter
           </Link>
         </div>
-      ) : sport && !year ? (
+      ) : sport && !year && sport !== "Pokemon" ? (
         // Year-grouped sections when a sport filter is active without a
         // specific year — gives Soccer / NBA / etc. a "by season" feel
         // instead of one giant grid. Each section header uses the
         // formatSeasonYear logic so NBA/NHL show "2024-25", Soccer's
         // UEFA-derived years show "2024-25", MLS/WC stay single-year.
+        //
+        // Pokemon is excluded — sets release quarterly under a single
+        // calendar and collectors browse by set name rather than year,
+        // so the flat grid (all sets together, sorted by release date)
+        // matches their mental model better.
         Object.entries(
           sorted.reduce((acc, c) => {
             const k = String(c.sku.year);
@@ -649,33 +668,45 @@ function BrowseGrid({
                   · {group.length}
                 </span>
               </h3>
-              <Grid>
-                {group.map((c) => (
-                  <ProductCard
-                    key={c.sku.variantGroup ?? c.sku.id}
-                    sku={c.sku}
-                    lowestAsk={c.lowestAskInGroup}
-                    lastSale={c.lastSaleInGroup}
-                    presale={isPresale(c.sku.releaseDate)}
-                    variantCount={c.variantCount}
-                  />
-                ))}
-              </Grid>
+              <SortableProductGrid
+                isAdmin={isAdmin}
+                items={group.map((c) => ({
+                  id: c.sku.id,
+                  variantGroup: c.sku.variantGroup,
+                  productLabel: `${c.sku.year} ${c.sku.brand} ${c.sku.set} ${c.sku.sport}`,
+                  node: (
+                    <ProductCard
+                      key={c.sku.variantGroup ?? c.sku.id}
+                      sku={c.sku}
+                      lowestAsk={c.lowestAskInGroup}
+                      lastSale={c.lastSaleInGroup}
+                      presale={isPresale(c.sku.releaseDate)}
+                      variantCount={c.variantCount}
+                    />
+                  ),
+                }))}
+              />
             </div>
           ))
       ) : (
-        <Grid>
-          {sorted.map((c) => (
-            <ProductCard
-              key={c.sku.variantGroup ?? c.sku.id}
-              sku={c.sku}
-              lowestAsk={c.lowestAskInGroup}
-              lastSale={c.lastSaleInGroup}
-              presale={isPresale(c.sku.releaseDate)}
-              variantCount={c.variantCount}
-            />
-          ))}
-        </Grid>
+        <SortableProductGrid
+          isAdmin={isAdmin}
+          items={sorted.map((c) => ({
+            id: c.sku.id,
+            variantGroup: c.sku.variantGroup,
+            productLabel: `${c.sku.year} ${c.sku.brand} ${c.sku.set} ${c.sku.sport}`,
+            node: (
+              <ProductCard
+                key={c.sku.variantGroup ?? c.sku.id}
+                sku={c.sku}
+                lowestAsk={c.lowestAskInGroup}
+                lastSale={c.lastSaleInGroup}
+                presale={isPresale(c.sku.releaseDate)}
+                variantCount={c.variantCount}
+              />
+            ),
+          }))}
+        />
       )}
     </section>
   );

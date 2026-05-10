@@ -51,7 +51,11 @@ export function formatSkuTitle(sku: {
   const brandSet = sku.set.toLowerCase().startsWith(sku.brand.toLowerCase())
     ? sku.set
     : `${sku.brand} ${sku.set}`;
-  return `${formatSeasonYear(sku.year, sku.sport, sku.set)} ${brandSet} ${sku.product}`;
+  // Year intentionally dropped from card/spec-row titles — the spec
+  // list and breadcrumb on the product page already surface it. The
+  // homepage grids are visually cleaner without "2025-26 …" prefixed
+  // on every card.
+  return `${brandSet} ${sku.product}`;
 }
 
 // Real time, not a pinned demo date. Earlier iterations froze "today" to

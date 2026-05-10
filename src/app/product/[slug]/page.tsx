@@ -10,6 +10,10 @@ import { RealtimeOrderBook } from "@/components/realtime-order-book";
 import { SellerLink } from "@/components/seller-link";
 import { PriceChart } from "@/components/price-chart";
 import { ProductImageWithPreview } from "@/components/product-image-with-preview";
+import { AdminImageDropOverlay } from "@/components/admin-image-drop-overlay";
+import { AdminDeleteSkuButton } from "@/components/admin-delete-sku-button";
+import { AdminAddSkuButton } from "@/components/admin-add-sku-button";
+import { AdminFeaturedRankButton } from "@/components/admin-featured-rank-button";
 import { SalesVolumeChart } from "@/components/sales-volume-chart";
 import { RecentlyViewed } from "@/components/recently-viewed";
 import { TrackView } from "@/components/track-view";
@@ -30,7 +34,6 @@ import {
 } from "@/lib/db";
 import { sortByVariantOrder, variantLabel } from "@/lib/variants";
 import {
-  formatSeasonYear,
   formatSkuTitle,
   formatUSD,
   formatUSDFull,
@@ -46,15 +49,16 @@ import type { Metadata } from "next";
  */
 function groupTitle(year: number, brand: string, set: string, sport: string): string {
   // Dedupe brand/set when set name already includes the brand (e.g. set
-  // "Bowman" with brand "Bowman" should render as "2025 Bowman MLB", not
-  // "2025 Bowman Bowman MLB").
+  // "Bowman" with brand "Bowman" should render as "Bowman MLB", not
+  // "Bowman Bowman MLB").
   const setLabel =
     set === brand || set.startsWith(`${brand} `) ? set : `${brand} ${set}`;
-  // formatSeasonYear handles split-season prefixes (NBA/NHL → "2025-26",
-  // Soccer UEFA/PL → "2025-26", MLS/World Cup → "2025"). Without this we
-  // got "2025 Topps Inception NBA" on the product page H1 when it should
-  // read "2025-26 Topps Inception NBA".
-  return `${formatSeasonYear(year, sport, set)} ${setLabel} ${sport === "Pokemon" ? "TCG" : sport}`;
+  // Year dropped from the H1 — the spec row right under the title still
+  // shows it. Pokemon products end with "Collection" instead of the
+  // sport tag, since the brand-as-sport ("Pokemon Pokemon") would feel
+  // awkward and "TCG" was duplicating context already in the navigation.
+  const suffix = sport === "Pokemon" ? "Collection" : sport;
+  return `${setLabel} ${suffix}`;
 }
 
 export async function generateMetadata({
@@ -109,12 +113,15 @@ export async function generateMetadata({
 async function resolveProduct(
   slug: string,
   variantParam?: string,
+  options: { includeUnpublished?: boolean } = {},
 ): Promise<{
   sku: Awaited<ReturnType<typeof getSkuBySlug>>;
   variants: Awaited<ReturnType<typeof getVariantsForGroup>>;
 }> {
   // Case 1: treat slug as a variant_group.
-  const variants = sortByVariantOrder(await getVariantsForGroup(slug));
+  const variants = sortByVariantOrder(
+    await getVariantsForGroup(slug, options),
+  );
   if (variants.length > 0) {
     const requested = variantParam
       ? variants.find((v) => v.variantType === variantParam)
@@ -125,9 +132,13 @@ async function resolveProduct(
 
   // Case 2: legacy per-SKU slug. Redirect to the canonical group URL so
   // any inbound link or bookmark still works without changing the API.
-  const direct = await getSkuBySlug(slug);
+  const direct = await getSkuBySlug(slug, options);
   if (direct?.variantGroup && direct.variantType) {
-    redirect(`/product/${direct.variantGroup}?variant=${direct.variantType}`);
+    // Preserve preview mode through the redirect so admins don't lose
+    // the unpublished-visible toggle when bouncing to the canonical URL.
+    const variantParam = `variant=${direct.variantType}`;
+    const previewParam = options.includeUnpublished ? "&preview=1" : "";
+    redirect(`/product/${direct.variantGroup}?${variantParam}${previewParam}`);
   }
 
   // Stranded SKU with no group/type backfill — render directly so the
@@ -140,11 +151,23 @@ export default async function ProductPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ variant?: string }>;
+  searchParams: Promise<{ variant?: string; preview?: string }>;
 }) {
   const { slug } = await params;
   const sp = await searchParams;
-  const { sku, variants } = await resolveProduct(slug, sp.variant);
+
+  // Resolve admin status once — used for two things: (1) bypassing the
+  // is_published filter when ?preview=1 is on, (2) showing the
+  // drag-and-drop image upload overlay over the product photo.
+  const { requireAdmin } = await import("@/lib/admin");
+  const adminUser = await requireAdmin();
+  const isAdmin = !!adminUser;
+
+  const includeUnpublished = isAdmin && sp.preview === "1";
+
+  const { sku, variants } = await resolveProduct(slug, sp.variant, {
+    includeUnpublished,
+  });
   if (!sku) notFound();
 
   // Parallel fetch everything the page needs for this SKU.
@@ -194,9 +217,50 @@ export default async function ProductPage({
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
         <div>
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#101012] p-6">
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#101012] p-6">
+            {/* Admin floating actions — corner pills, only visible
+                when signed in as admin. Layout left → right:
+                  + add (emerald)
+                  📌 featured rank (amber)
+                  ✕ delete (rose)
+                Most-destructive on the rightmost edge. */}
+            <AdminAddSkuButton
+              isAdmin={isAdmin}
+              prefill={{
+                year: sku.year,
+                brand: sku.brand,
+                setName: sku.set,
+                sport: sku.sport,
+                releaseDate: sku.releaseDate,
+                description: sku.description,
+                gradientFrom: sku.gradient[0],
+                gradientTo: sku.gradient[1],
+                imageUrl: sku.imageUrl,
+                sourceProduct: sku.product,
+                variantGroup: sku.variantGroup,
+              }}
+            />
+            <AdminFeaturedRankButton
+              skuId={sku.id}
+              currentRank={sku.featuredRank ?? null}
+              isAdmin={isAdmin}
+            />
+            <AdminDeleteSkuButton
+              skuId={sku.id}
+              skuLabel={sku.slug}
+              isAdmin={isAdmin}
+            />
             <div className="grid grid-cols-1 gap-6 md:grid-cols-[280px_1fr]">
-              <ProductImageWithPreview sku={sku} className="aspect-[4/5] rounded-xl border border-white/5" />
+              <AdminImageDropOverlay
+                skuId={sku.id}
+                slug={sku.slug}
+                isAdmin={isAdmin}
+              >
+                <ProductImageWithPreview
+                  sku={sku}
+                  className="aspect-[4/5] rounded-xl border border-white/5"
+                />
+              </AdminImageDropOverlay>
 
               <div>
                 <div className="flex items-start justify-between gap-3">
@@ -216,10 +280,20 @@ export default async function ProductPage({
                 <p className="mt-3 text-sm leading-relaxed text-white/60">{sku.description}</p>
 
                 <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                  <Spec label="Sport" value={sku.sport} />
+                  {/* Year hidden for Pokemon — collectors browse by set
+                      ("Prismatic Evolutions"), not season ("2025"); the
+                      release date below carries all the time signal
+                      they need. Sport "Pokemon" is also redundant with
+                      the brand "Pokemon", so we hide it on Pokemon
+                      products to keep the spec list tight. */}
+                  {sku.sport !== "Pokemon" && (
+                    <Spec label="Sport" value={sku.sport} />
+                  )}
                   <Spec label="Brand" value={sku.brand} />
                   <Spec label="Set" value={sku.set} />
-                  <Spec label="Year" value={String(sku.year)} />
+                  {sku.sport !== "Pokemon" && (
+                    <Spec label="Year" value={String(sku.year)} />
+                  )}
                   <Spec label="Product" value={sku.product} />
                   <Spec
                     label="Release"

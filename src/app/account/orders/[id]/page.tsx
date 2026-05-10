@@ -382,10 +382,11 @@ export default async function OrderDetailPage({
               <MarkDeliveredButton orderId={order.id} isSeller={isSeller} />
             )}
 
-            {/* Buyer can short-circuit by confirming immediately (gated to
-                ≥24h after shipped — see ConfirmDeliveryButton). */}
+            {/* Buyer can short-circuit and release funds the moment they
+                physically receive the box — no time gate. Auto-release
+                cron + dispute flow remain as buyer protection. */}
             {isBuyer && (order.status === "Shipped" || order.status === "Delivered") && (
-              <ConfirmDeliveryButton orderId={order.id} shippedAt={order.shipped_at} />
+              <ConfirmDeliveryButton orderId={order.id} />
             )}
 
             {/* Auto-release timer countdown */}

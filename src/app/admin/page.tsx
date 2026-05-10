@@ -14,6 +14,7 @@ import {
 import { serviceRoleClient } from "@/lib/supabase/admin";
 import { TIER_FEE } from "@/lib/fees";
 import { formatUSDFull } from "@/lib/utils";
+import { PreviewModeToggle } from "./preview-mode-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -300,10 +301,15 @@ async function loadOverview() {
 
 export default async function AdminOverview() {
   const data = await loadOverview();
+  const { isPreviewModeOn } = await import("@/lib/preview-mode");
+  const previewOn = await isPreviewModeOn();
 
   return (
     <div>
-      <h1 className="font-display mb-6 text-3xl font-black text-white">Overview</h1>
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h1 className="font-display text-3xl font-black text-white">Overview</h1>
+        <PreviewModeToggle previewOn={previewOn} />
+      </div>
 
       {/* Beta-state row — surface waitlist + invite bottleneck. Once we
           open public sign-up, swap the focus here back to GMV. */}

@@ -5,11 +5,13 @@ import { SkuForm } from "../sku-form";
 export const dynamic = "force-dynamic";
 
 /**
- * Admin "create SKU" page. Accepts query params to pre-fill the form
- * — used by the /admin/feedback "Add to catalog →" deep-link so admins
- * don't re-type a set request's brand/year/sport/etc.
+ * Admin "create SKU" page. Accepts query params to pre-fill the form.
+ * Two callers exercise this today:
+ *   1. /admin/feedback "Add to catalog →" deep-link from a set request
+ *   2. The floating "+" button on a product page (sibling variant flow)
  *
- * Supported params: slug, year, brand, set_name, product, sport
+ * Supported params: slug, year, brand, set_name, product, sport,
+ * release_date, description, image_url, gradient_from, gradient_to
  */
 export default async function AdminNewSkuPage({
   searchParams,
@@ -21,6 +23,12 @@ export default async function AdminNewSkuPage({
     set_name?: string;
     product?: string;
     sport?: string;
+    release_date?: string;
+    description?: string;
+    image_url?: string;
+    gradient_from?: string;
+    gradient_to?: string;
+    variant_group?: string;
   }>;
 }) {
   const sp = await searchParams;
@@ -29,17 +37,29 @@ export default async function AdminNewSkuPage({
     ? (sp.sport as (typeof validSports)[number])
     : undefined;
   const yearNum = sp.year ? parseInt(sp.year, 10) : undefined;
-  const initial =
-    sp.slug || sp.brand || sp.set_name
-      ? {
-          slug: sp.slug,
-          year: Number.isFinite(yearNum) ? yearNum : undefined,
-          brand: sp.brand,
-          set_name: sp.set_name,
-          product: sp.product || "Hobby Box",
-          sport,
-        }
-      : undefined;
+  const hasAnyPrefill =
+    sp.slug ||
+    sp.brand ||
+    sp.set_name ||
+    sp.release_date ||
+    sp.description ||
+    sp.image_url;
+  const initial = hasAnyPrefill
+    ? {
+        slug: sp.slug,
+        year: Number.isFinite(yearNum) ? yearNum : undefined,
+        brand: sp.brand,
+        set_name: sp.set_name,
+        product: sp.product || "Hobby Box",
+        sport,
+        release_date: sp.release_date,
+        description: sp.description,
+        image_url: sp.image_url,
+        gradient_from: sp.gradient_from,
+        gradient_to: sp.gradient_to,
+        variant_group: sp.variant_group,
+      }
+    : undefined;
 
   return (
     <div>
@@ -52,8 +72,9 @@ export default async function AdminNewSkuPage({
       <h1 className="font-display mb-1 text-2xl font-black text-white">Add new SKU</h1>
       {initial && (
         <p className="mb-6 text-xs text-amber-300">
-          Pre-filled from a feedback set request. Adjust fields as needed
-          and click Create SKU.
+          Pre-filled from an existing SKU. Pick the variant (Hobby Case
+          / Mega Box / etc.) and adjust anything else as needed before
+          hitting Create SKU.
         </p>
       )}
       <div className="rounded-xl border border-white/10 bg-[#101012] p-5">

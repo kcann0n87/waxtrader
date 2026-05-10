@@ -72,7 +72,19 @@ export function BuyBidActions({
     });
   };
 
-  const handleSubmitBid = () => submitBid(bidNum, parseInt(bidDays, 10), () => setMode("bid-confirmed"));
+  // If the typed bid meets or beats the lowest ask, an immediate
+  // match is guaranteed — no point routing through the bid table only
+  // to instantly resolve. Detour straight to Buy Now so the buyer
+  // gets a single clean Stripe checkout instead of "bid placed →
+  // accepted → checkout" three-step. Button label in the modal also
+  // morphs to reflect this (see BidModal below).
+  const handleSubmitBid = () => {
+    if (ask !== null && bidNum >= ask) {
+      handleBuyAtAsk();
+      return;
+    }
+    submitBid(bidNum, parseInt(bidDays, 10), () => setMode("bid-confirmed"));
+  };
 
   const handleBuyAtAsk = () => {
     if (ask === null) return;
@@ -445,13 +457,20 @@ function BidModal({
             className="flex flex-1 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2.5 text-sm font-bold text-slate-900 shadow-md shadow-amber-500/20 transition hover:from-amber-300 hover:to-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {pending ? <Loader2 size={14} className="animate-spin" /> : null}
-            Place bid — {formatUSD(bidNum)}
+            {/* When the bid amount meets or beats the lowest ask, we
+                detour the click straight to Buy Now (handled in the
+                parent) — relabel here so the user sees the immediate
+                purchase semantics instead of "place bid". Always shows
+                lowest-ask price in that branch since they'll buy at
+                the ask, not above it. */}
+            {meetsAsk
+              ? `Buy now — ${formatUSD(lowestAsk!)}`
+              : `Place bid — ${formatUSD(bidNum)}`}
           </button>
         </div>
 
         <div className="mt-3 text-[11px] text-white/60">
           Flat {(FEE_RATE * 100).toFixed(0)}% seller fee — no buyer fees, no separate processing.
-          {meetsAsk && " Use Buy Now if you want to take the lowest ask immediately."}
         </div>
         {/* keep referenced so the var isn't unused */}
         <div className="hidden">{fee}</div>

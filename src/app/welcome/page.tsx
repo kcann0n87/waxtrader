@@ -12,7 +12,11 @@ const sports = [
   { id: "NBA", label: "Basketball", emoji: "🏀" },
   { id: "MLB", label: "Baseball", emoji: "⚾" },
   { id: "NFL", label: "Football", emoji: "🏈" },
-  { id: "NHL", label: "Hockey", emoji: "🏒" },
+  // Hockey hidden until we reopen the NHL catalog — re-add this row
+  // (and the SPORT_TABS entry in src/components/site-header.tsx) when
+  // ready.
+  { id: "Soccer", label: "Soccer", emoji: "⚽" },
+  { id: "Pokemon", label: "Pokemon", emoji: "🎴" },
 ];
 
 type Step = "intro" | "sports" | "notifications" | "follow" | "done";

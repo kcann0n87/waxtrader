@@ -8,6 +8,7 @@ import { MobileNav } from "@/components/mobile-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SiteJsonLd } from "@/components/site-jsonld";
+import { PreviewModePill } from "@/components/preview-mode-pill";
 
 // Routes that render their own minimal layout (no SiteHeader/Footer/MobileNav).
 // Used for the beta gate so anon visitors don't see marketplace chrome /
@@ -27,7 +28,7 @@ const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://waxdepot.io";
 const TITLE = "WaxDepot — Sealed sports wax. Bought right. Sold right.";
 const DESCRIPTION =
-  "Buy and sell sealed NBA, MLB, NFL, and NHL wax at real market prices. Live bid and ask, escrow on every order, no eBay tax.";
+  "Buy and sell sealed NBA, MLB, NFL, soccer, and Pokemon TCG wax at real market prices. Live bid and ask, escrow on every order, no eBay tax.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -100,6 +101,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <main id="main" tabIndex={-1} className="flex-1 outline-none">{children}</main>
         {!standalone && <SiteFooter />}
         {!standalone && <MobileNav />}
+        {/* Floating pill — only renders for admins with preview mode
+            cookie set. Suspense fallback null because it server-fetches
+            an admin/cookie check that we don't want to block first paint. */}
+        <Suspense fallback={null}>
+          <PreviewModePill />
+        </Suspense>
       </body>
     </html>
   );

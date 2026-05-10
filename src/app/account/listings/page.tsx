@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, Box, DollarSign, Package } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { formatUSD, formatUSDFull } from "@/lib/utils";
+import { formatUSD } from "@/lib/utils";
+import { EditablePriceCell } from "./editable-price-cell";
 
 export const dynamic = "force-dynamic";
 
@@ -123,11 +124,11 @@ export default async function ListingHistoryPage({
         Back to dashboard
       </Link>
       <h1 className="font-display text-3xl font-black tracking-tight text-white sm:text-4xl">
-        Your listings
+        Selling
       </h1>
       <p className="mt-1 text-sm text-white/50">
-        Boxes you&apos;ve put on the order book. Active ones are visible to buyers
-        and accepting bids.
+        Your listings and sales — Active ones are live to buyers and accepting
+        bids; Sold filter shows what's already moved.
       </p>
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -240,8 +241,13 @@ export default async function ListingHistoryPage({
                       {skuTitle(l.sku)}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 font-display font-black text-amber-400">
-                    {formatUSDFull(l.price)}
+                  <td className="px-4 py-3">
+                    <EditablePriceCell
+                      listingId={l.id}
+                      price={l.price}
+                      qty={l.qty}
+                      status={l.status}
+                    />
                   </td>
                   <td className="px-4 py-3 text-white/70">{l.qty}</td>
                   <td className="px-4 py-3">

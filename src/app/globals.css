@@ -50,6 +50,38 @@ body {
 }
 
 /*
+ * Native <select> dropdowns inherit OS-level styling for the popup. On
+ * our dark theme the closed select gets `text-white`, but when the
+ * dropdown opens the browser paints options on a system-default white
+ * background — white-on-white = invisible until you hover one row.
+ *
+ * Force every <option> in the app onto a dark slate background with
+ * white text so the popup is readable everywhere. !important is
+ * required on Windows Chrome — it ignores plain author CSS for
+ * <option> backgrounds because the popup renders in a separate native
+ * widget context. macOS Chrome respects plain author CSS, but using
+ * !important is harmless there and means one rule covers both.
+ *
+ * `select` itself also gets the colors so the popup window inherits
+ * them on browsers that pull from the parent rather than the option.
+ */
+select {
+  background-color: #0f172a;
+  color: #ffffff;
+}
+
+option {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+}
+
+option:checked,
+option:hover {
+  background-color: #1e293b !important; /* slate-800 — slight highlight */
+  color: #ffffff !important;
+}
+
+/*
  * Default keyboard-focus indicator for every interactive element. Many
  * buttons in the app explicitly remove the browser default with
  * `focus:outline-none` (or via Tailwind's `focus:ring-*` utilities) so we

@@ -12,8 +12,11 @@ const SPORT_TABS: { id: string; label: string }[] = [
   { id: "NBA", label: "NBA" },
   { id: "MLB", label: "MLB" },
   { id: "NFL", label: "NFL" },
-  { id: "NHL", label: "NHL" },
+  // NHL hidden until we're ready to seed listings — re-add the tab
+  // here when the catalog reopens. SKUs themselves are kept (just
+  // is_published=false) so this is a one-line revert.
   { id: "Soccer", label: "Soccer" },
+  { id: "Pokemon", label: "Pokemon" },
 ];
 
 /**
@@ -24,9 +27,14 @@ const SPORT_TABS: { id: string; label: string }[] = [
 async function loadYearsBySport(): Promise<Record<string, number[]>> {
   try {
     const supabase = await createClient();
+    // Only count years where at least one SKU is actually live —
+    // otherwise the dropdown surfaces years for SKUs we've hidden via
+    // the focus-catalog migration, which feels broken (clicking the
+    // year takes you to an empty grid).
     const { data } = await supabase
       .from("skus")
       .select("sport, year")
+      .eq("is_published", true)
       .order("year", { ascending: false });
     const out: Record<string, Set<number>> = {};
     for (const row of data ?? []) {
@@ -95,7 +103,13 @@ export async function SiteHeader() {
               key={s.id}
               sport={s.id}
               label={s.label}
-              years={yearsBySport[s.id] ?? []}
+              // Pokemon skips the year-sorted hover menu — clicking the
+              // tab goes straight to /?sport=Pokemon and shows every set.
+              // Pokemon collectors don't browse by year the way sports
+              // collectors do (sets are released ~quarterly under a
+              // single calendar) so the year facet adds noise without
+              // utility. Other sports keep their year drilldown.
+              years={s.id === "Pokemon" ? [] : yearsBySport[s.id] ?? []}
             />
           ))}
         </nav>

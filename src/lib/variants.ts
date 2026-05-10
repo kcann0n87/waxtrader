@@ -79,52 +79,31 @@ const VARIANT_ORDER: string[] = [
 ];
 
 /**
- * Visual grouping for the variant selector — three buckets so buyers
- * see a clean "single box vs case" decision instead of one long row of
- * chips. Order within each group still follows VARIANT_ORDER (cheapest
- * box configurations show first).
+ * Visual grouping for the variant selector — TWO buckets, single vs
+ * sealed case. Suffix-based so it works uniformly across sports
+ * (hobby-box → single, hobby-case → case) and Pokemon (booster-box,
+ * elite-trainer-box, booster-bundle, mini-tin → single; their *-case
+ * counterparts → case).
+ *
+ * Earlier version had a third "tcg" group which lumped all Pokemon
+ * variants together — meant Booster Box, ETB, and ETB Case all showed
+ * in one row instead of single-on-top, case-below.
  */
-export type VariantGroup = "box" | "case" | "tcg";
-
-const VARIANT_GROUP_MAP: Record<string, VariantGroup> = {
-  // Single boxes — all configs land in one group, the chip ordering
-  // (Blaster → Hanger → Mega → Hobby → FOTL → FDI → Jumbo) keeps the
-  // visual hierarchy from cheap retail to expensive hobby.
-  "blaster-box": "box",
-  "hanger-box": "box",
-  "mega-box": "box",
-  "hobby-box": "box",
-  "fotl-hobby-box": "box",
-  "first-day-issue-hobby-box": "box",
-  "jumbo-box": "box",
-  "hobby-jumbo-box": "box",
-  "first-day-issue-hobby-jumbo-box": "box",
-  // Sealed cases — same logic mirrored
-  "blaster-case": "case",
-  "hanger-case": "case",
-  "mega-case": "case",
-  "hobby-case": "case",
-  "fotl-hobby-case": "case",
-  "first-day-issue-hobby-case": "case",
-  "jumbo-case": "case",
-  "hobby-jumbo-case": "case",
-  "inner-case": "case",
-  // TCG (Pokemon, etc.) stays separate — different audience.
-  "booster-box": "tcg",
-  "elite-trainer-box": "tcg",
-  "booster-box-case": "tcg",
-  "elite-trainer-box-case": "tcg",
-};
+export type VariantGroup = "single" | "case";
 
 export const VARIANT_GROUP_LABEL: Record<VariantGroup, string> = {
-  box: "Single box",
+  single: "Single",
   case: "Sealed case",
-  tcg: "TCG",
 };
 
 export function variantGroupOf(type: string | null | undefined): VariantGroup {
-  if (!type) return "box";
-  return VARIANT_GROUP_MAP[type] ?? "box";
+  if (!type) return "single";
+  // Anything ending in -case (or the bare "case" / "inner-case" odd
+  // legacy values) groups under sealed case. Everything else is a
+  // single item, regardless of sport.
+  if (type === "case" || type === "inner-case") return "case";
+  if (type.endsWith("-case")) return "case";
+  return "single";
 }
 
 export function variantLabel(type: string | null | undefined): string {
@@ -149,4 +128,54 @@ export function sortByVariantOrder<T extends { variantType?: string | null }>(
       variantSortIndex(a.variantType ?? null) -
       variantSortIndex(b.variantType ?? null),
   );
+}
+
+/**
+ * Box ↔ Case pairing map. Used by the image-sync hook in
+ * src/app/actions/admin.ts: when an admin uploads or pastes an image
+ * for a Hobby Box, we mirror it to the Hobby Case (and vice versa)
+ * so a product page never has one variant with a real photo and the
+ * other showing a generic gradient.
+ *
+ * Mostly a swap of -box ↔ -case at the end of the slug, but a few
+ * special cases:
+ *   - booster-box ↔ booster-box-case (append -case, don't swap)
+ *   - elite-trainer-box ↔ elite-trainer-box-case (same)
+ *   - first-day-issue-hobby-jumbo-box has no case sibling (Topps
+ *     never made one — leave unmapped so we don't accidentally write
+ *     it to a non-existent SKU)
+ */
+const VARIANT_PAIR: Record<string, string> = {
+  "hobby-box": "hobby-case",
+  "hobby-case": "hobby-box",
+  "mega-box": "mega-case",
+  "mega-case": "mega-box",
+  "blaster-box": "blaster-case",
+  "blaster-case": "blaster-box",
+  "hanger-box": "hanger-case",
+  "hanger-case": "hanger-box",
+  "jumbo-box": "jumbo-case",
+  "jumbo-case": "jumbo-box",
+  "hobby-jumbo-box": "hobby-jumbo-case",
+  "hobby-jumbo-case": "hobby-jumbo-box",
+  "fotl-hobby-box": "fotl-hobby-case",
+  "fotl-hobby-case": "fotl-hobby-box",
+  "first-day-issue-hobby-box": "first-day-issue-hobby-case",
+  "first-day-issue-hobby-case": "first-day-issue-hobby-box",
+  "booster-box": "booster-box-case",
+  "booster-box-case": "booster-box",
+  "elite-trainer-box": "elite-trainer-box-case",
+  "elite-trainer-box-case": "elite-trainer-box",
+};
+
+/**
+ * Returns the matching variant_type for a box/case pair, or null if
+ * the variant has no canonical pair (Pokemon ETB-only products,
+ * one-off retail variants, etc.).
+ */
+export function pairedVariantType(
+  type: string | null | undefined,
+): string | null {
+  if (!type) return null;
+  return VARIANT_PAIR[type] ?? null;
 }
