@@ -335,13 +335,27 @@ export function SettingsClient({
         </ul>
       </Section>
 
-      <Section icon={<Star size={16} />} title="Linked accounts" subtitle="Optional integrations">
+      <Section
+        icon={<Star size={16} />}
+        title="One-tap checkout"
+        subtitle="Apple Pay · Google Pay · Cash App Pay"
+      >
         <div className="rounded-lg border border-white/10 bg-[#101012] p-4">
-          <div className="text-sm font-bold text-white">Apple Pay</div>
-          <div className="text-xs text-white/50">For one-tap checkout</div>
-          <button className="mt-2 rounded-md border border-white/15 bg-[#101012] px-3 py-1.5 text-xs font-semibold text-white/80 hover:bg-white/[0.02]">
-            Connect
-          </button>
+          <div className="text-sm font-semibold text-white">
+            Already on by default
+          </div>
+          <p className="mt-1.5 text-xs leading-relaxed text-white/60">
+            Apple Pay (iPhone, iPad, and Mac/Safari), Google Pay (Chrome
+            desktop and Android), and Cash App Pay all show up automatically
+            at checkout if your device + browser supports them and you have
+            a card on file. Nothing to set up on our side — Stripe handles
+            the wallet integration.
+          </p>
+          <p className="mt-2 text-[11px] text-white/40">
+            Don&apos;t see the button at checkout? You&apos;re probably on a
+            browser that doesn&apos;t support that wallet (Firefox + Apple
+            Pay, for example). Card entry still works on every browser.
+          </p>
         </div>
       </Section>
 
