@@ -204,6 +204,82 @@ const SECTIONS: Section[] = [
         q: "What happens if there's a chargeback?",
         a: "We aggressively defend chargebacks on legitimate sales using carrier tracking + signature confirmation as evidence. If the dispute happened within our normal window, the buyer should have used the dispute process; chargebacks attempting to bypass it are likely to be reversed.",
       },
+      {
+        q: "What evidence does WaxDepot collect to defend chargebacks?",
+        a: (
+          <>
+            Every order builds a chargeback-defense file automatically:
+            <ul className="mt-2 ml-4 list-disc space-y-1 text-sm text-white/70">
+              <li>
+                <strong className="text-white">Stripe Checkout receipt</strong>{" "}
+                — buyer&apos;s name, email, billing address (AVS-verified), card
+                last 4, IP at time of payment
+              </li>
+              <li>
+                <strong className="text-white">Carrier tracking event log</strong>{" "}
+                — every scan from accepted → in transit → delivered, pulled
+                directly from USPS / UPS / FedEx
+              </li>
+              <li>
+                <strong className="text-white">Buyer&apos;s explicit confirmation</strong>{" "}
+                — when the buyer clicks &quot;Yes, release funds,&quot; we capture
+                the timestamp, their IP address, and the device user-agent.
+                That action is a legal acknowledgment that they received the
+                box sealed and are accepting the goods
+              </li>
+              <li>
+                <strong className="text-white">Order communication history</strong>{" "}
+                — every message between buyer and seller in the order thread
+              </li>
+              <li>
+                <strong className="text-white">Photo proof at packing</strong>{" "}
+                (recommended) — sellers who photograph the sealed box and
+                shipping label before drop-off win disputes at significantly
+                higher rates
+              </li>
+            </ul>
+            <span className="mt-3 block text-xs text-white/50">
+              For orders over $500, we automatically require signature
+              confirmation at delivery. Carrier signature + buyer&apos;s
+              explicit confirmation makes it nearly impossible for a
+              fraudulent &quot;item not received&quot; chargeback to succeed.
+            </span>
+          </>
+        ),
+      },
+      {
+        q: "What does clicking 'Yes, release funds' actually do?",
+        a: "It's a legally binding acknowledgment that you received the box sealed and are satisfied with the order. We capture the timestamp, your IP address, and your device fingerprint at the moment of the click. That record becomes the cornerstone of our chargeback defense — Stripe and the issuing bank both treat 'authenticated user explicitly confirmed receipt' as definitive proof against 'item not received' claims. If something is actually wrong with the box, open a dispute instead of confirming — confirming locks in your acceptance and you can no longer claim the box arrived broken/resealed/etc.",
+      },
+      {
+        q: "What should sellers do to bulletproof their case?",
+        a: (
+          <>
+            Three habits separate sellers who lose disputes from sellers who
+            don&apos;t:
+            <ol className="mt-2 ml-4 list-decimal space-y-1 text-sm text-white/70">
+              <li>
+                <strong className="text-white">Photograph the box and label</strong>{" "}
+                before dropping off at the carrier — proves you shipped the
+                exact item, sealed, with the buyer&apos;s correct shipping
+                address visible on the label
+              </li>
+              <li>
+                <strong className="text-white">Use signature confirmation</strong>{" "}
+                on any order over $500. WaxDepot requires it automatically;
+                even on smaller orders it&apos;s worth the extra few dollars
+                for high-value boxes
+              </li>
+              <li>
+                <strong className="text-white">Keep order messages on-platform</strong>{" "}
+                — don&apos;t take communication to text or DM. Anything
+                in the WaxDepot order thread is admissible as evidence; off-
+                platform conversation isn&apos;t
+              </li>
+            </ol>
+          </>
+        ),
+      },
     ],
   },
   {

@@ -314,10 +314,11 @@ export function SettingsClient({
             </li>
           ))}
         </ul>
-        <button className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-dashed border-white/15 px-3 py-2 text-sm font-semibold text-white/80 hover:border-white/30 hover:bg-white/[0.02]">
-          <Plus size={14} />
-          Add address
-        </button>
+        <div className="mt-3 rounded-md border border-dashed border-white/15 bg-white/[0.02] px-3 py-2.5 text-xs text-white/60">
+          Shipping address is collected at checkout for each order. Saved
+          addresses on your profile are coming soon — for now, your most
+          recent shipping address auto-fills the next checkout.
+        </div>
       </Section>
 
       <Section
@@ -363,10 +364,12 @@ export function SettingsClient({
             </li>
           ))}
         </ul>
-        <button className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-dashed border-white/15 px-3 py-2 text-sm font-semibold text-white/80 hover:border-white/30 hover:bg-white/[0.02]">
-          <Plus size={14} />
-          Add card
-        </button>
+        <div className="mt-3 rounded-md border border-dashed border-white/15 bg-white/[0.02] px-3 py-2.5 text-xs text-white/60">
+          Payment cards are entered securely at Stripe checkout for each
+          order — WaxDepot never stores card numbers directly. Stripe
+          remembers your card automatically when you opt in at checkout, so
+          repeat purchases on the same browser are one click.
+        </div>
       </Section>
 
       <Section icon={<Bell size={16} />} title="Email notifications" subtitle="What we send to your inbox. In-app bell stays on regardless.">

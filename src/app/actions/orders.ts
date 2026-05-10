@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { serviceRoleClient } from "@/lib/supabase/admin";
 import { stripe } from "@/lib/stripe";
@@ -568,6 +569,19 @@ export async function confirmDelivery(formData: FormData): Promise<ActionResult>
     // Stripe-related profile read. Ownership was just validated.
     const admin = serviceRoleClient();
 
+    // Capture chargeback-defense evidence at the moment of buyer
+    // confirmation — IP and user-agent prove the authenticated buyer
+    // explicitly acknowledged receipt at a known time and location.
+    // Stripe's dispute-resolution flow weighs this heavily for
+    // "merchandise not received" claims.
+    const hdr = await headers();
+    const forwardedFor = hdr.get("x-forwarded-for");
+    const confirmIp =
+      forwardedFor?.split(",")[0]?.trim() ||
+      hdr.get("x-real-ip") ||
+      null;
+    const confirmUa = hdr.get("user-agent") || null;
+
     const now = new Date().toISOString();
     const { error } = await admin
       .from("orders")
@@ -575,6 +589,9 @@ export async function confirmDelivery(formData: FormData): Promise<ActionResult>
         status: "Released",
         delivered_at: order.status === "Delivered" ? undefined : now,
         released_at: now,
+        confirmed_at: now,
+        confirmed_ip: confirmIp,
+        confirmed_user_agent: confirmUa,
       })
       .eq("id", orderId);
     if (error) throw error;
