@@ -207,10 +207,29 @@ export default async function ProductPage({
         <Link href={`/?sport=${sku.sport}`} className="hover:text-white">
           {sku.sport}
         </Link>
+        {/* Skip the brand crumb when it duplicates the sport — Pokemon
+            has brand=sport="Pokemon" so "All > Pokemon > Pokemon" was
+            redundant. For sports, brand and sport differ (Topps vs.
+            NFL) so both crumbs add real signal. Brand links to a search
+            scoped by name; the search page handles brand-as-text. */}
+        {sku.brand !== sku.sport && (
+          <>
+            <ChevronRight size={12} />
+            <Link
+              href={`/search?q=${encodeURIComponent(sku.brand)}`}
+              className="hover:text-white"
+            >
+              {sku.brand}
+            </Link>
+          </>
+        )}
         <ChevronRight size={12} />
-        <span className="text-white/60">{sku.brand}</span>
-        <ChevronRight size={12} />
-        <span className="text-white">{sku.set}</span>
+        <Link
+          href={`/search?q=${encodeURIComponent(sku.set)}`}
+          className="text-white hover:text-amber-300"
+        >
+          {sku.set}
+        </Link>
       </nav>
 
       {isPresale(sku.releaseDate) && <PresaleBanner releaseDate={sku.releaseDate} />}
