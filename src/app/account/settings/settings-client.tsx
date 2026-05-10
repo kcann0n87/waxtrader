@@ -28,6 +28,11 @@ import {
   deleteAddress,
   setDefaultAddress,
 } from "../../actions/addresses";
+import {
+  createCardSetupSession,
+  deleteSavedCard,
+  setDefaultSavedCard,
+} from "../../actions/payment-methods";
 
 type NotifPrefs = {
   order_emails: boolean;
@@ -37,7 +42,14 @@ type NotifPrefs = {
   marketing_emails: boolean;
 };
 
-type CardOnFile = { id: string; brand: string; last4: string; exp: string; isDefault: boolean };
+type CardOnFile = {
+  id: string;
+  brand: string;
+  last4: string;
+  expMonth: number;
+  expYear: number;
+  isDefault: boolean;
+};
 type Address = {
   id: string;
   name: string;
@@ -53,12 +65,14 @@ export function SettingsClient({
   initialUsername,
   email,
   initialAddresses,
+  initialCards,
   initialPrefs,
 }: {
   initialDisplayName: string;
   initialUsername: string;
   email: string;
   initialAddresses: Address[];
+  initialCards: CardOnFile[];
   initialPrefs: NotifPrefs;
 }) {
   const [addresses, setAddresses] = useState<Address[]>(initialAddresses);
@@ -283,12 +297,7 @@ export function SettingsClient({
         subtitle="Cards on file"
         right={<Lock size={11} className="text-white/60" />}
       >
-        <div className="rounded-md border border-dashed border-white/15 bg-white/[0.02] px-3 py-2.5 text-xs text-white/60">
-          Payment cards are entered securely at Stripe checkout for each
-          order — WaxDepot never stores card numbers directly. Stripe
-          remembers your card automatically when you opt in at checkout, so
-          repeat purchases on the same browser are one click.
-        </div>
+        <CardManager initialCards={initialCards} />
       </Section>
 
       <Section icon={<Bell size={16} />} title="Email notifications" subtitle="What we send to your inbox. In-app bell stays on regardless.">
@@ -718,3 +727,132 @@ function AddressManager({
     </>
   );
 }
+
+/**
+ * Saved cards list + Add Card button. Cards live on the user's
+ * Stripe Customer object — we never store card data, just retrieve
+ * brand/last4/exp from Stripe at render time.
+ *
+ * Add flow: click Add Card → server creates a Stripe Checkout
+ * session in mode='setup' → redirect to Stripe → user enters card →
+ * Stripe attaches it to the Customer + redirects back here.
+ */
+function CardManager({ initialCards }: { initialCards: CardOnFile[] }) {
+  const router = useRouter();
+  const [cards, setCards] = useState<CardOnFile[]>(initialCards);
+  const [pending, start] = useTransition();
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCards(initialCards);
+  }, [initialCards]);
+
+  const addCard = () => {
+    setErr(null);
+    start(async () => {
+      const res = await createCardSetupSession();
+      if (res.error) {
+        setErr(res.error);
+        return;
+      }
+      if (res.url) window.location.href = res.url;
+    });
+  };
+
+  const remove = (id: string) => {
+    setErr(null);
+    start(async () => {
+      const res = await deleteSavedCard(id);
+      if (res.error) {
+        setErr(res.error);
+        return;
+      }
+      setCards((arr) => arr.filter((c) => c.id !== id));
+      router.refresh();
+    });
+  };
+
+  const setDefault = (id: string) => {
+    setErr(null);
+    start(async () => {
+      const res = await setDefaultSavedCard(id);
+      if (res.error) {
+        setErr(res.error);
+        return;
+      }
+      setCards((arr) => arr.map((c) => ({ ...c, isDefault: c.id === id })));
+      router.refresh();
+    });
+  };
+
+  const fmtExp = (m: number, y: number) =>
+    `${String(m).padStart(2, '0')}/${String(y).slice(-2)}`;
+
+  return (
+    <>
+      {cards.length > 0 ? (
+        <ul className="divide-y divide-white/5 rounded-lg border border-white/10">
+          {cards.map((c) => (
+            <li key={c.id} className="flex items-center gap-3 px-4 py-3">
+              <div className="flex h-8 w-12 shrink-0 items-center justify-center rounded bg-slate-900 text-[10px] font-bold uppercase text-white">
+                {c.brand.slice(0, 4)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 text-sm font-bold text-white">
+                  {c.brand.charAt(0).toUpperCase() + c.brand.slice(1)} •••{c.last4}
+                  {c.isDefault && (
+                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+                      DEFAULT
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs text-white/50">Expires {fmtExp(c.expMonth, c.expYear)}</div>
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                {!c.isDefault && (
+                  <button
+                    onClick={() => setDefault(c.id)}
+                    disabled={pending}
+                    className="rounded-md px-2 py-1 text-xs font-semibold text-amber-300 hover:bg-amber-500/10 disabled:opacity-50"
+                  >
+                    Set default
+                  </button>
+                )}
+                <button
+                  onClick={() => remove(c.id)}
+                  disabled={pending}
+                  className="rounded-md p-1.5 text-white/60 hover:bg-rose-500/10 hover:text-rose-400 disabled:opacity-50"
+                  aria-label="Remove card"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="rounded-md border border-dashed border-white/10 bg-white/[0.02] px-3 py-4 text-center text-xs text-white/50">
+          No saved cards. Add one for one-click checkout — Stripe handles all
+          card storage; WaxDepot never sees full card numbers.
+        </div>
+      )}
+
+      {err && (
+        <div className="mt-3 rounded-md border border-rose-700/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+          {err}
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={addCard}
+        disabled={pending}
+        className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-dashed border-white/15 px-3 py-2 text-sm font-semibold text-white/80 hover:border-white/30 hover:bg-white/[0.02] disabled:opacity-50"
+      >
+        {pending ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+        {pending ? 'Opening Stripe…' : 'Add a card'}
+      </button>
+    </>
+  );
+}
+

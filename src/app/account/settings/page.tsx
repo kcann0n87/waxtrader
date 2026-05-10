@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getProfile, getUser } from "@/lib/supabase/user";
 import { createClient } from "@/lib/supabase/server";
+import { listSavedCards } from "@/app/actions/payment-methods";
 import { SettingsClient } from "./settings-client";
 
 export default async function SettingsPage() {
@@ -13,19 +14,22 @@ export default async function SettingsPage() {
   // notification_prefs is on profiles too — fetch separately rather than
   // bloating getProfile() which is used in many places that don't need it.
   const supabase = await createClient();
-  const [{ data: prefRow }, { data: addressRows }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("notification_prefs")
-      .eq("id", user.id)
-      .maybeSingle(),
-    supabase
-      .from("user_addresses")
-      .select("id, name, addr1, city, state, zip, is_default")
-      .eq("user_id", user.id)
-      .order("is_default", { ascending: false })
-      .order("created_at", { ascending: false }),
-  ]);
+  const [{ data: prefRow }, { data: addressRows }, cardsRes] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("notification_prefs")
+        .eq("id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("user_addresses")
+        .select("id, name, addr1, city, state, zip, is_default")
+        .eq("user_id", user.id)
+        .order("is_default", { ascending: false })
+        .order("created_at", { ascending: false }),
+      listSavedCards(),
+    ]);
+  const cards = cardsRes.cards ?? [];
   const prefs = (prefRow?.notification_prefs ?? {}) as Record<string, boolean>;
 
   const addresses = (addressRows ?? []).map((a) => ({
@@ -44,6 +48,7 @@ export default async function SettingsPage() {
       initialUsername={profile?.username ?? ""}
       email={user.email ?? ""}
       initialAddresses={addresses}
+      initialCards={cards}
       initialPrefs={{
         order_emails: prefs.order_emails !== false,
         bid_emails: prefs.bid_emails !== false,

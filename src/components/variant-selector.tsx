@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   DndContext,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   closestCenter,
@@ -137,10 +138,14 @@ function VariantRow({
     setItems(initial);
   }, [initial, dirty]);
 
-  // 6px activation distance — same as the homepage drag-drop. Keeps
-  // a click-on-chip from accidentally starting a drag.
+  // PointerSensor for mouse, TouchSensor for mobile. 6px / 250ms
+  // activation thresholds prevent accidental drags from clicking or
+  // tapping a chip to navigate.
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 8 },
+    }),
   );
 
   const onDragEnd = (e: DragEndEvent) => {
@@ -287,7 +292,10 @@ function SortableChip({
         type="button"
         {...attributes}
         {...listeners}
-        className="pointer-events-none absolute top-0 left-0 z-10 inline-flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center rounded-full border border-sky-700/40 bg-sky-500/20 text-sky-200 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100 hover:scale-110 active:cursor-grabbing"
+        // 60% opacity by default (visible enough to discover on touch
+        // devices where there's no hover), 100% on hover. Touch users
+        // see + can grab; mouse users get the same affordance.
+        className="absolute top-0 left-0 z-10 inline-flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center rounded-full border border-sky-700/40 bg-sky-500/20 text-sky-200 opacity-60 transition hover:scale-110 hover:opacity-100 active:cursor-grabbing"
         title="Drag to reorder"
         aria-label="Drag handle"
       >
