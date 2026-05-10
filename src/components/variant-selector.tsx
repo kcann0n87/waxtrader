@@ -263,24 +263,31 @@ function SortableChip({
     isDragging,
   } = useSortable({ id: variant.skuId });
 
-  const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.4 : 1,
-    zIndex: isDragging ? 30 : undefined,
-  };
+  // Only apply transform when actively dragging or animating into a
+  // new position. Setting `transform: undefined` on idle chips
+  // avoids creating a stacking context that Chrome's subpixel
+  // rounding renders inconsistently — was making chip borders look
+  // half-clipped when they had no transform applied.
+  const style: React.CSSProperties = transform
+    ? {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.4 : 1,
+        zIndex: isDragging ? 30 : 1,
+      }
+    : {};
 
   return (
-    <div ref={setNodeRef} style={style} className="group relative">
+    <div ref={setNodeRef} style={style} className="group relative inline-block">
       <VariantChip groupSlug={groupSlug} variant={variant} active={active} />
-      {/* Small grip handle — appears on hover. Lives in the top-left
-          corner of the chip; drag from here so clicks anywhere else
-          on the chip still navigate via the link. */}
+      {/* Small grip handle — invisible until hover. Positioned just
+          above the chip's top-left corner. The button only renders
+          its own content; no background container artifact. */}
       <button
         type="button"
         {...attributes}
         {...listeners}
-        className="absolute -top-1.5 -left-1.5 z-10 inline-flex h-5 w-5 cursor-grab items-center justify-center rounded-full border border-sky-700/40 bg-sky-500/20 text-sky-200 opacity-0 transition group-hover:opacity-100 hover:scale-110 active:cursor-grabbing"
+        className="pointer-events-none absolute top-0 left-0 z-10 inline-flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center rounded-full border border-sky-700/40 bg-sky-500/20 text-sky-200 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100 hover:scale-110 active:cursor-grabbing"
         title="Drag to reorder"
         aria-label="Drag handle"
       >
