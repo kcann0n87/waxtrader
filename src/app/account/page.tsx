@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatUSD, formatUSDFull } from "@/lib/utils";
+import { EditablePriceCell } from "./listings/editable-price-cell";
 
 type DbOrderStatus =
   | "Charged"
@@ -465,8 +466,13 @@ export default async function AccountPage() {
                         {skuTitleFromJoin(l.sku)}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 font-display font-black text-amber-400">
-                      {formatUSDFull(l.price)}
+                    <td className="px-4 py-3">
+                      <EditablePriceCell
+                        listingId={l.id}
+                        price={l.price}
+                        qty={l.qty}
+                        status={l.status}
+                      />
                     </td>
                     <td className="px-4 py-3 text-white/50">{l.qty}</td>
                     <td className="px-4 py-3 text-white/50">{formatShort(l.listed)}</td>

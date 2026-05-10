@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, Box, DollarSign, Package } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { formatUSD, formatUSDFull } from "@/lib/utils";
+import { formatUSD } from "@/lib/utils";
+import { EditablePriceCell } from "./editable-price-cell";
 
 export const dynamic = "force-dynamic";
 
@@ -240,8 +241,13 @@ export default async function ListingHistoryPage({
                       {skuTitle(l.sku)}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 font-display font-black text-amber-400">
-                    {formatUSDFull(l.price)}
+                  <td className="px-4 py-3">
+                    <EditablePriceCell
+                      listingId={l.id}
+                      price={l.price}
+                      qty={l.qty}
+                      status={l.status}
+                    />
                   </td>
                   <td className="px-4 py-3 text-white/70">{l.qty}</td>
                   <td className="px-4 py-3">
