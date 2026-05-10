@@ -252,6 +252,7 @@ export function SkuForm({
             onChange={(e) => set("product", e.target.value)}
             className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
           >
+            {/* Sports variants */}
             <option>Hobby Box</option>
             <option>FOTL Hobby Box</option>
             <option>First Day Issue Hobby Box</option>
@@ -259,13 +260,34 @@ export function SkuForm({
             <option>Mega Box</option>
             <option>Blaster Box</option>
             <option>Hanger Box</option>
-            <option>Booster Box</option>
-            <option>Elite Trainer Box</option>
             <option>Hobby Case</option>
             <option>Mega Case</option>
             <option>Blaster Case</option>
             <option>Jumbo Case</option>
             <option>Inner Case</option>
+            {/* Pokemon variants */}
+            <option>Booster Box</option>
+            <option>Booster Box Case</option>
+            <option>Booster Bundle</option>
+            <option>Booster Bundle Case</option>
+            <option>Booster Bundle Display</option>
+            <option>Elite Trainer Box</option>
+            <option>Elite Trainer Box Case</option>
+            <option>Pokemon Center Elite Trainer Box</option>
+            <option>Pokemon Center Elite Trainer Box Case</option>
+            <option>Premium Collection</option>
+            <option>Ultra-Premium Collection</option>
+            <option>Binder Collection</option>
+            <option>Binder Collection Case</option>
+            <option>Sticker Collection</option>
+            <option>Tech Sticker Collection</option>
+            <option>Mini Tin</option>
+            <option>Mini Tin Display</option>
+            <option>Mini Tin Display Case</option>
+            <option>3-Pack Blister</option>
+            <option>Build & Battle Box Display</option>
+            <option>Mega ex Box</option>
+            <option>Premium Poster Collection</option>
           </select>
         </Field>
       </div>
