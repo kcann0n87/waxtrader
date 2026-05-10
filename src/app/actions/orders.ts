@@ -266,6 +266,10 @@ export async function markShipped(formData: FormData): Promise<ActionResult> {
   const orderId = String(formData.get("orderId") || "").trim();
   const carrier = String(formData.get("carrier") || "").trim();
   const tracking = String(formData.get("tracking") || "").trim();
+  // Optional packing photo. We accept JPG/PNG/WebP up to 8MB —
+  // chargeback-defense evidence works at modest resolution; no need
+  // for 20MB DSLR shots eating Storage budget.
+  const photo = formData.get("photo");
 
   if (!orderId) return { error: "Missing order id." };
   if (!carrier) return { error: "Pick a carrier." };
@@ -297,6 +301,46 @@ export async function markShipped(formData: FormData): Promise<ActionResult> {
     // notification _for the buyer_ (different user_id).
     const admin = serviceRoleClient();
 
+    // Upload optional packing photo to Supabase Storage. Path scoped
+    // by order id so it's auditable + traceable. We don't fail the
+    // whole shipment on photo upload error — tracking + carrier are
+    // the legal essentials, photo is a bonus.
+    let photoUrl: string | null = null;
+    if (photo instanceof File && photo.size > 0) {
+      const allowed = new Map<string, string>([
+        ["image/jpeg", "jpg"],
+        ["image/png", "png"],
+        ["image/webp", "webp"],
+      ]);
+      const ext = allowed.get(photo.type);
+      if (!ext) {
+        return { error: "Photo must be JPG, PNG, or WebP." };
+      }
+      if (photo.size > 8 * 1024 * 1024) {
+        return { error: "Photo must be 8MB or smaller." };
+      }
+      const stamp = Date.now().toString(36);
+      const path = `${orderId}/${stamp}.${ext}`;
+      const buffer = Buffer.from(await photo.arrayBuffer());
+      const { error: uploadErr } = await admin.storage
+        .from("shipped-photos")
+        .upload(path, buffer, {
+          contentType: photo.type,
+          upsert: true,
+          cacheControl: "31536000",
+        });
+      if (uploadErr) {
+        console.error("markShipped photo upload failed:", uploadErr);
+        // Non-fatal — proceed without photo rather than block the
+        // shipment. Seller can attach later via Update tracking.
+      } else {
+        const { data: pub } = admin.storage
+          .from("shipped-photos")
+          .getPublicUrl(path);
+        photoUrl = pub.publicUrl ?? null;
+      }
+    }
+
     const now = new Date().toISOString();
     const { error } = await admin
       .from("orders")
@@ -305,6 +349,7 @@ export async function markShipped(formData: FormData): Promise<ActionResult> {
         carrier,
         tracking,
         shipped_at: now,
+        ...(photoUrl ? { shipped_photo_url: photoUrl } : {}),
       })
       .eq("id", orderId);
     if (error) throw error;

@@ -49,6 +49,7 @@ type OrderRow = {
   status: OrderStatus;
   carrier: string | null;
   tracking: string | null;
+  shipped_photo_url: string | null;
   estimated_delivery: string | null;
   ship_to_name: string;
   ship_to_addr1: string;
@@ -536,6 +537,30 @@ export default async function OrderDetailPage({
                 <div className="mt-3 flex items-center gap-1.5 text-xs text-white/60">
                   <Clock size={12} className="text-white/60" />
                   Est. delivery {formatDate(order.estimated_delivery)}
+                </div>
+              )}
+              {order.shipped_photo_url && (
+                <div className="mt-4 border-t border-white/10 pt-4">
+                  <div className="mb-2 text-[10px] font-semibold tracking-[0.15em] text-white/60 uppercase">
+                    Packing photo
+                  </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <a
+                    href={order.shipped_photo_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Open full size"
+                  >
+                    <img
+                      src={order.shipped_photo_url}
+                      alt="Sealed box at shipment"
+                      className="w-full max-w-xs rounded-md border border-white/10"
+                    />
+                  </a>
+                  <p className="mt-2 text-[11px] text-white/50">
+                    Captured by the seller at drop-off. Click to view full
+                    size.
+                  </p>
                 </div>
               )}
             </div>
