@@ -500,13 +500,24 @@ function collapseToVariantGroups(skus: FilteredSku[], now: Date): CollapsedRelea
       0,
     );
 
-    // Pick the representative SKU.
+    // Pick the representative SKU. Priority:
+    //   1. Whichever variant has the lowest variant_sort — i.e. the
+    //      one the admin dragged to "first" in the variant selector.
+    //      This means dragging a chip to position 1 also promotes its
+    //      image to the homepage card. One control, two behaviors.
+    //   2. The hobby-box variant if any (sports default — what admins
+    //      typically upload art to first).
+    //   3. The cheapest variant with a real listing.
+    //   4. Alphabetical fallback for stability.
+    const manuallyRanked = group
+      .filter((g) => g.variantSort !== null && g.variantSort !== undefined)
+      .sort((a, b) => (a.variantSort ?? 0) - (b.variantSort ?? 0))[0];
     const hobbyBox = group.find((g) => g.variantType === "hobby-box");
     const cheapest = group
       .filter((g) => g.lowestAsk !== null)
       .sort((a, b) => (a.lowestAsk ?? 0) - (b.lowestAsk ?? 0))[0];
     const fallback = [...group].sort((a, b) => a.id.localeCompare(b.id))[0];
-    const representative = hobbyBox ?? cheapest ?? fallback;
+    const representative = manuallyRanked ?? hobbyBox ?? cheapest ?? fallback;
 
     out.push({
       sku: representative,
