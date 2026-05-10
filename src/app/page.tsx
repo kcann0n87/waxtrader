@@ -165,19 +165,21 @@ export default async function Home({
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_110%,rgba(124,58,237,0.12),transparent_50%)]" />
           <div className="relative mx-auto max-w-7xl px-6 py-20 lg:py-28">
             <div className="max-w-3xl">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-white/70 uppercase backdrop-blur">
-                <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-br from-amber-400 to-amber-600" />
-                Sealed Sports Cards · Est. 2026
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-medium tracking-[0.18em] text-emerald-200 uppercase backdrop-blur">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                Live · Buyer protection on every order
               </div>
               <h1 className="font-display text-5xl leading-[1.05] font-black tracking-tight text-white lg:text-7xl">
-                Sealed{" "}
-                <span className="italic text-amber-400">sports</span> wax.
+                Sealed wax.
                 <br />
-                Bought right. Sold right.
+                <span className="italic text-amber-400">Real prices.</span>
+                <br />
+                Zero eBay tax.
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/70">
-                Pay what the market actually pays. Sell without the eBay tax. Every box
-                arrives sealed — or your money back, no questions.
+                A live marketplace for sealed sports + Pokemon boxes. Bid below
+                ask, buy at the spot, or list yours and get paid faster. Every
+                order held in escrow until you confirm the box arrived sealed.
               </p>
               <div className="mt-10 flex flex-wrap gap-3">
                 <Link
@@ -190,8 +192,24 @@ export default async function Home({
                   href="/sell"
                   className="rounded-md border border-white/15 px-5 py-3 text-sm font-semibold text-white/90 transition hover:border-white/30 hover:bg-white/5"
                 >
-                  List a box →
+                  Sell yours →
                 </Link>
+              </div>
+              {/* Trust strip — three quick proof points so first-time
+                  visitors don't bounce off "is this site legit." */}
+              <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-semibold tracking-wide text-white/50 uppercase">
+                <span className="inline-flex items-center gap-1.5">
+                  <ShieldCheck size={12} className="text-emerald-400" />
+                  Stripe escrow
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Sparkles size={12} className="text-amber-400" />
+                  No buyer fees
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Star size={12} className="text-amber-400" />
+                  Sealed guarantee
+                </span>
               </div>
             </div>
           </div>

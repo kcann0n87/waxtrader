@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   DndContext,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   closestCenter,
@@ -70,11 +71,16 @@ export function SortableProductGrid({
     setItems(initialItems);
   }, [initialItems, dirty]);
 
-  // PointerSensor with a small activation distance so a click on a
-  // card link doesn't accidentally start a drag. 6px is the standard
-  // dnd-kit recommendation for "intent to drag".
+  // PointerSensor (mouse + Apple Pencil) + TouchSensor (mobile) so
+  // drag works on every input. Activation thresholds keep a tap/
+  // click on a card link from accidentally starting a drag — 6px on
+  // pointer, and a 250ms hold on touch since taps are inherently
+  // imprecise vs. mouse clicks.
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 8 },
+    }),
   );
 
   if (!isAdmin) {

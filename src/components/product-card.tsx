@@ -121,18 +121,38 @@ export function ProductCard({
             : `${sku.sport} · ${sku.brand}`}
         </div>
         <div className="mt-3 flex items-end justify-between">
-          <div>
-            <div className="text-[10px] font-semibold tracking-[0.15em] text-white/60 uppercase">
-              {lowestAsk !== null
-                ? isMultiVariant
-                  ? "From"
-                  : "Lowest Ask"
-                : "Last Sale"}
+          {lowestAsk !== null ? (
+            <div>
+              <div className="text-[10px] font-semibold tracking-[0.15em] text-white/60 uppercase">
+                {isMultiVariant ? "From" : "Lowest Ask"}
+              </div>
+              <div className="font-display text-lg font-black tracking-tight text-amber-400">
+                {formatUSD(lowestAsk)}
+              </div>
             </div>
-            <div className="font-display text-lg font-black tracking-tight text-amber-400">
-              {lowestAsk !== null ? formatUSD(lowestAsk) : lastSale !== null ? formatUSD(lastSale) : "—"}
+          ) : lastSale !== null ? (
+            <div>
+              <div className="text-[10px] font-semibold tracking-[0.15em] text-white/60 uppercase">
+                Last Sale
+              </div>
+              <div className="font-display text-lg font-black tracking-tight text-amber-400">
+                {formatUSD(lastSale)}
+              </div>
             </div>
-          </div>
+          ) : (
+            // Empty state: no listings AND no past sales. Replace the
+            // bare "—" with a soft CTA so the first visitor understands
+            // they can BE the first seller. Cleaner than "no listings"
+            // which reads as broken.
+            <div>
+              <div className="text-[10px] font-semibold tracking-[0.15em] text-emerald-300/80 uppercase">
+                Be first
+              </div>
+              <div className="text-xs font-semibold text-white/70">
+                Set the price →
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </Link>
