@@ -147,7 +147,7 @@ export async function AuthMenu() {
               one click away instead of buried under "see all" links on
               the dashboard. */}
           <Item href="/account/orders" icon={<Package size={14} />} label="Orders" />
-          <Item href="/account/listings" icon={<Tag size={14} />} label="Listings" />
+          <Item href="/account/listings" icon={<Tag size={14} />} label="Selling" />
           <Item href="/account/bids" icon={<Gavel size={14} />} label="Bids" />
           <Item href="/account/messages" icon={<MessageCircle size={14} />} label="Messages" />
           <Item href="/account/watchlist" icon={<Heart size={14} />} label="Watchlist" />

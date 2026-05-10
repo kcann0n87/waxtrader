@@ -124,11 +124,11 @@ export default async function ListingHistoryPage({
         Back to dashboard
       </Link>
       <h1 className="font-display text-3xl font-black tracking-tight text-white sm:text-4xl">
-        Your listings
+        Selling
       </h1>
       <p className="mt-1 text-sm text-white/50">
-        Boxes you&apos;ve put on the order book. Active ones are visible to buyers
-        and accepting bids.
+        Your listings and sales — Active ones are live to buyers and accepting
+        bids; Sold filter shows what's already moved.
       </p>
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">

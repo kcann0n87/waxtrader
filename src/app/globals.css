@@ -56,13 +56,29 @@ body {
  * background — white-on-white = invisible until you hover one row.
  *
  * Force every <option> in the app onto a dark slate background with
- * white text so the popup is readable everywhere (admin SKU form,
- * filter bars, role/tier dropdowns, etc.) without patching each call
- * site individually.
+ * white text so the popup is readable everywhere. !important is
+ * required on Windows Chrome — it ignores plain author CSS for
+ * <option> backgrounds because the popup renders in a separate native
+ * widget context. macOS Chrome respects plain author CSS, but using
+ * !important is harmless there and means one rule covers both.
+ *
+ * `select` itself also gets the colors so the popup window inherits
+ * them on browsers that pull from the parent rather than the option.
  */
-option {
-  background-color: #0f172a; /* slate-900 */
+select {
+  background-color: #0f172a;
   color: #ffffff;
+}
+
+option {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+}
+
+option:checked,
+option:hover {
+  background-color: #1e293b !important; /* slate-800 — slight highlight */
+  color: #ffffff !important;
 }
 
 /*
