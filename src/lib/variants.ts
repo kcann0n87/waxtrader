@@ -79,52 +79,31 @@ const VARIANT_ORDER: string[] = [
 ];
 
 /**
- * Visual grouping for the variant selector — three buckets so buyers
- * see a clean "single box vs case" decision instead of one long row of
- * chips. Order within each group still follows VARIANT_ORDER (cheapest
- * box configurations show first).
+ * Visual grouping for the variant selector — TWO buckets, single vs
+ * sealed case. Suffix-based so it works uniformly across sports
+ * (hobby-box → single, hobby-case → case) and Pokemon (booster-box,
+ * elite-trainer-box, booster-bundle, mini-tin → single; their *-case
+ * counterparts → case).
+ *
+ * Earlier version had a third "tcg" group which lumped all Pokemon
+ * variants together — meant Booster Box, ETB, and ETB Case all showed
+ * in one row instead of single-on-top, case-below.
  */
-export type VariantGroup = "box" | "case" | "tcg";
-
-const VARIANT_GROUP_MAP: Record<string, VariantGroup> = {
-  // Single boxes — all configs land in one group, the chip ordering
-  // (Blaster → Hanger → Mega → Hobby → FOTL → FDI → Jumbo) keeps the
-  // visual hierarchy from cheap retail to expensive hobby.
-  "blaster-box": "box",
-  "hanger-box": "box",
-  "mega-box": "box",
-  "hobby-box": "box",
-  "fotl-hobby-box": "box",
-  "first-day-issue-hobby-box": "box",
-  "jumbo-box": "box",
-  "hobby-jumbo-box": "box",
-  "first-day-issue-hobby-jumbo-box": "box",
-  // Sealed cases — same logic mirrored
-  "blaster-case": "case",
-  "hanger-case": "case",
-  "mega-case": "case",
-  "hobby-case": "case",
-  "fotl-hobby-case": "case",
-  "first-day-issue-hobby-case": "case",
-  "jumbo-case": "case",
-  "hobby-jumbo-case": "case",
-  "inner-case": "case",
-  // TCG (Pokemon, etc.) stays separate — different audience.
-  "booster-box": "tcg",
-  "elite-trainer-box": "tcg",
-  "booster-box-case": "tcg",
-  "elite-trainer-box-case": "tcg",
-};
+export type VariantGroup = "single" | "case";
 
 export const VARIANT_GROUP_LABEL: Record<VariantGroup, string> = {
-  box: "Single box",
+  single: "Single",
   case: "Sealed case",
-  tcg: "TCG",
 };
 
 export function variantGroupOf(type: string | null | undefined): VariantGroup {
-  if (!type) return "box";
-  return VARIANT_GROUP_MAP[type] ?? "box";
+  if (!type) return "single";
+  // Anything ending in -case (or the bare "case" / "inner-case" odd
+  // legacy values) groups under sealed case. Everything else is a
+  // single item, regardless of sport.
+  if (type === "case" || type === "inner-case") return "case";
+  if (type.endsWith("-case")) return "case";
+  return "single";
 }
 
 export function variantLabel(type: string | null | undefined): string {

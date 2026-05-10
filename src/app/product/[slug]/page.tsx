@@ -280,10 +280,20 @@ export default async function ProductPage({
                 <p className="mt-3 text-sm leading-relaxed text-white/60">{sku.description}</p>
 
                 <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                  <Spec label="Sport" value={sku.sport} />
+                  {/* Year hidden for Pokemon — collectors browse by set
+                      ("Prismatic Evolutions"), not season ("2025"); the
+                      release date below carries all the time signal
+                      they need. Sport "Pokemon" is also redundant with
+                      the brand "Pokemon", so we hide it on Pokemon
+                      products to keep the spec list tight. */}
+                  {sku.sport !== "Pokemon" && (
+                    <Spec label="Sport" value={sku.sport} />
+                  )}
                   <Spec label="Brand" value={sku.brand} />
                   <Spec label="Set" value={sku.set} />
-                  <Spec label="Year" value={String(sku.year)} />
+                  {sku.sport !== "Pokemon" && (
+                    <Spec label="Year" value={String(sku.year)} />
+                  )}
                   <Spec label="Product" value={sku.product} />
                   <Spec
                     label="Release"

@@ -28,19 +28,20 @@ function emitPreview(imageUrl: string | null) {
   );
 }
 
-const GROUP_ORDER: VariantGroup[] = ["box", "case", "tcg"];
+const GROUP_ORDER: VariantGroup[] = ["single", "case"];
 
 const GROUP_ACCENT: Record<VariantGroup, string> = {
-  box: "text-amber-400/80",
+  single: "text-amber-400/80",
   case: "text-fuchsia-400/80",
-  tcg: "text-emerald-400/80",
 };
 
 /**
- * Variant selector grouped by Box / Retail / Case / TCG so buyers see the
- * "single box vs sealed case" decision as a top-level scan instead of one
- * long row of chips. Each group renders its own labeled section; groups
- * with no variants are skipped entirely.
+ * Variant selector with two rows — single items on top, sealed cases
+ * below — so buyers can scan "single vs case" as a top-level decision
+ * instead of one long row of chips. Works uniformly for sports (Hobby
+ * Box / Hobby Case) and Pokemon (Booster Box, ETB, Booster Bundle on
+ * top; Booster Box Case, ETB Case below). Groups with no variants are
+ * skipped entirely.
  *
  * Active variant is bordered amber and bold; inactive variants are normal
  * weight and link to /product/<group>?variant=<type> with scroll: false
