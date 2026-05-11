@@ -58,6 +58,24 @@ export async function middleware(request: NextRequest) {
   const response = await updateSession(request);
   const { pathname } = request.nextUrl;
 
+  // Referral code capture. When a visitor lands with ?ref=XYZ, stash
+  // it in a 30-day cookie so it survives navigation, browser closes,
+  // and the signup roundtrip. The signup action reads + clears it,
+  // attributing the new profile to the partner before the cookie
+  // expires. Won't overwrite a cookie that's already set — first
+  // partner to bring a visitor in keeps the attribution.
+  const refCode = request.nextUrl.searchParams.get("ref");
+  if (refCode && /^[A-Z0-9_-]{2,32}$/i.test(refCode)) {
+    if (!request.cookies.get("waxdepot_ref")) {
+      response.cookies.set("waxdepot_ref", refCode.toUpperCase(), {
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        path: "/",
+        sameSite: "lax",
+        httpOnly: false, // readable in client too if a debug page wants it
+      });
+    }
+  }
+
   // We only need the user lookup if either gate could trigger.
   const needsUser = BETA_MODE
     ? !isAlwaysPublic(pathname)
