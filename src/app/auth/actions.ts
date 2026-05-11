@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { attributeSignupToPartner } from "./../actions/partners";
 
 export type AuthResult = { error?: string; ok?: boolean };
 
@@ -53,6 +54,22 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
     },
   });
   if (error) return { error: error.message };
+
+  // Referral attribution. If this visitor landed via ?ref=CODE
+  // earlier, the middleware stored a cookie; now that we have a
+  // user.id (even without a session yet — confirm-email flow), wire
+  // it permanently to the partner. Idempotent + safe to call when
+  // cookie missing.
+  if (data.user) {
+    const cookieStore = await cookies();
+    const refCode = cookieStore.get("waxdepot_ref")?.value;
+    if (refCode) {
+      await attributeSignupToPartner(data.user.id, refCode);
+      // Clear the cookie so a future visitor on the same device
+      // doesn't keep getting attributed.
+      cookieStore.delete("waxdepot_ref");
+    }
+  }
 
   // If "Confirm email" is enabled in Supabase, no session is returned and the
   // user has to click the link in their email. If disabled, we have a session.

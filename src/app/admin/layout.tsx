@@ -10,6 +10,7 @@ import {
   Lightbulb,
   Mail,
   Inbox,
+  Handshake,
 } from "lucide-react";
 import { requireAdminOrNotFound } from "@/lib/admin";
 
@@ -52,6 +53,11 @@ export default async function AdminLayout({
               label="Listings"
             />
             <NavLink href="/admin/users" icon={<Users size={14} />} label="Users" />
+            <NavLink
+              href="/admin/partners"
+              icon={<Handshake size={14} />}
+              label="Partners"
+            />
             <NavLink
               href="/admin/invite"
               icon={<Mail size={14} />}
