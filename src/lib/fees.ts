@@ -23,7 +23,7 @@ export const TIER_THRESHOLDS = {
 
 export const TIER_PAYOUT_CADENCE: Record<SellerTier, string> = {
   Starter: "Weekly Friday",
-  Pro: "Twice-weekly (Tue + Fri)",
+  Pro: "Weekly Friday",
   Elite: "Every 3 days",
   Apex: "Next business day",
 };
