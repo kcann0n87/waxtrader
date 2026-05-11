@@ -49,16 +49,24 @@ export function ProductImage({
     >
       {sku.imageUrl ? (
         // next/image gives us AVIF/WebP serving + responsive sizing.
-        // object-contain (not cover) so the whole product is visible —
-        // box images come from a few sources at different aspect ratios,
-        // and cover ends up cropping heads/box-tops on portrait or wide
-        // shots. Dark bg fills letterbox space cleanly.
+        //
+        // size="lg" (product detail page) → object-cover, no padding.
+        // Many source images bake in a colored/gradient background
+        // around the box and contain leaves a lot of dead space. Cover
+        // zooms in so the box itself fills the frame; the source's
+        // colored bleed crops along the edges.
+        //
+        // Smaller sizes (cards, thumbs) keep object-contain so the
+        // whole box stays visible in grid layouts — losing a corner of
+        // a thumbnail reads as a bug.
         <Image
           src={sku.imageUrl}
           alt={`${sku.brand} ${sku.set} ${sku.product}`}
           fill
           sizes={SIZES_FOR[size]}
-          className="object-contain p-2"
+          className={
+            size === "lg" ? "object-cover" : "object-contain p-2"
+          }
           priority={size === "lg"}
         />
       ) : showText ? (
