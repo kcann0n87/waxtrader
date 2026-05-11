@@ -13,6 +13,7 @@ import { ProductImageWithPreview } from "@/components/product-image-with-preview
 import { AdminImageDropOverlay } from "@/components/admin-image-drop-overlay";
 import { AdminDeleteSkuButton } from "@/components/admin-delete-sku-button";
 import { AdminAddSkuButton } from "@/components/admin-add-sku-button";
+import { AdminEditSkuButton } from "@/components/admin-edit-sku-button";
 import { AdminFeaturedRankButton } from "@/components/admin-featured-rank-button";
 import { SalesVolumeChart } from "@/components/sales-volume-chart";
 import { RecentlyViewed } from "@/components/recently-viewed";
@@ -239,10 +240,12 @@ export default async function ProductPage({
           <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#101012] p-6">
             {/* Admin floating actions — corner pills, only visible
                 when signed in as admin. Layout left → right:
+                  🖊️ edit SKU (slate)
                   + add (emerald)
                   📌 featured rank (amber)
                   ✕ delete (rose)
                 Most-destructive on the rightmost edge. */}
+            <AdminEditSkuButton skuId={sku.id} isAdmin={isAdmin} />
             <AdminAddSkuButton
               isAdmin={isAdmin}
               prefill={{
